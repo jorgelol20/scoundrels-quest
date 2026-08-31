@@ -15,7 +15,7 @@ function App() {
     <Fragment>
       <BrowserRouter>
         <GAListener />
-
+        <h1>Prueba Workflow</h1>
         <Navbar className="navbar" />
 
         <Banner />
