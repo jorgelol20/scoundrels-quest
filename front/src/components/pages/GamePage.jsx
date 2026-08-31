@@ -1640,7 +1640,7 @@ const GamePage = () => {
             );
         }
 
-        const extraDmgEffects = userExtraDmg.current + (weapon ? blacksmithDmg : 0);
+        const extraDmgEffects = userExtraDmg.current + (weapon ? blacksmithDmg : 0) + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0);
         const calcExtraGold = () => {
             if (isGambler && goldMultiplier.current != 1) {
                 return `5 más ${goldMultiplier.current}% del total por enemigo`
