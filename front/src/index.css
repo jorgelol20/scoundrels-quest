@@ -94,10 +94,10 @@ select{
     border-style: groove;
 }
 select:hover {
-    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto !important;
 }
 select:active, option:active {
-    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto !important;
 }
 
 .color-input {
@@ -166,45 +166,45 @@ button {
     }
 }
 button:hover {
-    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto !important;
     background-color: var(--second-color);
     color: var(--main-white);
 }
 
 button:disabled {
-    background-color: var(--second-color-dark);
+    background-color: var(--second-color-dark) !important;
     color: var(--main-color);
 }
 
 button:hover:disabled {
     background-color: var(--second-color-dark);
     color: var(--main-color);
-    cursor: url('/images/cursor/Cursor_5.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_5.webp') 3 7, auto !important;
 }
 
 html {
-    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto !important;
     height: 100%;
 }
 main{
-    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto !important;
 }
 
 
 
 button:active {
-    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto !important;
 }
 a:hover {
-    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto !important;
 }
 
 a:active {
-    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto !important;
 }
 option:hover{
-    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto !important;
 }
 option:active{
-    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto;
+    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto !important;
 }

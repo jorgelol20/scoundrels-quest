@@ -20,9 +20,9 @@ const enemyCardEffectList = [
     { 'name': 'thorny', 'value': true },
     { 'name': 'plunder', 'value': true },
     { 'name': 'mitosis', 'value': true },
-    { 'name': 'souleater', 'value': true},
-    { 'name': 'seal', 'value': true},
-    { 'name': 'blocked', 'value': true},
+    { 'name': 'souleater', 'value': true },
+    { 'name': 'seal', 'value': true },
+    { 'name': 'blocked', 'value': true },
     { 'name': 'extra_gold', 'value': true },
 ];
 
@@ -126,17 +126,20 @@ const MatchProvider = (props) => {
             ...item,
             efectos: typeof item.efectos === 'string' ? JSON.parse(item.efectos) : item.efectos
         }));
+        const normalize = (str) => str?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
         const tempCards = cards
             .filter((card) => {
-                const isForbiddenDiamond = card?.palo === 'Diamante' && card?.valor > 10;
-                const isForbiddenHeart = card?.palo === 'Corazon' && card?.valor > 10;
+                const palo = normalize(card?.palo);
+                const isForbiddenDiamond = palo === 'diamante' && card?.valor > 10;
+                const isForbiddenHeart = palo === 'corazon' && card?.valor > 10;
                 return !isForbiddenDiamond && !isForbiddenHeart;
             })
             .map((card) => ({
                 ...card,
                 x: 200,
                 y: 0,
-                key: Date.now() * card?.id // Cada carta tiene su propia identidad
+                key: Date.now() * card?.id
             }));
         setBaseDeck(tempCards);
         setAvailableCharacters(characters);
@@ -151,10 +154,9 @@ const MatchProvider = (props) => {
         setGameLoading(true);
         const shuffledDeck = lodash.shuffle(baseDeck).map(card => (
             {
-            ...card,
-            key: Date.now() * card?.id
-        }));
-
+                ...card,
+                key: Date.now() * card?.id
+            }));
         setMatchDeck(shuffledDeck);
         setCharacter(undefined);
         setActiveModifiers([]);
@@ -162,10 +164,10 @@ const MatchProvider = (props) => {
         setGameLoading(false);
     };
 
+
     useEffect(() => {
         setGameLoading(true)
         if (!isLoadingCard && !isLoadingCharacter && !isLoadingModifier && !isLoadingAchievements && !isLoadingUser) {
-            //console.log("Ha cargado")
             load();
         }
     }, [isLoadingCard, isLoadingCharacter, isLoadingModifier, isLoadingAchievements, isLoadingUser]);
@@ -187,7 +189,7 @@ const MatchProvider = (props) => {
     const handleNewAchievement = async (achievementId) => {
         // 1. Safe lookup using optional chaining
         const alreadyUnlocked = user?.logros?.some(
-            (logro) =>logro.id === achievementId && logro.pivot.obtenido
+            (logro) => logro.id === achievementId && logro.pivot.obtenido
         );
 
         if (alreadyUnlocked) return;
@@ -424,6 +426,7 @@ const MatchProvider = (props) => {
         setMatchDeck(prevDeck => [...prevDeck, ...newEnemys]);
         return newEnemys;
     };
+
 
     /**
      * Añadir cun enemigo de valor X al mazo.
