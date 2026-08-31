@@ -41,7 +41,25 @@ import GoldAnimation from '/images/gold.webp';
 import AllDamageAnimation from '/images/animations/AllDamageAnimation.webp';
 import DamageAnimation from '/images/animations/DamageAnimation.webp';
 import ConfirmationModal from "../modals/ConfirmationModal.jsx";
+import PlayerEffects from "../game-components/PlayerEffects.jsx";
+import TooltipLayer from "../game-components/TooltipLayer.jsx";
 
+// 8. Iconos de efectos
+import PoisonIcon from '/images/cardEffects/Poison.webp';
+import AntihealIcon from '/images/cardEffects/Antiheal.webp';
+import DmgReductionIcon from '/images/cardEffects/DmgReduction.webp';
+import ProgresiveHealIcon from '/images/cardEffects/ProgresiveHeal.webp';
+import InvincibilityIcon from '/images/cardEffects/Invincibility.webp';
+import HealthStealIcon from '/images/cardEffects/HealthSteal.webp';
+import ExtraGoldIcon from '/images/cardEffects/ExtraGold.webp';
+import MitosisIcon from '/images/cardEffects/Mitosis.webp';
+import SouleaterIcon from '/images/cardEffects/Souleater.webp';
+import BuffIcon from '/images/cardEffects/BuffIcon.webp';
+import DebuffIcon from '/images/cardEffects/DebuffIcon.webp';
+import SealIcon from '/images/cardEffects/Seal.webp';
+import MMA1Icon from '/images/cardEffects/MMA1.webp';
+import MMA2Icon from '/images/cardEffects/MMA2.webp';
+import MMA3Icon from '/images/cardEffects/MMA3.webp';
 
 const GamePage = () => {
     // =====================================================
@@ -106,6 +124,7 @@ const GamePage = () => {
     const [WEAPON_ZONE, setWEAPON_ZONE] = useState({ x: 200, y: 200, width: 400, height: 240 });
     const [weapon, setWeapon] = useState(null);
     const [slainMonsters, setSlainMonsters] = useState([]);
+    const [tooltip, setTooltip] = useState(null);
 
     // Layout
     const VIRTUAL_WIDTH = 800;
@@ -180,6 +199,10 @@ const GamePage = () => {
 
     // Control de robo
     const isDrawingRef = useRef(false);
+
+    // Evita que la inicialización de la partida se ejecute más de una vez
+    // por cambios de gameLoading o por renders/Strict Mode.
+    const hasStartedNewGameRef = useRef(false);
 
     // =====================================================
     // REFS ESPEJO — evitan closures obsoletas en cleanups
@@ -349,6 +372,8 @@ const GamePage = () => {
             poison.current = 0;
             antiheal.current = false;
             breakWeapon.current = false;
+            sealTurns.current = 0;
+            souleaterTurns.current = 0;
         }
 
         const shuffleDeck = (deck) => {
@@ -360,11 +385,11 @@ const GamePage = () => {
             setDungeon(shuffled);
         };
 
-        const addEnemy = async () => {
+        const addEnemy = async (anti_exec) => {
             const newEnemy = await addEnemysToMatchDeck(1, rounds);
             return newEnemy[0];
         }
-        const addEnemys = async () => {
+        const addEnemys = async (anti_exec) => {
             const quantity = 5 + Math.floor((rounds - 1) * 2);
             const newEnemys = await addEnemysToMatchDeck(quantity, rounds);
             return newEnemys;
@@ -543,7 +568,7 @@ const GamePage = () => {
         }
 
         const applySeal = () => {
-            sealTurns.current = 3;
+            sealTurns.current += 3;
             setAvailableAbility(false);
             logsRef.current.push((logsRef.current.length + 1) + " - " + `El enemigo estaba maldito y te ha sellado la habilidad.`)
         }
@@ -551,7 +576,6 @@ const GamePage = () => {
         const fillRoom = useCallback((onComplete) => {
             const roomSize = room.length;
             const cardsNeeded = 4 - roomSize;
-
             if (cardsNeeded <= 0 || dungeon.length === 0) {
                 onComplete?.();
                 return;
@@ -579,12 +603,14 @@ const GamePage = () => {
 
             if (poison.current > 0) {
                 poison.current -= 1;
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `El veneno te resta 1 de salud.`)
                 damageAnimation(1);
                 setHealth(prev => prev - 1);
             }
 
             if (antihealTurns.current > 0) {
                 antiheal.current = true;
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Turnos restantes de anticura: ${antiheal.current}.`)
                 antihealTurns.current -= 1;
             } else {
                 antiheal.current = false;
@@ -594,6 +620,7 @@ const GamePage = () => {
                 setHealth(prev => Math.min(maxHealth, prev + progresiveHeal.current));
                 healAnimation(progresiveHeal.current);
                 healedLife.current += progresiveHeal.current;
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Te has curado ${progresiveHeal.current}.`)
                 progresiveHealTurns.current -= 1;
             }
             if (souleaterTurns.current > 0) {
@@ -602,14 +629,17 @@ const GamePage = () => {
                         setHealth(prev => prev + 3)
                     }
                     setMaxHealth(prev => prev + 3)
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Has recuperado tu salud máxima.`)
                 }
                 souleaterTurns.current -= 1;
             }
             if (sealTurns.current > 0) {
                 if (sealTurns.current === 1) {
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Tu habilidad ya no está sellada.`)
                     setAvailableAbility(true)
                 }
                 sealTurns.current -= 1;
+
             }
 
         }, [room.length, dungeon, maxHealth]);
@@ -705,8 +735,9 @@ const GamePage = () => {
             }
             else if (rounds !== maxRounds || continueMatch) {
                 setSelectModifier(true)
-                const newEnemys = await addEnemys();
+                let newEnemys = [];
                 if (rounds >= 1 && gameOn) {
+                    newEnemys = await addEnemys()
                     setShopAvailable(true)
                 } else {
                     setShopAvailable(false)
@@ -736,26 +767,31 @@ const GamePage = () => {
                 setHealth(prev => Math.min(maxHealth, prev + 10));
                 userExtraDmg.current += 10;
                 setLastGamblerEffect(`¡JACKTPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ¡JACKTPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
 
             }
             else if (roll === 1) {
                 setGold(0)
                 setLastGamblerEffect(`La banca gana, tú pierdes todo tu dinero.`);
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> La banca gana, tú pierdes todo tu dinero.`)
             }
             else if (roll <= 10) {
                 //Veneno
                 poison.current += 3;
                 setLastGamblerEffect(`Estás envenenado 3 turnos. Ese chupito tenia un sabor raro...`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> La banca gana, tú pierdes todo tu dinero.`)
             }
             else if (roll <= 20) {
                 //Modificar daño
                 const randomDmg = Math.floor(Math.random() * 7) - 3;
                 userExtraDmg.current += randomDmg;
                 setLastGamblerEffect(`${randomDmg} de daño extra en la siguiente acción.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ${randomDmg} de daño extra en la siguiente acción.`)
             } else if (roll <= 30) {
                 progresiveHeal.current = 1;
                 progresiveHealTurns.current = 3;
                 setLastGamblerEffect(`Curación progresiva 3 turnos. ¡La hidromiel no falla!`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Curación progresiva 3 turnos. ¡La hidromiel no falla!.`)
             }
             else if (roll <= 40) {
                 //Curación/Daño
@@ -767,6 +803,7 @@ const GamePage = () => {
                 }
                 setHealth(prev => Math.min(maxHealth, Math.max(0, prev + randomHeal)));
                 setLastGamblerEffect(`${randomHeal} de vida.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ${randomHeal} de vida.`)
             } else if (roll <= 60) {
                 //Añadir arma
                 const randomPower = Math.floor(Math.random() * (rounds + 3))
@@ -775,6 +812,7 @@ const GamePage = () => {
                 const newWeapon = await getWeapon(weaponPower);
                 addCardToMatchDeck(newWeapon);
                 setLastGamblerEffect(`Añadida una nueva arma con valor ${newWeapon?.valor}.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Añadida una nueva arma con valor ${newWeapon?.valor}.`)
                 setDungeon(prev => [newWeapon, ...prev])
             } else if (roll <= 80) {
                 //Añadir curación
@@ -784,6 +822,7 @@ const GamePage = () => {
                 const newHeal = await getHealItem(healPower);
                 addCardToMatchDeck(newHeal);
                 setLastGamblerEffect(`Añadida una nueva curación con valor ${newHeal?.valor}.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Añadida una nueva curación con valor ${newHeal?.valor}.`)
                 setDungeon(prev => [newHeal, ...prev])
             } else if (roll <= 90) {
                 const randomHealth = Math.floor(Math.random() * 3) - 1;
@@ -794,10 +833,12 @@ const GamePage = () => {
                 }
                 setMaxHealth(prev => prev + randomHealth);
                 setLastGamblerEffect(`${randomHealth} de vida máxima.`)
-            } else if (roll < 100) {
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ${randomHealth} de vida máxima.`)
+            } else {
                 //Añadir enemigo
                 const newEnemy = await addEnemy();
                 setLastGamblerEffect(`Añadido un nuevo enemigo con valor ${newEnemy?.valor}.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Añadido un nuevo enemigo con valor ${newEnemy?.valor}.`)
                 setDungeon(prev => [newEnemy, ...prev])
             }
         }
@@ -971,7 +1012,6 @@ const GamePage = () => {
         };
 
         const handleCombat = (card) => {
-
             // Comprobación inicial de efectos en la carta 
             if (card.especial) {
                 handleCardEffect(card);
@@ -1083,6 +1123,7 @@ const GamePage = () => {
             const weaponValue = Math.floor(Math.random() * (14 - 2) + 2);
             const newWeapon = await getWeapon(weaponValue);
             handleWeapon(newWeapon);
+            logsRef.current.push((logsRef.current.length + 1) + " - " + `Has forjado una nueva arma con valor ${weaponValue}.`)
         }
 
 
@@ -1310,12 +1351,15 @@ const GamePage = () => {
             }
         }, [canBeClicked]);
 
-        // FIX (punto 2): este es el ÚNICO punto de entrada que dispara
-        // startNewGame(). Ya no se llama también dentro de restartFunction()
-        // ni en el useEffect de montaje, evitando llamadas duplicadas/triples.
+        // Inicialización de partida: solo una vez cuando el estado de carga
+        // queda preparado. Antes dependía de cualquier cambio en gameLoading,
+        // lo que podía disparar startNewGame() varias veces y duplicar cartas.
         useEffect(() => {
+            if (gameLoading !== false || hasStartedNewGameRef.current) return;
+
+            hasStartedNewGameRef.current = true;
             startNewGame();
-        }, [gameLoading]);
+        }, [gameLoading, startNewGame]);
 
         useEffect(() => {
             if (isWarrior && health <= (maxHealth / 2)) {
@@ -1326,10 +1370,13 @@ const GamePage = () => {
         }, [isWarrior, health, maxHealth]);
 
         useEffect(() => {
-            if (isGambler && gold >= 25) {
-                setAvailableAbility(true);
-            } else if (isGambler && gold < 25) {
-                setAvailableAbility(false);
+            console.log(sealTurns.current)
+            if (sealTurns.current === 0) {
+                if (isGambler && gold >= 25) {
+                    setAvailableAbility(true);
+                } else if (isGambler && gold < 25) {
+                    setAvailableAbility(false);
+                }
             }
         }, [gold, isGambler]);
 
@@ -1396,7 +1443,7 @@ const GamePage = () => {
                 });
 
                 if (!isScapingRef.current) {
-                    if (character?.habilidad_personaje?.id === 1) {
+                    if (isWarrior && sealTurns.current === 0) {
                         setAvailableAbility(true);
                     }
                     healedRef.current = false;
@@ -1462,16 +1509,18 @@ const GamePage = () => {
                         enemysDefeatedRef.current
                     );
                 }
-                restartFunction();
                 stopTimer();
-                setDungeon([]);
-                setRoom([]);
-                setDiscardPile([]);
-                setNewDeck();
-                setNewCharacter(null);
-                setGameOn(false);
             };
         }, []);
+
+        const handleEffectHover = (effect) => {
+            const stage = stageRef.current;
+
+            setTooltip({
+                ...effect,
+                stage: stage,
+            });
+        };
 
         // Cuando el mazo base de la partida esté listo, se carga en el mazo de juego.
         useEffect(() => {
@@ -1589,6 +1638,19 @@ const GamePage = () => {
                     />
                 </>
             );
+        }
+
+        const extraDmgEffects = userExtraDmg.current + (weapon ? blacksmithDmg : 0);
+        const calcExtraGold = () => {
+            if (isGambler && goldMultiplier.current != 1) {
+                return `5 más ${goldMultiplier.current}% del total por enemigo`
+            } else if (isGambler) {
+                return 5;
+            } else if (goldMultiplier.current != 1) {
+                return `${goldMultiplier.current}%`
+            } else {
+                return 0
+            }
         }
 
         return (
@@ -1747,7 +1809,155 @@ const GamePage = () => {
                                         />
                                     ))}
                                 </Group>
+                                <Group x={DUNGEON_ZONE.x} y={WEAPON_ZONE.y}>
+                                    <Rect width={WEAPON_ZONE.width / 3} height={WEAPON_ZONE.height} fill="#9c94476e" stroke="white" strokeWidth={2} cornerRadius={8} />
+                                    <Text text="Efectos" fontFamily="Alagard" fontSize={16} fill="white" y={WEAPON_ZONE.height * 0.05} x={(WEAPON_ZONE.width / 3) * 0.3} />
+                                    <PlayerEffects
+                                        x={5}
+                                        y={30}
+                                        size={32}
+                                        nombre="Daño extra"
+                                        turnos={false}
+                                        valor={extraDmgEffects}
+                                        icono={BuffIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={47.5}
+                                        y={30}
+                                        size={32}
+                                        nombre="Daño extra de enemigos"
+                                        turnos={false}
+                                        valor={enemyExtraDmg.current}
+                                        icono={DebuffIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={90}
+                                        y={30}
+                                        size={32}
+                                        nombre="Daño extra a picas"
+                                        turnos={false}
+                                        valor={spadesExtraTakedDmg.current}
+                                        icono={SpadeIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={5}
+                                        y={70}
+                                        size={32}
+                                        nombre="Daño extra a tréboles"
+                                        turnos={false}
+                                        valor={clubsExtraTakedDmg.current}
+                                        icono={ClubIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={47.5}
+                                        y={70}
+                                        size={32}
+                                        nombre="Veneno"
+                                        turnos={poison.current}
+                                        valor={false}
+                                        icono={PoisonIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={90}
+                                        y={70}
+                                        size={32}
+                                        nombre="Sello Arcano"
+                                        turnos={sealTurns.current}
+                                        valor={false}
+                                        icono={SealIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={5}
+                                        y={110}
+                                        size={32}
+                                        nombre="Robaalmas"
+                                        turnos={souleaterTurns.current}
+                                        valor={false}
+                                        icono={SouleaterIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={47.5}
+                                        y={110}
+                                        size={32}
+                                        nombre="Daño desarmado"
+                                        turnos={false}
+                                        valor={mma.current}
+                                        icono={mma.current === 3 ? MMA3Icon : mma.current === 2 ? MMA2Icon : MMA1Icon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={90}
+                                        y={110}
+                                        size={32}
+                                        nombre="Anticura"
+                                        turnos={antihealTurns.current}
+                                        valor={false}
+                                        icono={AntihealIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={5}
+                                        y={150}
+                                        size={32}
+                                        nombre="Oro extra"
+                                        turnos={false}
+                                        valor={calcExtraGold()}
+                                        icono={ExtraGoldIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={47.5}
+                                        y={150}
+                                        size={32}
+                                        nombre="Invencible"
+                                        turnos={invincibilityTurns.current}
+                                        valor={false}
+                                        icono={InvincibilityIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={90}
+                                        y={150}
+                                        size={32}
+                                        nombre="Curación progresiva"
+                                        turnos={progresiveHealTurns.current}
+                                        valor={progresiveHeal.current}
+                                        icono={ProgresiveHealIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                    <PlayerEffects
+                                        x={5}
+                                        y={190}
+                                        size={32}
+                                        nombre="Reducción de daño"
+                                        turnos={dmgReduction.current}
+                                        valor={false}
+                                        icono={DmgReductionIcon}
+                                        onHover={setTooltip}
+                                        onLeave={() => setTooltip(null)}
+                                    />
+                                </Group>
                             </Layer>
+
 
                             {/* PARTES JUGABLES (No estáticas) */}
                             <Layer ref={layerRef}>
@@ -1766,6 +1976,9 @@ const GamePage = () => {
                                         defaultImage={defaultImage}
                                     />
                                 ))}
+                            </Layer>
+                            <Layer>
+                                <TooltipLayer tooltip={tooltip} onTap={() => setTooltip(null)} />
                             </Layer>
                         </Stage>
                         {
@@ -1795,7 +2008,7 @@ const GamePage = () => {
                         <button onClick={(event) => {
                             setRestart(true)
                         }}>
-                            'JUGAR OTRA' 
+                            'JUGAR OTRA'
                         </button>
 
                         <button onClick={(event) => {
