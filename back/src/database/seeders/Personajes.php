@@ -57,11 +57,11 @@ class Personajes extends Seeder
                 'habilidad_id' => 6
             ],
             [
-                'id' => 6,
-                'nombre' => 'Herrero',
-                'descripcion' => 'Nació porque su madre lo parió, y desde entonces no ha dejado de golpear cosas con un martillo. Forjó espadas, armaduras y, según él, “una sartén que podría matar a un dragón”.',
-                'activo' => true,
-                'habilidad_id' => 6
+                'id' => 7,
+                'nombre' => 'Cazarrecompensas',
+                'descripcion' => '',
+                'activo' => false,
+                'habilidad_id' => 7
             ],
             
         ];

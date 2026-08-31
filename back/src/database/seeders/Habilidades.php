@@ -81,6 +81,7 @@ class Habilidades extends Seeder
                 'descripcion' => 'Aplica el modificador `botín` a dos enemigos de la mano actual. Además, desbloqueas las misiones en tienda.',
                 'icono' => '/storage/habilidades/Cazarrecompensas.webp',
                 'codigo' => 'cazador',
+                'efectos' => null,
                 'coste_oro' => null,
                 'usos_por_ronda' => 1,
             ],
