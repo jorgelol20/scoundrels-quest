@@ -32,3 +32,11 @@ jobs:
             cd ../back
             docker compose down
             docker compose up -d --build
+            docker compose exec -it php sh
+            php artisan migrate:status
+            php artisan migrate --force
+            php artisan migrate:status
+            php artisan db:seed --class=Habilidades
+            php artisan db:seed --class=Personajes
+            php artisan db:seed --class=Cartas
+            php artisan db:seed --class=Modificadores
