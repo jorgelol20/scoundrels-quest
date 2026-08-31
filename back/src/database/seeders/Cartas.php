@@ -32,11 +32,9 @@ class Cartas extends Seeder
 
         foreach ($palos as $palo) {
             foreach ($valores as $num => $nombre) {
-                // 1. Verificamos si es una carta especial
                 $esEspecial = $num > 10 && in_array($palo, ['Diamante', 'Corazon']);
                 $efectos = null;
 
-                // 2. Si es especial, buscamos su efecto único
                 if ($esEspecial) {
                     $idCarta = "{$num}-{$palo}";
                     $arrayEfectos = match ($idCarta) {
@@ -57,15 +55,18 @@ class Cartas extends Seeder
                     $efectos = json_encode($arrayEfectos);
                 }
 
-                // 3. Un único create para todo
-                ModelCarta::factory()->create([
-                    'palo' => $palo,
-                    'valor' => $num,
-                    'imagen' => config('app.backend_url') . "/storage/cartas/{$nombre}{$palo}.webp",
-                    'activa' => true,
-                    'especial' => $esEspecial,
-                    'efectos' => $efectos,
-                ]);
+                ModelCarta::updateOrCreate(
+                    [
+                        'palo' => $palo,
+                        'valor' => $num,
+                    ],
+                    [
+                        'imagen' => config('app.backend_url') . "/storage/cartas/{$nombre}{$palo}.webp",
+                        'activa' => true,
+                        'especial' => $esEspecial,
+                        'efectos' => $efectos,
+                    ]
+                );
             }
         }
     }
