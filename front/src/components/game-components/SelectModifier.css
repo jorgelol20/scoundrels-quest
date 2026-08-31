@@ -1,0 +1,40 @@
+.modifiers-list {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    position: absolute;
+    background-color: var(--main-color);
+    z-index: 100;
+    margin-top: 20%;
+    width: 80%;
+}
+
+.select-modifier {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .shop-man {
+        width: 15%;
+        background-color: var(--main-color);
+
+        img {
+            height: 30cqh;
+            background: none;
+            z-index: 100;
+            margin-top: 10cqw;
+        }
+    }
+
+    .dialog {
+        overflow: visible;
+        background-color: var(--main-white);
+        border: 5px solid var(--main-black);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width:20cqw;
+        margin-bottom: -15cqh;
+    }
+}

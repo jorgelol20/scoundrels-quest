@@ -1,0 +1,15 @@
+# Scoundrel's Quest
+
+> Roguelike de cartas gratuito con ambientación D&D. Elige entre 5 personajes y sobrevive 10 rondas usando una baraja de póker: diamantes como armas, corazones como curaciones, y tréboles/picas como enemigos.
+
+Scoundrel's Quest es un juego web 100% gratuito con ambientación D&D. El objetivo es sobrevivir 10 rondas gestionando recursos limitados (armas, curación) frente a enemigos cada vez más difíciles, usando la mecánica de una baraja de póker estándar. Requiere una cuenta gratuita para jugar, que puede crearse con correo electrónico o mediante Google/X.
+
+## Juego
+
+- [Jugar](https://scoundrels-quest.com/jugar): acceso al juego (requiere haber iniciado sesión).
+- [Crear cuenta](https://scoundrels-quest.com/signup): registro gratuito con correo, Google o X.
+- [Tutorial](https://scoundrels-quest.com/jugar/tutorial): explicación de las reglas y mecánicas del juego.
+
+## Opcional
+
+- [Créditos](https://scoundrels-quest.com/creditos): equipo y agradecimientos del proyecto.

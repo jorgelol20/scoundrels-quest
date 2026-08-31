@@ -1,0 +1,361 @@
+.game-shop {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2cqw;
+    padding: 2%;
+    position: relative;
+
+    .shop-man {
+        width: 15%;
+        background-color: var(--main-color);
+        margin-left: -2cqw;
+
+        img {
+            height: 40cqh;
+            background: none;
+            z-index: 100;
+            margin-top: 10cqw;
+        }
+    }
+
+    .dialog {
+        overflow: visible;
+        position: absolute;
+        top: 15%;
+        right: 5%;
+        background-color: var(--main-white);
+        width: 10%;
+        height: 15%;
+        border: 5px solid var(--main-black);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1cqw;
+    }
+}
+
+.game-hud {
+    margin-right: 1%;
+    padding: 1%;
+    background-color: var(--second-color);
+    border-color: var(--second-color);
+    border-width: 5%;
+    border-style: solid;
+    box-shadow:
+        inset 3px 2px 0px var(--main-color),
+        inset -2px -2px 0px var(--second-color-dark),
+        inset -4px -4px 4px var(--second-color-dark),
+        inset 4px 4px 4px var(--second-color-dark);
+    width: 10cqw;
+    height: 25cqw;
+
+    h1,
+    h2 {
+        margin-bottom: 0cqh;
+        margin-top: 0.1cqh;
+        font-size: 2cqw;
+        color: var(--main-white);
+    }
+
+    h2 {
+        font-size: 1cqw;
+        margin-bottom: 1cqh;
+    }
+
+    .player-health {
+        display: flex;
+        align-items: center;
+        color: var(--main-red);
+        font-size: 2cqw;
+
+        img {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            margin-right: 0.5cqw;
+            background: none;
+            width: 2cqw;
+        }
+    }
+
+    .player-gold {
+        display: flex;
+        align-items: center;
+        color: var(--main-gold);
+        font-size: 2cqw;
+
+        img {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            margin-right: 0.5cqw;
+            background: none;
+            width: 2cqw;
+        }
+    }
+
+
+
+    p {
+        margin-top: -1cqh;
+        font-size: 1cqw;
+        color: var(--main-white);
+    }
+}
+
+.game-modifiers {
+    width: 95%;
+    border: 0.5cqh solid black;
+    border-radius: 4%;
+    height: 20%;
+    margin-bottom: 5%;
+    overflow-y: scroll;
+    display: flex;
+    justify-content: start;
+    align-items: start;
+    flex-wrap: wrap;
+}
+
+.game-buttons {
+    display: flex;
+
+    button {
+        width: 50%;
+        height: 10%;
+        font-size: 1.2cqw;
+    }
+}
+
+.game-character {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+
+    .character-ability {
+        width: 2cqw;
+        height: 2cqw;
+        margin-left: -2cqw;
+        border-width: 0.5cqw;
+        border-style: groove;
+        background-color: var(--main-black);
+        border-color: var(--main-black);
+        filter: brightness(0.8) grayscale();
+    }
+
+    .available {
+        border-color: var(--main-gold);
+        background-color: var(--background-profile-color);
+        filter: brightness(1.2);
+    }
+
+    .character-avatar {
+        width: 5cqw;
+        height: 5cqw;
+        border: 0.5cqh groove;
+        border-radius: 50%;
+        background-color: var(--main-black);
+        margin-bottom: 1cqw;
+    }
+}
+
+.shop-container {
+    background-color: var(--main-color);
+    width: 55%;
+    height: auto;
+    min-height: 50cqh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 0.5cqw groove var(--second-color-dark);
+    padding: 2cqh 0;
+    box-shadow:
+        inset 4px 4px 0px var(--second-color-light),
+        inset -4px -4px 0px var(--main-black);
+
+}
+
+.shop-items {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2cqw;
+    padding: 2cqw;
+    width: 100%;
+    height: 40cqh;
+    box-sizing: border-box;
+    overflow-y: scroll;
+}
+
+.shop-item-wrapper {
+    background-color: var(--second-color-light);
+    border: 0.3cqw groove var(--main-black);
+    width: 12cqw;
+    padding: 1cqw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0.4cqw 0.4cqw 0px var(--main-black);
+    transition: transform 0.1s ease-in-out;
+}
+
+.shop-item-wrapper:hover:not(.bought) {
+    transform: translateY();
+    border-color: var(--main-gold);
+}
+
+.shop-item-wrapper.bought {
+    opacity: 0.5;
+    filter: grayscale(1);
+    box-shadow: 0.1cqw 0.1cqw 0px var(--main-black);
+    transform: translateY(0.3cqh);
+}
+
+.item-display {
+    width: 100%;
+    height: 12cqh;
+    padding-top: 3cqh;
+    background-color: var(--main-color);
+    border: 0.2cqw inset var(--second-color-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1cqh;
+}
+
+.card {
+    margin-left: 1cqw;
+}
+
+.item-purchase-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.item-purchase-controls p {
+    color: var(--main-gold);
+    font-size: 1.2cqw;
+    font-weight: bold;
+    margin: 0.5cqh 0;
+    text-shadow: 1px 1px 0px var(--main-black);
+    display: flex;
+    align-items: center;
+}
+
+.item-purchase-controls p img {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: none;
+}
+
+.shop-container button {
+    background-color: var(--second-color);
+    color: var(--main-gold);
+    border: 0.2cqw groove var(--main-black);
+    box-shadow:
+        inset 2px 2px 0px var(--second-color-light),
+        inset -2px -2px 0px var(--second-color-dark);
+    padding: 0.8cqh 1.5cqw;
+    font-family: inherit;
+    font-size: 1cqw;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.1s;
+}
+
+.shop-container button:hover:not(:disabled) {
+    background-color: var(--second-color-light);
+    color: var(--main-white);
+}
+
+.shop-container button:active:not(:disabled) {
+    box-shadow:
+        inset 2px 2px 0px var(--main-black),
+        inset -2px -2px 0px var(--second-color-light);
+}
+
+.shop-container button:disabled {
+    background-color: var(--second-color-dark);
+    color: var(--main-color);
+    cursor: not-allowed;
+    box-shadow: none;
+    border-color: var(--main-black);
+}
+
+/* Modifica esta regla en tu CSS */
+.shop-item-wrapper.bought {
+    opacity: 0.5;
+    filter: grayscale(1);
+    transform: translateY(0.3cqh);
+    box-shadow: 0.1cqw 0.1cqw 0px var(--main-black);
+    pointer-events: none;
+    cursor: default;
+}
+
+@media (max-width: 1080px) {
+    .game-shop {
+        display: flex;
+        flex-direction: column;
+
+        .shop-container {
+            min-width: 50cqw;
+            width: 100%;
+
+            button {
+                font-size: 0.7em;
+                width: 100%;
+            }
+
+            .shop-item-wrapper {
+                width: 5em;
+
+                p {
+                    font-size: 1em;
+                }
+            }
+
+        }
+
+        .game-hud {
+            display: flex;
+            flex-direction: column;
+            height: 30cqw;
+            min-height: 10em;
+
+            .game-modifiers {
+                height: 50%;
+                min-height: 10cqw;
+                padding: 1cqw;
+            }
+        }
+
+        .shop-man {
+            position: absolute;
+            background: none;
+            scale: 0.4;
+            top: -6em;
+            margin-left: 2em;
+            width: 15em;
+        }
+
+        .dialog {
+            top: 0;
+            right: 0;
+            background-color: var(--main-white);
+            width: 5em;
+            height: 5em;
+            border: 5px solid var(--main-black);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+
+        }
+    }
+
+}

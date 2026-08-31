@@ -1,0 +1,132 @@
+.achievement-modal {
+    position: fixed;
+    flex-direction: column;
+    bottom: 0;
+    justify-self: end;
+    z-index: 1000;
+    background-color: var(--main-color);
+    width: 20%;
+    min-width: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: var(--main-gold) 5px groove;
+
+
+    span {
+        width: 100%;
+        background-color: var(--main-gold);
+        height: 5px;
+        animation: 5s loadingBar infinite;
+        align-self: flex-start;
+    }
+
+    .achievement-info {
+        display: flex;
+        justify-content: start;
+        align-items: center;
+        padding-bottom: 0.5em;
+        width: 100%;
+
+        h1 {
+            font-size: 1em;
+            margin-right: 1em;
+            color: var(--main-gold);
+        }
+
+        p {
+            font-size: 0.5em;
+        }
+
+        img {
+            width: 2em;
+            height: 2em;
+            margin-right: 1cqw;
+            border: 0.3em groove var(--main-gold);
+        }
+    }
+
+    .achievement {
+        width: 90%;
+        height: 8cqw;
+        background-color: var(--second-color-light);
+        border-radius: 5px;
+        margin-bottom: 0.5em;
+        margin-top: 0.5em;
+        margin-left: -0.7em;
+        padding: 1cqw;
+        border: 0.3em groove var(--second-color-dark);
+    }
+
+    .achievement-description {
+        width: 100%;
+
+        p {
+            font-size: 0.7em;
+            color: var(--main-white);
+        }
+    }
+
+}
+
+
+
+@media (max-width: 1080px) {
+    .achievement {
+        display: flex;
+
+        .achievement-info {
+            text-align: center;
+            border-right: 0.3em groove var(--second-color-dark);
+            border-bottom: 0;
+            width: 15em;
+            margin-right: 1em;
+
+            p {
+                display: none;
+            }
+
+            h1 {
+                font-size: 2.5cqw;
+            }
+
+            img {
+                width: 1em;
+                height: 1em;
+            }
+        }
+
+        .achievement-description {
+            p {
+                font-size: 0.4em;
+            }
+        }
+
+    }
+}
+
+.false {
+    filter: grayscale(1);
+
+    p {
+        color: grey;
+    }
+}
+
+@media (max-width: 1000px) {
+    .achievement-modal {
+        h1 {
+            font-size: 0.6em;
+        }
+    }
+}
+
+@keyframes loadingBar {
+    0% {
+        width: 100%;
+    }
+
+    100% {
+        width: 0%;
+    }
+}

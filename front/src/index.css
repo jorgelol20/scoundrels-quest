@@ -1,0 +1,210 @@
+:root {
+    --main-green: #1E5128;
+    --main-red: #84142D;
+    --main-orange: #F77F00;
+    --main-color: #4C3E3E;
+    --second-color: #5A4E4E;
+    --second-color-light: #685a5a;
+    --second-color-dark: #363030;
+    --main-black: #0C0C0C;
+    --main-white: #FFF;
+    --main-gold: #D4AF37;
+    --main-silver:#DCDCDC;
+    --main-bronze:#A97142;
+    --second-gold: #030303;
+    --background-image-color: #f0f0f0;
+    --background-profile-color: #8A6A6A;
+}
+
+*, *::before, *::after {
+  cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto !important;
+}
+@font-face {
+    font-family: 'Alagard';
+    src: url('/font/Alagard.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+img{
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+
+body {
+    font-family: 'Alagard';
+    font-size: 1.3em;
+    text-shadow: 1.5px 1px 2px black;
+    font-weight: bold;
+    background-color: var(--second-color);
+    background-size: 50px 50px;
+    font-weight: 100;
+    background-image:
+        linear-gradient(335deg, var(--second-color-dark) 23px, transparent 23px),
+        linear-gradient(155deg, var(--second-color-dark) 23px, transparent 23px),
+        linear-gradient(335deg, var(--second-color-dark) 23px, transparent 23px),
+        linear-gradient(155deg, var(--second-color-dark) 23px, transparent 23px);
+    background-position:
+        0px 2px,
+        4px 35px,
+        29px 31px,
+        34px 6px;
+    text-rendering: optimizeSpeed;
+}
+
+input {
+    font-family: 'Alagard';
+    font-size: 1.3em;
+    text-shadow: 1px 1px 2px black;
+}
+
+button {
+    font-family: 'Alagard';
+    text-shadow: 1.5px 1px 2px black;
+    text-rendering: optimizeSpeed;
+}
+
+img {
+    background-color: var(--background-image-color);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+input {
+    margin-bottom: 0.5em;
+    padding: 0.5em;
+    border-radius: 5px;
+    border-color: var(--main-color);
+    background-color: var(--main-color);
+    width: 80%;
+    color: white;
+}
+
+select{
+    margin-bottom: 0.5em;
+    padding: 0.5em;
+    border-color: var(--main-color);
+    background-color: var(--main-color);
+    color: white;
+    font-family: 'Alagard';
+    margin-right: 1cqw;
+    border-radius: 5px;
+    border-width: 2px;
+    border-color: var(--main-color);
+    border-style: groove;
+}
+select:hover {
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+}
+select:active, option:active {
+    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto;
+}
+
+.color-input {
+    min-height: 2em;
+}
+
+.password-field {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+
+    .seePassword {
+        background: none;
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 1cqw;
+        border-radius: 50%;
+        width: 2em;
+        height: 2em;
+        img {
+            width: 2em;
+            height: 2em;
+            background: none;
+            margin-bottom: 50%;
+        }
+
+        img:hover {
+            filter: brightness(1.2) contrast(1.1);
+            background-color: #ffffff25;
+            border-radius: 100%;
+        }
+    }
+}
+
+.form-error {
+    color: var(--main-red);
+    text-rendering: optimizeSpeed;
+}
+
+button {
+    border-radius: 2cqw;
+    border-color: var(--main-color);
+    background-color: var(--second-color-light);
+    width: 10cqw;
+    height: 3cqw;
+    box-sizing: border-box;
+    color: var(--main-gold);
+    transition: all 0.3s ease;
+    z-index: 10;
+    font-size: 1.2cqw;
+}
+@media (max-width: 980px) {
+    button{
+        width: 20cqw;
+        height: 6cqw;
+        font-size: 2cqw;
+    }
+}
+@media (max-width: 600px) {
+    button{
+        width: 25cqw;
+        height: 9cqw;
+        font-size: 3cqw;
+    }
+}
+button:hover {
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+    background-color: var(--second-color);
+    color: var(--main-white);
+}
+
+button:disabled {
+    background-color: var(--second-color-dark);
+    color: var(--main-color);
+}
+
+button:hover:disabled {
+    background-color: var(--second-color-dark);
+    color: var(--main-color);
+    cursor: url('/images/cursor/Cursor_5.webp') 3 7, auto;
+}
+
+html {
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+    height: 100%;
+}
+main{
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+}
+
+
+
+button:active {
+    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto;
+}
+a:hover {
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+}
+
+a:active {
+    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto;
+}
+option:hover{
+    cursor: url('/images/cursor/Cursor_1.webp') 3 7, auto;
+}
+option:active{
+    cursor: url('/images/cursor/Cursor_2.webp') 3 7, auto;
+}

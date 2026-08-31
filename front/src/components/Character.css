@@ -1,0 +1,256 @@
+.character-container {
+    display: flex;
+    background-color: var(--second-color-light);
+    padding: 1.5em;
+    width: 100%;
+    max-width: 40cqw;
+    height: auto;
+    min-height: 20cqw;
+    border: 4px solid var(--main-color);
+    box-shadow: 4px 4px 0px var(--main-black);
+    gap: 1.5cqw;
+
+    .character-image {
+        width: 7em;
+        height: 7em;
+        border: 5px groove var(--main-gold);
+        background-color: var(--main-black);
+        flex-shrink: 0;
+    }
+
+    .character-info {
+        flex: 0 0 30%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5em;
+
+        h1 {
+            margin: 0;
+            font-size: 1em;
+            color: var(--main-gold);
+            text-shadow: 1px 1px 2px var(--main-black);
+        }
+
+        button {
+            width: 85%;
+        }
+    }
+
+    .character-abilitie {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1cqw;
+        margin-bottom: 1cqw;
+    }
+
+    .character-abilitie img {
+        /* Mantenemos el tamaño fijo */
+        min-width: 5em;
+        width: 5em;
+        height: 5em;
+        border: 0.5em groove var(--main-gold);
+        background-color: var(--background-profile-color);
+        /* Asegura que no se deforme */
+        object-fit: cover;
+    }
+
+    .abilitie-text {
+        /* Forzamos la misma altura que la imagen */
+        height: 8em;
+        /* Usamos flexbox para centrar el texto verticalmente dentro de esta altura fija */
+        display: flex;
+        align-items: center;
+
+        border: 3px solid var(--main-color);
+        border-radius: 0.5cqw;
+        padding: 0.8em;
+        background-color: var(--main-white);
+        color: var(--main-black);
+        font-size: 1cqw;
+        line-height: 1.2;
+        /* Ligeramente más pequeño para que quepa bien */
+        flex-grow: 1;
+        /* Hace que el cuadro ocupe el resto del espacio disponible */
+        text-shadow: 0.5px 0px 0px var(--main-gold);
+    }
+
+    .character-description {
+        border: 0.3cqw solid var(--main-color);
+        border-radius: 0.5cqw;
+        padding: 0.8cqw;
+        background-color: var(--main-white);
+        color: var(--main-black);
+        font-size: 1cqw;
+        line-height: 1.4;
+        word-wrap: break-word;
+        width: 93%;
+        text-shadow: 0.5px 0px 0px var(--main-gold);
+    }
+
+}
+
+.fastSelector-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--second-color-light);
+    padding: 1.5em;
+    width: 10cqw;
+    max-width: 40cqw;
+    height: auto;
+    min-height: 20cqw;
+    border: 4px solid var(--main-color);
+    box-shadow: 4px 4px 0px var(--main-black);
+    gap: 1.5cqw;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+
+    .character-image {
+        width: 10cqw;
+        height: 10cqw;
+        border: 5px groove var(--main-gold);
+        background-color: var(--main-black);
+        flex-shrink: 0;
+    }
+
+    .character-info {
+        flex: 0 0 30%;
+        display: flex;
+        flex-direction: column-reverse;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5em;
+
+        h1 {
+            margin: 0;
+            font-size: 1em;
+            color: var(--main-gold);
+            text-shadow: 1px 1px 2px var(--main-black);
+        }
+
+        button {
+            width: 85%;
+        }
+    }
+
+    .character-abilitie img {
+        /* Mantenemos el tamaño fijo */
+        width: 4cqw;
+        height: 4cqw;
+        border: 0.5cqw groove var(--main-gold);
+        background-color: var(--background-profile-color);
+        /* Asegura que no se deforme */
+        object-fit: cover;
+        position: absolute;
+        bottom: 7cqw;
+        right: 1cqw;
+    }
+}
+
+/* Regla para pantallas pequeñas */
+@media (max-width: 1200px) {
+    .character-container {
+        flex-direction: row;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+        max-width: fit-content;
+        position: relative;
+
+        .character-abilitie img {
+            min-width: 10cqw;
+            width: 4cqw;
+            height: 10cqw;
+            border: 0.5cqw groove var(--main-gold);
+            background-color: var(--background-profile-color);
+            /* Asegura que no se deforme */
+            object-fit: cover;
+            right: 1cqw;
+            bottom: -5cqw;
+            position: absolute;
+        }
+
+        .character-image {
+            width: 15cqw;
+            height: 15cqw;
+            border: 5px groove var(--main-gold);
+            background-color: var(--main-black);
+            flex-shrink: 0;
+        }
+
+        .abilitie-text {
+            font-size: 3cqw;
+            height: fit-content;
+        }
+
+        .character-description {
+            display: none;
+        }
+
+        .character-info {
+            h1 {
+                font-size: 1em;
+            }
+
+            button {
+                width: 85%;
+            }
+        }
+
+    }
+
+    .fastSelector-container {
+        .character-abilitie img {
+            /* Mantenemos el tamaño fijo */
+            width: 4cqw;
+            height: 4cqw;
+            border: 0.5cqw groove var(--main-gold);
+            background-color: var(--background-profile-color);
+            /* Asegura que no se deforme */
+            object-fit: cover;
+            position: absolute;
+            bottom: 10cqw;
+            right: 1cqw;
+        }
+
+        button {
+            width: 15cqw;
+            width: 15cqw;
+            height: 5cqw;
+        }
+    }
+}
+
+/* Regla para pantallas pequeñas */
+@media (max-width: 1080px) {
+    .character-container {
+        flex-direction: row;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+        max-width: fit-content;
+    }
+
+    .fastSelector-container {
+        .character-abilitie img {
+            /* Mantenemos el tamaño fijo */
+            width: 4cqw;
+            height: 4cqw;
+            border: 0.5cqw groove var(--main-gold);
+            background-color: var(--background-profile-color);
+            /* Asegura que no se deforme */
+            object-fit: cover;
+            position: absolute;
+            bottom: 35%;
+            right: 20%;
+        }
+
+        button {
+
+            font-size: 2cqw;
+        }
+    }
+}

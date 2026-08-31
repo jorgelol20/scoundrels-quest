@@ -1,0 +1,21 @@
+.banner{
+    width: 99.5%;
+    height: 40em;
+    background-image: url('/images/banner.webp');
+    background-repeat: no-repeat;
+    background-size:100%;
+    background-position-y: -5em;
+    background-position-x: 50%;
+    image-rendering: pixelated; 
+    image-rendering: crisp-edges; 
+    margin-bottom: -30em;
+    border-radius: 20px;
+    border-color: var(--main-color);
+    border-width: 0.25cqw;
+    border-style: groove;
+}
+@media (max-width: 1080px){
+    .banner{
+        margin-bottom: -32em;
+    }
+}

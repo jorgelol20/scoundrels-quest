@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /ajustes
+
+Sitemap: https://scoundrels-quest.com/sitemap.xml

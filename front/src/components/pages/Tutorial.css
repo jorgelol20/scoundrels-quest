@@ -1,0 +1,512 @@
+.tutorial-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    top: -10em;
+    font-weight: 100;
+    text-shadow: 1px 1px 1px black;
+
+    p {
+        font-size: 1cqw;
+        width: 100%;
+    }
+
+    .tutorial-carousel {
+        position: relative;
+        width: 80%;
+        margin: auto;
+        overflow: hidden;
+        border-radius: 8px;
+        background-color: var(--main-color);
+
+        .btn-prev,
+        .btn-next {
+            opacity: 0.9;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        button:hover {
+            opacity: 1;
+        }
+    }
+    .active{
+        color: var(--main-orange);
+    }
+}
+
+.slide {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--second-color);
+    min-height: 50cqh;
+    justify-content: center;
+    align-items: center;
+    padding-top: 5cqh;
+    color: var(--main-white);
+
+    span {
+        color: var(--main-orange);
+    }
+
+    strong {
+        color: var(--main-red);
+    }
+
+    h1 {
+        color: var(--main-gold);
+    }
+}
+
+.slide-1 {
+
+    p {
+        width: 30% !important;
+        text-align: center !important;
+    }
+
+
+    img {
+        background: none;
+        width: 30cqw;
+    }
+
+}
+
+.slide-2 {
+    .container {
+        width: 80%;
+    }
+
+    img {
+        background: none;
+        width: 30cqw;
+    }
+
+    h1 {
+        margin: 0;
+        text-align: center;
+    }
+
+    h2 {
+        margin: 0;
+    }
+
+
+}
+
+.slide-3 {
+    .slide-3-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    h1 {
+        font-size: 2cqw;
+    }
+
+    img {
+        background: none;
+        width: 3cqw;
+    }
+
+    .card-stage {
+        width: 100%;
+        height: 16cqh;
+        padding-top: 3cqh;
+        background-color: var(--main-color);
+        border: 0.2cqw inset var(--second-color-dark);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 1cqh;
+    }
+
+}
+
+.slide-4 {
+    text-align: justify;
+    padding-bottom: 1cqw;
+    padding-top: 1cqw;
+    p{
+        width: 80%;
+    }
+
+    .tutorial-modifiers {
+        width: 80%;
+        max-height: 35cqh;
+        overflow: auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        background-color: var(--main-color);
+        border: 0.8cqw var(--main-gold) groove;
+        margin-bottom: 1.5em;
+
+        img {
+            width: 4cqw;
+            height: 4cqw;
+        }
+    }
+}
+
+.slide-5 {
+    text-align: justify;
+    padding-bottom: 1cqw;
+    padding-top: 1cqw;
+
+    .card-effects {
+        width: 80%;
+        max-height: 50cqh;
+        display: flex;
+        flex-wrap: wrap;
+        overflow: auto;
+        justify-content: center;
+
+        .card-effect {
+            width: 10cqw;
+            padding: 4%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 0.5em solid var(--second-color-dark);
+
+            .effect-image {
+                width: 100%;
+                height: 30%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+
+                img {
+                    height: 4cqw;
+                    width: 4cqw;
+                    background: none;
+                    border: 0.5em groove var(--main-gold);
+                }
+            }
+
+            .effect-text {
+                height: 60%;
+                width: 100%;
+                background-color: var(--main-color);
+                text-align: center;
+                padding: 10%;
+                padding-top: 0;
+                margin-top: 10%;
+
+                .effect-name {
+                    height: 20%;
+                    margin-bottom: 1em;
+                }
+
+                .effect-description {
+                    height: 100%;
+                    p{
+                        width: 100%;
+                    }
+                }
+
+                h1 {
+                    font-size: 1em;
+                    margin-bottom: 0;
+                }
+
+            }
+        }
+    }
+}
+
+.slide-6 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    p {
+        text-align: justify;
+    }
+}
+
+.slide-7 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .container{
+        width: 80%;
+    }
+    h1{
+        text-align: center;
+    }
+    p {
+        width: 100%;
+    }
+
+    h3 {
+        font-size: 1em;
+        text-align: center;
+    }
+}
+
+.slide-8 {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    .player-health {
+        display: flex;
+        align-items: center;
+        color: var(--main-red);
+        font-size: 2cqw;
+
+        img {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            margin-right: 0.5cqw;
+            background: none;
+            width: 2cqw;
+        }
+    }
+
+    h3 {
+        font-size: 1cqw;
+        color: var(--main-gold);
+        text-align: center;
+    }
+
+    .reset-simulator-btn {
+        position: relative;
+        background-color: var(--main-red, #c0392b);
+        color: white;
+        border: 2px solid white;
+        padding: 10px 20px;
+        font-family: 'Alagard', sans-serif;
+        font-size: 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .reset-simulator-btn:hover {
+        background-color: var(--dark-red, #a93226);
+    }
+}
+
+.slide-9 {
+    img {
+        background: none;
+    }
+}
+
+.btn-prev {
+    position: absolute;
+    left: 5cqw;
+}
+
+.btn-next {
+    position: absolute;
+    right: 5cqw;
+}
+
+.movement-buttons {
+    width: 60%;
+
+    .movement-button {
+        width: 1.5em;
+        border-radius: 5px;
+    }
+}
+
+
+@media (max-width: 1080px) {
+    .tutorial-container {
+        top: -5em;
+
+        p {
+            font-size: 0.6em;
+        }
+
+    }
+
+    .slide-1 {
+        text-align: center;
+
+        img {
+            background: none;
+            width: 50cqw;
+        }
+
+        h1 {
+            font-size: 6cqw;
+        }
+
+
+
+    }
+
+    .slide-2 {
+        p {
+            font-size: 3cqw;
+            margin: 0;
+        }
+
+        span {
+            color: var(--main-orange);
+        }
+
+        strong {
+            color: var(--main-red);
+        }
+    }
+
+    .slide-3 {
+
+        .slide-3-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 8cqw;
+        }
+
+        img {
+            background: none;
+            width: 3cqw;
+        }
+
+        p {
+            font-size: 2.5cqw;
+            text-align: center;
+        }
+
+        span {
+            color: var(--main-orange);
+        }
+
+        .card-stage {
+            width: 90%;
+            height: 12cqh;
+            padding-top: 3cqh;
+            background-color: var(--main-color);
+            border: 0.2cqw inset var(--second-color-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1cqh;
+        }
+
+    }
+
+    .slide-4 {
+        h1 {
+            font-size: 6cqw;
+        }
+    }
+
+    .slide-5 {
+        h1 {
+            font-size: 6cqw;
+        }
+
+        .card-effects {
+            justify-content: center;
+            
+            .card-effect {
+                width: 15em;
+
+                .effect-image {
+                    margin-top: 1em;
+                    margin-bottom: 0;
+
+                    img {
+                        width: 3em;
+                        height: 3em;
+                    }
+                }
+
+                .effect-text {
+                    margin: 0;
+                    margin-top: 0.5em;
+                }
+            }
+        }
+    }
+
+    .slide-8 {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+
+        .player-health {
+            display: flex;
+            align-items: center;
+            color: var(--main-red);
+            font-size: 1em;
+
+            img {
+                image-rendering: pixelated;
+                image-rendering: crisp-edges;
+                margin-right: 0.5cqw;
+                background: none;
+                width: 2cqw;
+            }
+        }
+
+
+        h3 {
+            font-size: 0.6em;
+            color: var(--main-gold);
+            text-align: center;
+        }
+
+        .reset-simulator-btn {
+            position: relative;
+            background-color: var(--main-red, #c0392b);
+            color: white;
+            border: 2px solid white;
+            height: 0.7em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            font-family: 'Alagard', sans-serif;
+            font-size: 0.6em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .reset-simulator-btn:hover {
+            background-color: var(--dark-red, #a93226);
+        }
+    }
+
+    .btn-prev {
+        position: absolute;
+        left: 5cqw;
+        width: 10cqw;
+    }
+
+    .btn-next {
+        position: absolute;
+        right: 5cqw;
+        width: 10cqw;
+    }
+}

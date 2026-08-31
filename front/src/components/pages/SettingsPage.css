@@ -1,0 +1,139 @@
+.settings-container{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-right: 1em;
+    background-color: var(--second-color);
+    width: 40em;
+    padding: 1em;
+    border-radius: 15px;
+    border-color: var(--main-color);
+    border-width: 5px;
+    border-style: solid;
+    label{
+        color: var(--main-white);
+    }
+}
+.settings{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.sound-setting{
+    display: flex;
+    align-items: center;
+}
+.muteButton{
+    width: 2em;
+    height: 2em;
+    background: none;
+    border: none;
+    img{
+        width: 2cqw;
+        height: 2cqw;
+        background: none;
+    }
+}
+.muteButton:hover{
+    filter: brightness(0.6)
+}
+.fps-setting{
+    width: 1em;
+    height: 1em;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: transparent;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    background: var(--main-white);
+    height: 8px;
+    border: 2px solid #000;
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-track {
+    background: var(--main-white);
+    height: 8px;
+    border: 2px solid #000;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; 
+    appearance: none;
+    margin-top: -10px; 
+    background-color: var(--main-color);
+    height: 24px;
+    width: 12px;
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0px #000; 
+}
+
+/* Firefox */
+input[type="range"]::-moz-range-thumb {
+    border: none; 
+    background-color: var(--main-color);
+    height: 24px;
+    width: 12px;
+    border-radius: 0;
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0px #000;
+}
+
+input[type="range"]:focus {
+    outline: none;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+    background-color: var(--main-white); /* Feedback visual al seleccionar */
+}
+
+.checkbox-setting {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: var(--main-white);
+    border: 3px solid #000;
+    cursor: pointer;
+    position: relative;
+}
+
+.checkbox-setting:checked {
+    background-color: var(--main-color); 
+}
+
+.checkbox-setting:checked::after {
+    content: '✔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Efecto Hover para ambos */
+.checkbox-setting:hover, 
+input[type="range"]:hover::-webkit-slider-thumb {
+    filter: brightness(1.2);
+}
+@media (max-width: 1080px) {
+    .muteButton{
+    width: 2em;
+    height: 2em;
+    background: none;
+    border: none;
+    img{
+        width: 5cqw;
+        height: 5cqw;
+        background: none;
+    }
+}
+}

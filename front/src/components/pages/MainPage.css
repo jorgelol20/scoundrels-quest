@@ -1,0 +1,121 @@
+.main-menu {
+    display: flex;
+    background-color: var(--second-color);
+    flex-direction: column;
+    width: 20%;
+    border-color: var(--main-color);
+    border-width: 5px;
+    border-style: solid;
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+
+    button {
+        margin-bottom: 1cqh;
+        margin-top: 1cqh;
+    }
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+article {
+    position: relative;
+    top: -5cqh;
+    display: flex;
+    justify-content: center;
+}
+
+.banner-menu {
+    background: none;
+    margin-bottom: -2.5cqw;
+    margin-top: -15cqh;
+    width: 45cqw;
+    z-index: 10;
+}
+
+.advise {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 5px var(--main-red) groove;
+    margin: 1cqw;
+    margin-top: 2cqw;
+    background-color: var(--second-color-dark);
+
+    h1 {
+        color: var(--main-red);
+        margin-bottom: 0;
+        filter: brightness(2);
+        font-size: 2cqw;
+    }
+
+    p {
+        color: var(--main-white);
+        padding-right: 1caw;
+        font-size: 1cqw;
+    }
+
+    strong {
+        color: var(--main-orange);
+        filter: brightness(1.1);
+    }
+}
+
+.last-matches {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--main-color);
+    margin-top: 2em;
+    width: 50%;
+    text-align: center;
+    height: 45cqh;
+    border-radius: 5px;
+
+    h1 {
+        color: var(--main-gold);
+        margin-bottom: 0%;
+        font-size: 2cqw;
+    }
+
+    .match-history {
+        width: 90%;
+        overflow-y: scroll;
+        padding: 2%;
+        padding-top: 5%;
+        padding-bottom: 0;
+        border-color: var(--second-color-dark);
+        border-width: 5px;
+        border-style: groove;
+        border-radius: 5px;
+        min-height: 5cqw;
+    }
+}
+
+@media (max-width: 900px) {
+    article {
+        margin-top: 10cqw;
+        .banner-menu{
+            margin-right: 40%;
+        }
+        .main-menu{
+            width: 30cqw;
+            margin-right: 40%;
+        }
+        .last-matches {
+            width: 100cqw;
+            margin-top: 0;
+            .match-history {
+                padding-top: 10cqw;
+            }
+        }
+    }
+}

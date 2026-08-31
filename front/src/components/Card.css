@@ -1,0 +1,6 @@
+#card{
+    cursor: pointer;
+}
+#card:active{
+    cursor: cell;
+}

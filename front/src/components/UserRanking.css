@@ -1,0 +1,190 @@
+.ranking {
+    position: absolute;
+    background-color: var(--main-color);
+    border-color: var(--main-color);
+    border-width: 5px;
+    border-style: solid;
+    border-radius: 5px;
+    margin-left: 11%;
+    margin-top: -15%;
+    width: 25cqw;
+    height: 12cqw;
+    color: var(--main-white);
+    text-align: center;
+    z-index: 100;
+
+    h1 {
+        font-size: 1em;
+    }
+
+    .user-ranking {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: var(--second-color);
+        height: 3cqw;
+        width: 95%;
+        border-color: var(--second-color-dark);
+        border-width: 5px;
+        border-style: solid;
+        border-radius: 5px;
+
+
+        h1 {
+            font-size: 0.9em;
+            margin-left: 0.5cqw;
+            margin-right: 0.5cqw;
+            color: var(--main-white);
+            text-wrap-mode: wrap;
+            text-wrap-style: pretty;
+        }
+
+        img {
+            width: 2cqw;
+            height: 2cqw;
+            min-width: 2cqw;
+            max-width: 2cqw;
+            border-width: 5px;
+            border-style: solid;
+            border-radius: 5px;
+        }
+
+        .admin {
+            width: 10cqw;
+            color: var(--main-gold);
+            overflow: hidden;
+        }
+        .user {
+            width: 10cqw;
+            text-overflow: clip;
+            overflow:hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .ranking-container {
+        overflow-y: auto;
+        height: 75%;
+        margin: 5px solid var(--main-color);
+        overflow: auto;
+        z-index: 10;
+    }
+
+    .ranking-buttons {
+        position: absolute;
+        right: 0;
+        top: -2.2cqw;
+        z-index: 1;
+        display: flex;
+
+        .ranking-button {
+            width: 6cqw;
+            height: 2cqw;
+            font-size: 0.8cqw;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            filter: brightness(0.9);
+        }
+
+        .active {
+            filter: brightness(1.2);
+        }
+    }
+
+    #num-1 {
+        color: var(--main-gold);
+    }
+
+    #num-2 {
+        color: var(--main-silver);
+    }
+
+    #num-3 {
+        color: var(--main-bronze);
+    }
+
+}
+
+@media (max-width: 900px) {
+
+    .ranking {
+        height: 150%;
+        top: -2em;
+        right: 0;
+        width: 45%;
+
+        h1 {
+            font-size: 1em;
+            margin-bottom: 0;
+        }
+
+        .ranking-container {
+            height: 90%;
+        }
+
+        .user-ranking {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            background-color: var(--second-color);
+            height: 10cqw;
+            width: 99%;
+            border-color: var(--second-color-dark);
+            border-width: 5px;
+            border-style: solid;
+            border-radius: 5px;
+            margin-top: 5%;
+
+
+            h1 {
+                font-size: 2cqw;
+                margin-left: 0.5cqw;
+                margin-right: 0.5cqw;
+                color: var(--main-white);
+                text-wrap-mode: wrap;
+                text-wrap-style: pretty;
+            }
+
+            img {
+                width: 5cqw;
+                height: 5cqw;
+                min-width: 5cqw;
+                max-width: 5cqw;
+                border-width: 0.5cqw;
+                border-style: solid;
+                border-radius: 5px;
+            }
+
+            .admin {
+                color: var(--main-gold);
+            }
+        }
+
+        .ranking-buttons {
+            position: absolute;
+            right: -2%;
+            top: -5cqw;
+            z-index: 1;
+            display: flex;
+            flex-direction: row;
+            justify-content: end;
+            align-items: end;
+
+            .ranking-button {
+                width: 15cqw;
+                height: 5cqw;
+                font-size: 2cqw;
+                margin-left: 0em;
+                margin-bottom: -1em;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+                filter: brightness(0.9);
+            }
+
+            .active {
+                filter: brightness(1.2);
+                z-index: 10;
+            }
+        }
+    }
+}

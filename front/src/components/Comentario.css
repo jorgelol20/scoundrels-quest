@@ -1,0 +1,122 @@
+.box {
+    display: flex;
+    width: 100%;
+}
+
+.owner {
+    justify-content: end;
+}
+
+.user {
+    justify-content: start;
+}
+
+.commnet .owner {
+    background-color: var(--second-color-light);
+}
+
+.comment {
+    padding: 5px;
+    min-width: 30cqw;
+    max-width: 60%;
+    display: flex;
+    justify-content: start;
+    border: 2px groove var(--second-color-dark);
+    border-radius: 5px;
+    margin: 5px;
+
+    .comment-content {
+        .admin_nick {
+            color: var(--main-gold);
+        }
+
+        .user_nick {
+            color: var(--main-white)
+        }
+    }
+
+    .date {
+        font-size: 0.7em;
+    }
+
+    .comment-info {
+        position: relative;
+        width: 15%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        img {
+            width: 2em;
+            height: 2em;
+            border-radius: 50%;
+            border: 3px groove;
+        }
+
+        .delete-button {
+            width: max-content;
+            height: max-content;
+            position: absolute;
+            bottom: -20px;
+            padding: 5px;
+            padding-bottom: 0;
+            margin: 0;
+            .delete-icon {
+                background: none;
+                border-width: 0px;
+                max-width: 20px;
+                max-height: 20px;
+            }
+        }
+    }
+
+    p {
+        color: var(--main-white);
+        text-shadow: 1px 1px 2px black;
+    }
+}
+
+.comment:hover {
+    filter: brightness(1.1);
+}
+
+#owner {
+    background-color: var(--second-color-light);
+    justify-content: end;
+    flex-direction: row-reverse;
+
+    .comment-content {
+        margin-right: 5%;
+        text-align: right;
+    }
+}
+
+#user {
+    background-color: var(--second-color-dark);
+    .delete-button{
+        background-color: var(--second-color-dark);
+    }
+    .comment-content {
+        margin-left: 5%;
+        text-align: left;
+    }
+}
+
+@media (max-width: 1080px) {
+    .comment{
+        max-width: 100%;
+        width: 100%;
+    }
+    #owner {
+    .comment-content {
+        margin-right: 10%;
+    }
+}
+
+#user {
+    .comment-content {
+        margin-left: 10%;
+    }
+}
+}

@@ -1,0 +1,115 @@
+.form {
+    position: relative;
+    top: -2em;
+    display: flex;
+    color: white;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-fields {
+    width: 60%;
+}
+
+.edit-form {
+    display: flex;
+    justify-content: space-between;
+    margin-right: 1em;
+    background-color: var(--second-color);
+    width: 40em;
+    padding: 1em;
+    border-radius: 15px;
+    border-color: var(--main-color);
+    border-width: 5px;
+    border-style: solid;
+}
+
+.avatar-preview-container {
+    width: 40%;
+}
+
+.avatar-preview {
+    border-radius: 50%;
+    border-width: 10px;
+    border-color: var(--main-gold);
+    border-style: groove;
+
+    width: 15cqw;
+    height: 15cqw;
+    box-sizing: border-box;
+}
+
+.custom-file-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+
+    /* Escondemos el input real */
+    input[type="file"] {
+        display: none;
+    }
+
+    .file-button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: var(--main-color);
+        color: var(--main-white);
+        padding: 10px 20px;
+        border: 2px solid var(--main-color);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        font-family: inherit;
+        font-weight: bold;
+        box-shadow: 2px 2px 0px var(--second-gold);
+
+        img {
+            background: none;
+        }
+    }
+
+    .file-button:hover {
+        background-color: var(--second-color);
+        border-color: var(--main-gold);
+        transform: scale(1.02);
+    }
+
+    .file-button:active {
+        transform: scale(0.98);
+        box-shadow: none;
+    }
+
+    .file-status {
+        color: var(--main-white);
+        font-size: 0.9em;
+        font-style: italic;
+        opacity: 0.8;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width:1080px) {
+    .avatar-preview-container {
+        width: 40%;
+    }
+
+    .avatar-preview {
+        min-width: 25cqw;
+        min-height: 25cqw;
+        max-width: 25cqw;
+        max-height: 25cqw;
+    }
+
+    input {
+        width: 40cqw;
+    }
+
+    .custom-file-container {
+        flex-direction: column;
+        justify-content: start;
+        align-items: start;
+
+    }
+}

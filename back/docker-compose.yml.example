@@ -1,0 +1,67 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./src:/var/www
+      - ./../front/dist:/srv/frontend:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      php:
+        condition: service_started
+      db:
+        condition: service_started
+    networks:
+      web-network:
+        aliases:
+          - caddy
+  php:
+    build: ./php
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
+    depends_on:
+      db:
+        condition: service_started
+    networks:
+      web-network:
+        aliases:
+          - php
+  scheduler:
+    build: ./php
+    working_dir: /var/www
+    volumes:
+      - ./src:/var/www
+    command: php artisan schedule:work
+    depends_on:
+      db:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - web-network
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: CONTRASEÑA_USUARIO_ROOT
+      MYSQL_DATABASE: scoundrel
+      MYSQL_USER: USUARIO
+      MYSQL_PASSWORD: CONTRASEÑA_USUARIO
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - web-network
+
+networks:
+  web-network:
+    name: web-network
+    driver: bridge
+    external: true
+
+volumes:
+  db_data:
+  caddy_config:
+  caddy_data:

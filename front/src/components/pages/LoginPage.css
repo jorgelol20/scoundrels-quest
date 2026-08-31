@@ -1,0 +1,48 @@
+.form{
+    position: relative;
+    top: -2em;
+    display: flex;
+    color: white;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.login-form{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-right: 1em;
+    background-color: var(--second-color);
+    width: 40em;
+    padding: 1em;
+    border-radius: 15px;
+    border-color: var(--main-color);
+    border-width: 5px;
+    border-style: solid;
+}
+.avatar-preview{
+    border-radius: 50%;
+    border-width:10px;
+    border-color: var(--main-gold);
+    border-style: groove;
+    width: 10em;
+}
+a{
+    color: #F77F00;
+}
+a:hover{
+    filter: brightness(1.2);  
+}
+.google-login{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .google-icon{
+        background: none;
+        width: 15%;
+    }
+}
+.social-login{
+    display: flex;
+}
