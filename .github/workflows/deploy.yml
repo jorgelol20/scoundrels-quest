@@ -3,7 +3,7 @@ name: Deploy and Build on Server
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
