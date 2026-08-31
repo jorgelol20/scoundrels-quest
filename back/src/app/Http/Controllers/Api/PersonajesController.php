@@ -12,7 +12,10 @@ class PersonajesController extends Controller
 {
     public function index()
     {   
-        $personajes = Personajes::with('habilidadPersonaje')->select('id', 'nombre', 'descripcion', 'imagen', 'activo', 'habilidad_id')->get();
+        $personajes = Personajes::with('habilidadPersonaje')->
+        select('id', 'nombre', 'descripcion', 'imagen', 'activo', 'habilidad_id')
+        ->where('activo', true)
+        ->get();
         return response()->json($personajes);
     }
 
