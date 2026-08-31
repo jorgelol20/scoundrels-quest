@@ -21,7 +21,7 @@ jobs:
 
             # Navegar al proyecto y actualizar código
             cd /root/scoundrels-quest
-            git pull origin master
+            git pull
 
             # Frontend: instalar y compilar
             cd ./front
@@ -30,4 +30,5 @@ jobs:
 
             # Backend: reiniciar contenedor
             cd ../back
-            docker compose restart
+            docker compose down
+            docker compose up -d --build
