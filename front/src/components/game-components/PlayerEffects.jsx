@@ -20,7 +20,6 @@ const PlayerEffects = ({
   const effectRef = useRef(null);
 
   const disabled = !(turnos !== 0) && !(valor !== 0);
-  console.log(disabled)
 
   const getTooltipData = () => {
     if (!effectRef.current) {

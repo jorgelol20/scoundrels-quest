@@ -165,7 +165,7 @@ const GamePage = () => {
     const [actualStreak, setActualStreak] = useState(0);
     const [maxScapes, setMaxScapes] = useState(1);
     const actualScapes = useRef(1);
-    const ricochet = useRef(false);
+    const [ricochet, setRicochet] = useState(false);
     const goldMultiplier = useRef(1);
     const criticalPercentage = useRef(0);
     const [grandma, setGrandma] = useState(false);
@@ -486,12 +486,11 @@ const GamePage = () => {
             setActualStreak(0);
             actualScapes.current = (1);
             healthSteal.current = (false);
-            ricochet.current = (false)
+            setRicochet(false)
             enemyDmgMultiplier.current = (1);
             enemyExtraDmg.current = (0)
             spadesExtraTakedDmg.current = (0);
             clubsExtraTakedDmg.current = (0);
-            ricochet.current = (false);
             goldMultiplier.current = (1)
             setMaxScapes(1)
             userExtraDmg.current = (0)
@@ -645,22 +644,23 @@ const GamePage = () => {
         }, [room.length, dungeon, maxHealth]);
 
         const applyCharacterPassive = useCallback((char) => {
+            console.log("Personaje")
             if (!char) return;
-            if (char?.habilidad_personaje?.id === 1) {
+            if (char?.habilidad_personaje?.codigo === 'guerrero') {
                 setIsWarrior(true);
-            } else if (char?.habilidad_personaje?.id === 2) {
-                setMaxHealth(prev => prev + 5);
-                setHealth(prev => prev + 5);
-            } else if (char?.habilidad_personaje?.id === 3) {
-                setMaxScapes(prev => prev + 1);
-                actualScapes.current += 1;
-            } else if (char?.habilidad_personaje?.id === 4) {
+            } else if (char?.habilidad_personaje?.codigo === 'paladin') {
+                setMaxHealth(prev => 25);
+                setHealth(prev => 25);
+            } else if (char?.habilidad_personaje?.codigo === 'elfo') {
+                setMaxScapes(2);
+                actualScapes.current = 2;
+            } else if (char?.habilidad_personaje?.codigo === 'mago') {
                 setIsWizard(true);
-            } else if (char?.habilidad_personaje?.id === 5) {
+            } else if (char?.habilidad_personaje?.codigo === 'gambler') {
                 setIsGambler(true);
                 coinAnimation(50);
-                setGold(prev => prev + 50);
-            } else if (char?.habilidad_personaje?.id === 6) {
+                setGold(prev => 50);
+            } else if (char?.habilidad_personaje?.codigo === 'herrero') {
                 setBlacksmishDmg(1);
             }
         }, []);
@@ -700,8 +700,6 @@ const GamePage = () => {
             setActiveModifiers([]);
             if (resetCharacter) {
                 setNewCharacter(null);
-            } else if (character) {
-                applyCharacterPassive(character);
             }
             setGameLoading(false)
             setRestart(false)
@@ -748,6 +746,7 @@ const GamePage = () => {
 
                 // La primera ronda debe dejar la partida activa.
                 if (rounds === 0) {
+                    applyCharacterPassive(character);
                     setGameOn(true)
                 }
 
@@ -1053,7 +1052,7 @@ const GamePage = () => {
             const canUseWeapon = weapon && (
                 slainMonsters.length === 0 ||
                 card?.valor < lastSlainCard?.valor ||
-                (ricochet.current && card?.valor <= lastSlainCard?.valor)
+                (ricochet && card?.valor <= lastSlainCard?.valor)
             );
 
             // Resolución de Ramas de Combate
@@ -1225,6 +1224,7 @@ const GamePage = () => {
         // =====================================================
 
         const applyEffect = (effect) => {
+            console.log("Modificador")
             switch (effect.name) {
                 case "chest_rewards":
                     const weaponValue = lodash.shuffle(effect.value)[0];
@@ -1269,7 +1269,7 @@ const GamePage = () => {
                     setHealth(prev => prev + effect.value)
                     break;
                 case "ricochet":
-                    ricochet.current = true;
+                    setRicochet(true);
                     break;
                 case 'gold_multiplier':
                     goldMultiplier.current = effect.value
@@ -1458,7 +1458,7 @@ const GamePage = () => {
         // Pasivas de personaje (primera selección / cambio de personaje)
         useEffect(() => {
             applyCharacterPassive(character);
-        }, [character]);
+        }, [character, gameOn]);
 
         // Inicialización
         // FIX (punto 2): se elimina la llamada directa a startNewGame() de aquí;
@@ -1471,12 +1471,6 @@ const GamePage = () => {
         // Reinicio solicitado
         useEffect(() => {
             if (restart) {
-                // FIX (nuevo botón "CAMBIAR PERSONAJE"): se pasa el flag
-                // changeCharacter para decidir si este reinicio debe forzar
-                // también la reselección de personaje (CAMBIAR PERSONAJE) o
-                // mantener el actual (REINTENTAR / JUGAR OTRA). Se consume el
-                // flag inmediatamente después para no arrastrarlo al próximo
-                // reinicio.
                 restartFunction(changeCharacter);
                 setChangeCharacter(false);
             }
@@ -1735,80 +1729,6 @@ const GamePage = () => {
                         <Stage className="game-window" width={layout.width} height={layout.height * 0.8} scaleX={layout.scale} scaleY={layout.scale} imageSmoothingEnabled={false} x={0}>
                             {/* CAPA ESTÁTICA */}
                             <Layer>
-                                {/* ZONA DEL MAZO */}
-                                <Group x={DUNGEON_ZONE.x} y={DUNGEON_ZONE.y}>
-                                    <Rect width={DUNGEON_ZONE.width} height={DUNGEON_ZONE.height} fill="#0000006c" stroke="white" strokeWidth={2} cornerRadius={8} onMouseEnter={(e) => { setOverDungeonZone(true) }} onMouseLeave={(e) => { setOverDungeonZone(false) }} />
-                                    <Text text="DUNGEON" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={20} x={35} />
-
-                                    {dungeon.toReversed().slice(0, 4).toReversed().map((card, i) => (
-                                        <Card
-                                            key={card.key}
-                                            cardInfo={card}
-                                            x={7}
-                                            y={isWizard ? 5 + (i * (overDungeonZone ? 100 : 0)) : 5}
-                                            onDragEnd={() => { }}
-                                            onClick={setOverDungeonZone}
-                                            canBeClicked={canBeClicked}
-                                            isDraggable={false}
-                                            isWizard={isWizard}
-                                            onDeck={true}
-                                            setOverDungeonZone={setOverDungeonZone}
-                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : SpadeIcon}
-                                            defaultImage={defaultImage}
-                                        />
-                                    ))}
-                                </Group>
-
-                                {/* PILA DE DESCARTES */}
-                                <Group x={DISCARD_ZONE.x} y={DISCARD_ZONE.y}>
-                                    <Rect width={DISCARD_ZONE.width} height={DISCARD_ZONE.height} fill="#9c4747c9" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                    <Text text="DESCARTES" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={WEAPON_ZONE.height * 0.05} x={WEAPON_ZONE.width * 0.08} />
-                                    {discardPile.toReversed().slice(0, 1).map((card, i) => (
-                                        <Card
-                                            key={card.key}
-                                            cardInfo={card}
-                                            x={5}
-                                            y={5}
-                                            onDragEnd={() => { }}
-                                            onClick={() => { }}
-                                            isDraggable={false}
-                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : SpadeIcon}
-                                            defaultImage={defaultImage}
-                                        />
-                                    ))}
-                                </Group>
-
-                                {/* ZONA DE EQUIPO */}
-                                <Group x={WEAPON_ZONE.x} y={WEAPON_ZONE.y}>
-                                    <Rect width={WEAPON_ZONE.width} height={WEAPON_ZONE.height} fill="#6a9c476e" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                    <Text text="ZONA DE EQUIPO" fontFamily="Alagard" fontSize={40} fill="white" y={WEAPON_ZONE.height * 0.4} x={WEAPON_ZONE.width * 0.12} />
-                                    {weapon && <Card
-                                        ref={el => cardRefs.current[weapon.key] = el}
-                                        key={weapon.key}
-                                        cardInfo={weapon}
-                                        x={10}
-                                        y={10}
-                                        onDragEnd={() => { }}
-                                        onClick={() => { }}
-                                        isDraggable={false}
-                                        cardSuit={weapon?.palo == "Diamante" ? DiamonIcon : weapon?.palo == "Trebol" ? ClubIcon : weapon?.palo == "Corazon" ? HeartIcon : SpadeIcon}
-                                        defaultImage={defaultImage}
-                                    />}
-                                    {slainMonsters.map((card, i) => (
-                                        <Card
-                                            ref={el => cardRefs.current[card.key] = el}
-                                            key={card.key}
-                                            cardInfo={card}
-                                            x={150 + (i * 20)}
-                                            y={10 + (i * 10)}
-                                            onDragEnd={() => { }}
-                                            onClick={() => { }}
-                                            isDraggable={false}
-                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : SpadeIcon}
-                                            defaultImage={defaultImage}
-                                        />
-                                    ))}
-                                </Group>
                                 <Group x={DUNGEON_ZONE.x} y={WEAPON_ZONE.y}>
                                     <Rect width={WEAPON_ZONE.width / 3} height={WEAPON_ZONE.height} fill="#9c94476e" stroke="white" strokeWidth={2} cornerRadius={8} />
                                     <Text text="Efectos" fontFamily="Alagard" fontSize={16} fill="white" y={WEAPON_ZONE.height * 0.05} x={(WEAPON_ZONE.width / 3) * 0.3} />
@@ -1955,6 +1875,81 @@ const GamePage = () => {
                                         onHover={setTooltip}
                                         onLeave={() => setTooltip(null)}
                                     />
+                                </Group>
+
+                                {/* ZONA DEL MAZO */}
+                                <Group x={DUNGEON_ZONE.x} y={DUNGEON_ZONE.y}>
+                                    <Rect width={DUNGEON_ZONE.width} height={DUNGEON_ZONE.height} fill="#0000006c" stroke="white" strokeWidth={2} cornerRadius={8} onMouseEnter={(e) => { setOverDungeonZone(true) }} onMouseLeave={(e) => { setOverDungeonZone(false) }} />
+                                    <Text text="DUNGEON" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={20} x={35} />
+
+                                    {dungeon.toReversed().slice(0, 4).toReversed().map((card, i) => (
+                                        <Card
+                                            key={card.key}
+                                            cardInfo={card}
+                                            x={7}
+                                            y={isWizard ? 5 + (i * (overDungeonZone ? 100 : 0)) : 5}
+                                            onDragEnd={() => { }}
+                                            onClick={setOverDungeonZone}
+                                            canBeClicked={canBeClicked}
+                                            isDraggable={false}
+                                            isWizard={isWizard}
+                                            onDeck={true}
+                                            setOverDungeonZone={setOverDungeonZone}
+                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : SpadeIcon}
+                                            defaultImage={defaultImage}
+                                        />
+                                    ))}
+                                </Group>
+
+                                {/* PILA DE DESCARTES */}
+                                <Group x={DISCARD_ZONE.x} y={DISCARD_ZONE.y}>
+                                    <Rect width={DISCARD_ZONE.width} height={DISCARD_ZONE.height} fill="#9c4747c9" stroke="white" strokeWidth={2} cornerRadius={8} />
+                                    <Text text="DESCARTES" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={WEAPON_ZONE.height * 0.05} x={WEAPON_ZONE.width * 0.08} />
+                                    {discardPile.toReversed().slice(0, 1).map((card, i) => (
+                                        <Card
+                                            key={card.key}
+                                            cardInfo={card}
+                                            x={5}
+                                            y={5}
+                                            onDragEnd={() => { }}
+                                            onClick={() => { }}
+                                            isDraggable={false}
+                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : SpadeIcon}
+                                            defaultImage={defaultImage}
+                                        />
+                                    ))}
+                                </Group>
+
+                                {/* ZONA DE EQUIPO */}
+                                <Group x={WEAPON_ZONE.x} y={WEAPON_ZONE.y}>
+                                    <Rect width={WEAPON_ZONE.width} height={WEAPON_ZONE.height} fill="#6a9c476e" stroke="white" strokeWidth={2} cornerRadius={8} />
+                                    <Text text="ZONA DE EQUIPO" fontFamily="Alagard" fontSize={40} fill="white" y={WEAPON_ZONE.height * 0.4} x={WEAPON_ZONE.width * 0.12} />
+                                    {weapon && <Card
+                                        ref={el => cardRefs.current[weapon.key] = el}
+                                        key={weapon.key}
+                                        cardInfo={weapon}
+                                        x={10}
+                                        y={10}
+                                        onDragEnd={() => { }}
+                                        onClick={() => { }}
+                                        isDraggable={false}
+                                        cardSuit={weapon?.palo == "Diamante" ? DiamonIcon : weapon?.palo == "Trebol" ? ClubIcon : weapon?.palo == "Corazon" ? HeartIcon : SpadeIcon}
+                                        defaultImage={defaultImage}
+                                    />}
+                                    {slainMonsters.map((card, i) => (
+                                        <Card
+                                            ref={el => cardRefs.current[card.key] = el}
+                                            key={card.key}
+                                            cardInfo={card}
+                                            x={150 + (i * 20)}
+                                            y={10 + (i * 10)}
+                                            onDragEnd={() => { }}
+                                            onClick={() => { }}
+                                            isDraggable={false}
+                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : SpadeIcon}
+                                            defaultImage={defaultImage}
+                                        />
+                                    ))}
                                 </Group>
                             </Layer>
 
