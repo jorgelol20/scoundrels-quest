@@ -180,6 +180,7 @@ const GamePage = () => {
     const [thanatophobia, setThanatophobia] = useState(false);
     const [thanatophobiaActivated, setThanatophobiaActivated] = useState(false);
     const [lifeward, setLifeward] = useState(false)
+    const [refund, setRefund] = useState(false);
 
     // Efectos de cartas
     const currentHeal = useRef(0);
@@ -415,8 +416,8 @@ const GamePage = () => {
             }
             actualScapes.current - 1 > 0 ?
                 actualScapes.current -= 1 :
-                canScape.current = false 
-                setThanatophobiaActivated(false);
+                canScape.current = false
+            setThanatophobiaActivated(false);
             canScape.current ? setAvailableAbility(true) : setAvailableAbility(false)
         }
 
@@ -1050,7 +1051,7 @@ const GamePage = () => {
                     setHealth(reviveHealth.current);
                     revive.current = false;
                     reviveHealth.current = 0;
-                }else if(health - dmg <= 0 && lifeward){
+                } else if (health - dmg <= 0 && lifeward) {
                     setHealth(1);
                     setLifeward(false)
                     logsRef.current.push(`${nextLogIndex} - Tu ángel guardián te ha salvado la vida.`);
@@ -1339,6 +1340,8 @@ const GamePage = () => {
                 case 'lifeward':
                     setLifeward(true);
                     break;
+                case 'refund':
+                    setRefund(true);
                 default:
                     return false;
             }
@@ -1647,6 +1650,7 @@ const GamePage = () => {
                         healthIcon={healthIcon}
                         character={character}
                         round={rounds}
+                        refund={refund}
                     />
                 </Fragment>
             )

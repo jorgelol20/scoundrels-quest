@@ -285,6 +285,15 @@ class Modificadores extends Seeder
                     ['name' => 'lifeward', 'value' => true],
                 ])
             ],
+            [
+                'nombre' => 'Reembolso',
+                'descripcion' => 'Al empezar la ronda, te devuelve el 10% de todo el oro gastado en la tienda.',
+                'imagen' => "/storage/modificadores/Reembolso.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'refund', 'value' => true],
+                ])
+            ],
         ];
         foreach ($modificadores as $data) {
             ModelModificadores::updateOrCreate(
