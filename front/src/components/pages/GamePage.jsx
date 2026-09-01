@@ -172,6 +172,14 @@ const GamePage = () => {
     const tacticalChange = useRef(0);
     const expert = useRef(false);
     const extraHealthExpert = useRef(0);
+    const [scavenger, setScavenger] = useState(false);
+    const [vitamine, setVitamine] = useState(false);
+    const vitamineValue = useRef(0);
+    const [gluttony, setGluttony] = useState(false);
+    const [interest, setInterest] = useState(0);
+    const [thanatophobia, setThanatophobia] = useState(false);
+    const [thanatophobiaActivated, setThanatophobiaActivated] = useState(false);
+    const [lifeward, setLifeward] = useState(false)
 
     // Efectos de cartas
     const currentHeal = useRef(0);
@@ -200,15 +208,10 @@ const GamePage = () => {
     // Control de robo
     const isDrawingRef = useRef(false);
 
-    // Evita que la inicialización de la partida se ejecute más de una vez
-    // por cambios de gameLoading o por renders/Strict Mode.
     const hasStartedNewGameRef = useRef(false);
 
-    // =====================================================
-    // REFS ESPEJO — evitan closures obsoletas en cleanups
-    // que no dependen de estos valores (p.ej. el efecto de
-    // layout/resize, que solo debe montarse/desmontarse una vez)
-    // =====================================================
+    const gameSavedRef = useRef(false);
+
     const userRef = useRef(user);
     const characterRef = useRef(character);
     const gameWinRef = useRef(gameWin);
@@ -228,18 +231,6 @@ const GamePage = () => {
     // =====================================================
     try {
 
-        const guardarYTerminarPartida = async () => {
-            await endGame(
-                user.id,
-                timeRef.current,
-                gameWin,
-                rounds,
-                totalEarnedGold.current,
-                healedLife.current,
-                enemysDefeated
-            );
-        };
-
         const handleCloseModal = useCallback(() => {
             setIsModalOpen(false);
             window.history.pushState(null, null, window.location.pathname);
@@ -249,7 +240,10 @@ const GamePage = () => {
             setIsModalOpen(false);
 
             try {
-                await endGame(user.id, timeRef.current, gameWin, rounds, totalEarnedGold.current, healedLife.current, enemysDefeated);
+                if (!gameSavedRef.current) {
+                    gameSavedRef.current = true;
+                    await endGame(user.id, timeRef.current, gameWin, rounds, totalEarnedGold.current, healedLife.current, enemysDefeated);
+                }
             } catch (error) {
                 console.error("Error al guardar la partida:", error);
             } finally {
@@ -421,7 +415,8 @@ const GamePage = () => {
             }
             actualScapes.current - 1 > 0 ?
                 actualScapes.current -= 1 :
-                canScape.current = false;
+                canScape.current = false 
+                setThanatophobiaActivated(false);
             canScape.current ? setAvailableAbility(true) : setAvailableAbility(false)
         }
 
@@ -468,12 +463,12 @@ const GamePage = () => {
                 })
                 setDungeon(prev => [...nonBlocked, ...prev]);
                 setRoom(blockedCards);
+                fillRoom();
                 if (actualScapes.current - 1 > 0) {
                     actualScapes.current -= 1;
                 } else {
                     canScape.current = false;
                 }
-
                 if (character?.habilidad_personaje?.id === 1 && !canScape.current) {
                     setAvailableAbility(false);
                 }
@@ -501,6 +496,13 @@ const GamePage = () => {
             tacticalChange.current = (0);
             expert.current = (false);
             extraHealthExpert.current = (0)
+            setScavenger(false);
+            setVitamine(false);
+            setGluttony(false);
+            setThanatophobia(false)
+            setThanatophobiaActivated(false);
+            setInterest(0);
+
         }
         // =====================================================
         // CAPA 3 — COMPOSICIÓN DE FUNCIONES
@@ -541,7 +543,7 @@ const GamePage = () => {
         }
 
         const applyMitosis = async (cardValue) => {
-            const cardPower = Math.ceil(cardValue / 2)
+            const cardPower = Math.max(Math.floor(cardValue / 2), 2)
             const card1 = await addEnemyToMatchDeck(cardPower, rounds);
             const card2 = await addEnemyToMatchDeck(cardPower, rounds);
             logsRef.current.push((logsRef.current.length + 1) + " - " + "¡El enemigo ha hecho mitosis!")
@@ -644,7 +646,6 @@ const GamePage = () => {
         }, [room.length, dungeon, maxHealth]);
 
         const applyCharacterPassive = useCallback((char) => {
-            console.log("Personaje")
             if (!char) return;
             if (char?.habilidad_personaje?.codigo === 'guerrero') {
                 setIsWarrior(true);
@@ -687,6 +688,7 @@ const GamePage = () => {
             setMaxScapes(1);
             setLastGamblerEffect(null);
             setContinuedGame(false);
+            gameSavedRef.current = false;
 
             // Limpieza de cartas y mazo
             setDungeon([]);
@@ -735,6 +737,9 @@ const GamePage = () => {
                 setSelectModifier(true)
                 let newEnemys = [];
                 if (rounds >= 1 && gameOn) {
+                    if (interest !== 0) {
+                        setGold(prev => prev + (prev / interest));
+                    }
                     newEnemys = await addEnemys()
                     setShopAvailable(true)
                 } else {
@@ -849,6 +854,7 @@ const GamePage = () => {
             switch (effect.name) {
                 case 'restore_ability':
                     if (!isGambler) {
+                        sealTurns.current = 0
                         setAvailableAbility(true);
                     }
                     currentHeal.current = 0;
@@ -950,6 +956,12 @@ const GamePage = () => {
                 handleCardEffect(card)
             }
             if (!healedRef.current && !antiheal.current) {
+                if (gluttony) {
+                    currentHeal.current += 1;
+                }
+                if (currentHeal.current + health > maxHealth) {
+                    vitamineValue.current = Math.min(2, (currentHeal.current + health - maxHealth));
+                }
                 setHealth(prev => Math.max(0, Math.min(maxHealth, prev + currentHeal.current)));
                 healAnimation(currentHeal.current)
                 healedLife.current += currentHeal.current;
@@ -1026,10 +1038,6 @@ const GamePage = () => {
 
             // Helpers locales para evitar duplicar lógica recurrente
             const grantGoldReward = () => {
-                // FIX (bug "Gambler da 5 oro en vez de 10"): faltaba el bonus
-                // de clase del Apostador, que debe duplicar el oro obtenido al
-                // matar con arma (10 en vez de los 5 base). goldMultiplier
-                // (de los modificadores de ronda) se sigue aplicando encima.
                 const baseGold = isGambler ? 10 : 5;
                 const earnedGold = Math.floor(baseGold * goldMultiplier.current);
                 setGold(prev => prev + earnedGold);
@@ -1042,6 +1050,10 @@ const GamePage = () => {
                     setHealth(reviveHealth.current);
                     revive.current = false;
                     reviveHealth.current = 0;
+                }else if(health - dmg <= 0 && lifeward){
+                    setHealth(1);
+                    setLifeward(false)
+                    logsRef.current.push(`${nextLogIndex} - Tu ángel guardián te ha salvado la vida.`);
                 } else {
                     setHealth(prev => Math.max(0, prev - dmg));
                 }
@@ -1136,8 +1148,10 @@ const GamePage = () => {
                 validMove = handleHeal(card);
                 if (validMove) {
                     userExtraDmg.current = 0;
+                    userExtraDmg.current += vitamineValue.current;
+                    vitamineValue.current = 0;
                     if (grandma) {
-                        userExtraDmg.current = 1;
+                        userExtraDmg.current += 1;
                     }
                 }
             }
@@ -1156,6 +1170,16 @@ const GamePage = () => {
                     setEnemysDefeated(prev => prev + 1);
                     userExtraDmg.current = 0;
                     dmgReduction.current = 0;
+                }
+                if (scavenger) {
+                    if (Math.floor(Math.random() * 100) <= 10) {
+                        if (Math.floor(Math.random() * 100) > 50) {
+                            userExtraDmg.current += 1;
+                        } else {
+                            setHealth(prev => prev + 1)
+                            healAnimation(1)
+                        }
+                    }
                 }
             }
 
@@ -1224,7 +1248,6 @@ const GamePage = () => {
         // =====================================================
 
         const applyEffect = (effect) => {
-            console.log("Modificador")
             switch (effect.name) {
                 case "chest_rewards":
                     const weaponValue = lodash.shuffle(effect.value)[0];
@@ -1297,6 +1320,25 @@ const GamePage = () => {
                     extraHealthExpert.current = Math.min(10, Math.floor(enemysDefeated / 20));
                     setMaxHealth(prev => prev + extraHealthExpert.current);
                     break;
+                case 'scavenger':
+                    setScavenger(true)
+                    break;
+                case 'vitamine':
+                    setVitamine(true)
+                    break;
+                case 'gluttony':
+                    setGluttony(true)
+                    break;
+                case 'interest':
+                    setInterest(effect.value);
+                    break;
+                case 'thanatophobia':
+                    setThanatophobia(true);
+                    setThanatophobiaActivated(false);
+                    break;
+                case 'lifeward':
+                    setLifeward(true);
+                    break;
                 default:
                     return false;
             }
@@ -1324,11 +1366,6 @@ const GamePage = () => {
             if (health <= 0) {
                 setGameOn(false);
                 setGameOver(true);
-                // FIX (bug botón CONTINUAR tras perder): "gameWin" se ponía a
-                // true al ganar la primera vez y nunca se reseteaba. Si el
-                // jugador continuaba tras ganar y después moría, la pantalla
-                // de derrota seguía leyendo gameWin=true y mostraba el botón
-                // CONTINUAR, que ya no tiene sentido tras un game over real.
                 setGameWin(false);
             }
         }, [health]);
@@ -1351,9 +1388,6 @@ const GamePage = () => {
             }
         }, [canBeClicked]);
 
-        // Inicialización de partida: solo una vez cuando el estado de carga
-        // queda preparado. Antes dependía de cualquier cambio en gameLoading,
-        // lo que podía disparar startNewGame() varias veces y duplicar cartas.
         useEffect(() => {
             if (gameLoading !== false || hasStartedNewGameRef.current) return;
 
@@ -1370,7 +1404,6 @@ const GamePage = () => {
         }, [isWarrior, health, maxHealth]);
 
         useEffect(() => {
-            console.log(sealTurns.current)
             if (sealTurns.current === 0) {
                 if (isGambler && gold >= 25) {
                     setAvailableAbility(true);
@@ -1412,17 +1445,11 @@ const GamePage = () => {
             } else if (user !== undefined) {
                 stopTimer();
                 if (continuedGame) {
-                    // FIX (bug "ganar y luego perder cuenta como derrota"):
-                    // continuedGame solo puede ser true si el jugador ya ganó
-                    // antes (es la única vía para llegar al botón CONTINUAR).
-                    // Si luego muere en la ronda extra, gameWin pasa a false
-                    // (fix del botón CONTINUAR fantasma), pero la partida SIGUE
-                    // habiendo sido una victoria. Por eso aquí se guarda
-                    // siempre "true", no el gameWin actual.
                     updateActualGame(user.id, timeRef.current, true, rounds, totalEarnedGold.current, healedLife.current, enemysDefeated);
                 } else {
                     endGame(user.id, timeRef.current, gameWin, rounds, totalEarnedGold.current, healedLife.current, enemysDefeated);
                 }
+                gameSavedRef.current = true;
             }
 
             return () => stopTimer();
@@ -1434,10 +1461,6 @@ const GamePage = () => {
 
             if (room.length <= 1) {
                 isDrawingRef.current = true;
-                // FIX (bug más de 4 cartas en mano): el guard solo se libera
-                // dentro de este callback, que fillRoom ejecuta cuando ha
-                // colocado de verdad la última carta del robo — ya no depende
-                // de un temporizador fijo que podía desincronizarse.
                 fillRoom(() => {
                     isDrawingRef.current = false;
                 });
@@ -1449,6 +1472,7 @@ const GamePage = () => {
                     healedRef.current = false;
                     actualScapes.current = maxScapes;
                     canScape.current = true;
+                    setThanatophobiaActivated(false);
                 }
 
                 isScapingRef.current = false;
@@ -1461,8 +1485,6 @@ const GamePage = () => {
         }, [character, gameOn]);
 
         // Inicialización
-        // FIX (punto 2): se elimina la llamada directa a startNewGame() de aquí;
-        // ya se dispara desde el useEffect que depende de [gameLoading].
         useEffect(() => {
             restartFunction();
             setShopAvailable(false);
@@ -1477,11 +1499,6 @@ const GamePage = () => {
         }, [restart]);
 
         // Layout / resize
-        // FIX (punto 5): el cleanup usa refs espejo (userRef, characterRef,
-        // gameWinRef, roundsRef, modifiersRef, enemysDefeatedRef) en lugar de
-        // las variables de estado capturadas en el montaje, para que al
-        // desmontar el componente se guarde el progreso REAL de la partida
-        // y no los valores obsoletos del primer render.
         useEffect(() => {
             if (!user) {
                 navigate('/');
@@ -1492,7 +1509,8 @@ const GamePage = () => {
             window.addEventListener('resize', handleResize);
             return () => {
                 window.removeEventListener('resize', handleResize);
-                if (userRef.current && characterRef.current && modifiersRef.current.length > 0) {
+                if (!gameSavedRef.current && userRef.current && characterRef.current && modifiersRef.current.length > 0) {
+                    gameSavedRef.current = true;
                     endGame(
                         userRef.current.id,
                         timeRef.current,
@@ -1506,6 +1524,18 @@ const GamePage = () => {
                 stopTimer();
             };
         }, []);
+
+        useEffect(() => {
+            if (thanatophobia && room.length === 4) {
+                const allEnemys = room.reduce(
+                    (areEnemys, currentValue) => areEnemys = ((currentValue.palo === 'Trebol' || currentValue.palo === 'Pica') && areEnemys),
+                    true,);
+                if (allEnemys && !thanatophobiaActivated) {
+                    canScape.current = true;
+                    setThanatophobiaActivated(true);
+                }
+            }
+        }, [room, thanatophobia])
 
         const handleEffectHover = (effect) => {
             const stage = stageRef.current;
@@ -1536,15 +1566,18 @@ const GamePage = () => {
             const gestionarSalidaNavbar = async (e) => {
                 const rutaDestino = e.detail.destino;
                 try {
-                    await endGame(
-                        user?.id,
-                        timeRef.current,
-                        false,
-                        rounds,
-                        totalEarnedGold.current,
-                        healedLife.current,
-                        enemysDefeated
-                    );
+                    if (!gameSavedRef.current) {
+                        gameSavedRef.current = true;
+                        await endGame(
+                            user?.id,
+                            timeRef.current,
+                            false,
+                            rounds,
+                            totalEarnedGold.current,
+                            healedLife.current,
+                            enemysDefeated
+                        );
+                    }
                 } catch (error) {
                     console.error("Error al guardar la partida desde el Navbar:", error);
                 } finally {
