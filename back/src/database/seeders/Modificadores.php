@@ -231,6 +231,60 @@ class Modificadores extends Seeder
                     ['name' => 'expert', 'value' => true],
                 ])
             ],
+            [
+                'nombre' => 'Carroñero',
+                'descripcion' => 'Matar a un enemigo tiene una probabilidad (10%) de que te cure 1 de daño o darte 1 de daño extra la siguiente acción. ',
+                'imagen' => "/storage/modificadores/Carroñero.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'scavenger', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Vitamínico',
+                'descripcion' => 'El excedente de curación se vuelve daño hasta un máximo de 2. (No aplica para el robo de vida)',
+                'imagen' => "/storage/modificadores/Vitaminico.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'vitamine', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Gula',
+                'descripcion' => 'Las cartas de curación te curan 1 más.',
+                'imagen' => "/storage/modificadores/Gula.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'gluttony', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Interes Compuesto',
+                'descripcion' => 'Gana un 10% de tu oro al finalizar la ronda.',
+                'imagen' => "/storage/modificadores/InteresCompuesto.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'interest', 'value' => 10],
+                ])
+            ],
+            [
+                'nombre' => 'Miedo a morir',
+                'descripcion' => 'Si aparecen 4 enemigos en la mano tras huir, puedes volver a escapar.',
+                'imagen' => "/storage/modificadores/MiedoAMorir.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'thanatophobia', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Salvavidas',
+                'descripcion' => 'Si fueses a morir, te salvas a 1 de vida. (Solo sirve una vez en la partida)',
+                'imagen' => "/storage/modificadores/Salvavidas.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'lifeward', 'value' => true],
+                ])
+            ],
         ];
         foreach ($modificadores as $data) {
             ModelModificadores::updateOrCreate(
