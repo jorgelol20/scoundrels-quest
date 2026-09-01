@@ -12,7 +12,7 @@ import lodash from 'lodash';
 import HeartIcon from '/images/suit_heart.webp';
 import DiamonIcon from '/images/suit_diamond.webp';
 
-const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formatedTimeRef, healthIcon, character, round }) => {
+const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formatedTimeRef, healthIcon, character, round, refund }) => {
     const { user } = useUser();
     const { addCardToMatchDeck, addModifierToMatch, getRandomsModifier, getWeapon, getHealItem, activeModifiers: modifiers, } = useContext(matchContext);
 
@@ -25,71 +25,72 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
 
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
+    let usedGold = 0;
+
     const calculateWeaponPrice = (valor, multiplicador) => {
-    const base = valor <= 10 
-        ? valor * 5 
-        : ((valor - 4) * 5) + ((valor >= 14 ? 15 : 10) * (valor - 8));
-    
-    return Math.max(20, base) * multiplicador;
-};
+        const base = valor <= 10
+            ? valor * 5
+            : ((valor - 4) * 5) + ((valor >= 14 ? 15 : 10) * (valor - 8));
 
-const calculateHealPrice = (valor, multiplicador) => {
-    const base = valor <= 10 
-        ? valor * 5 
-        : ((valor - 4) * 5) + (10 * (valor - 8));
-        
-    return Math.max(5, base) * multiplicador;
-};
+        return Math.max(20, base) * multiplicador;
+    };
 
-// ... Dentro de tu componente:
+    const calculateHealPrice = (valor, multiplicador) => {
+        const base = valor <= 10
+            ? valor * 5
+            : ((valor - 4) * 5) + (10 * (valor - 8));
 
-useEffect(() => {
-    const currentRound = round; 
-    const mods = getRandomsModifier(3, currentRound) || [];
-    const items = [];
+        return Math.max(5, base) * multiplicador;
+    };
 
-    // Multiplicador de precio corregido
-    const multiplicador = currentRound > 10 ? currentRound % 10 == 0? Math.min(20, currentRound - 10) / 2 : Math.min(20, currentRound - 10) : 1;
 
-    // Agregar modificadores si existen
-    mods.forEach((mod, index) => {
-        if (mod) {
-            items.push({
-                id: `mod-${index}`,
-                type: 'modifier',
-                data: mod,
-                price: 50 * (mod.nivel || 1) * multiplicador,
-                isBought: false
-            });
+    useEffect(() => {
+        const currentRound = round;
+        const mods = getRandomsModifier(3, currentRound) || [];
+        const items = [];
+
+        // Multiplicador de precio corregido
+        const multiplicador = currentRound > 10 ? currentRound % 10 == 0 ? Math.min(10, currentRound - 10) / 2 : Math.min(20, currentRound - 10) : 1;
+
+        // Agregar modificadores si existen
+        mods.forEach((mod, index) => {
+            if (mod) {
+                items.push({
+                    id: `mod-${index}`,
+                    type: 'modifier',
+                    data: mod,
+                    price: 50 * (mod.nivel || 1) * multiplicador,
+                    isBought: false
+                });
+            }
+        });
+
+        for (let valor = 2; valor <= 14; valor++) {
+            const wep = getWeapon(valor);
+            if (wep) {
+                items.push({
+                    id: `wep-${valor}`,
+                    type: 'card',
+                    data: wep,
+                    price: calculateWeaponPrice(wep?.valor, multiplicador),
+                    isBought: false
+                });
+            }
+
+            const heal = getHealItem(valor);
+            if (heal) {
+                items.push({
+                    id: `heal-${valor}`,
+                    type: 'card',
+                    data: heal,
+                    price: calculateHealPrice(heal?.valor, multiplicador),
+                    isBought: false
+                });
+            }
         }
-    });
 
-    for (let valor = 2; valor <= 14; valor++) {
-        const wep = getWeapon(valor);
-        if (wep) {
-            items.push({
-                id: `wep-${valor}`,
-                type: 'card',
-                data: wep,
-                price: calculateWeaponPrice(wep?.valor, multiplicador),
-                isBought: false
-            });
-        }
-
-        const heal = getHealItem(valor);
-        if (heal) {
-            items.push({
-                id: `heal-${valor}`,
-                type: 'card',
-                data: heal,
-                price: calculateHealPrice(heal?.valor, multiplicador),
-                isBought: false
-            });
-        }
-    }
-
-    setShopItems(items);
-}, [round]);
+        setShopItems(items);
+    }, [round]);
 
     const [scale, setScale] = useState(window.innerWidth / 1920)
     const [scaleMultiplier, setScaleMultiplier] = useState(1.2)
@@ -125,6 +126,8 @@ useEffect(() => {
 
         // 1. Restar el oro al jugador
         setGold(prevGold => prevGold - item.price);
+
+        usedGold += item.price;
 
         // 2. Añadir el ítem al jugador según su tipo
         if (item.type === 'modifier') {
@@ -244,7 +247,13 @@ useEffect(() => {
                             </div>
                         ))}
                     </div>
-                    <button className="continue-button" style={{ marginTop: '20px' }} onClick={() => { setShopAvailable(false) }}>
+                    <button className="continue-button" style={{ marginTop: '20px' }}
+                        onClick={() => {
+                            if(refund){
+                                setGold(prev => prev + usedGold)
+                            }
+                            setShopAvailable(false)
+                        }}>
                         Seguir
                     </button>
                 </div>
