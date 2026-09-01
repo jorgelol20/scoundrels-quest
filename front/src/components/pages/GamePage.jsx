@@ -165,7 +165,7 @@ const GamePage = () => {
     const [actualStreak, setActualStreak] = useState(0);
     const [maxScapes, setMaxScapes] = useState(1);
     const actualScapes = useRef(1);
-    const ricochet = useRef(false);
+    const [ricochet, setRicochet] = useState(false);
     const goldMultiplier = useRef(1);
     const criticalPercentage = useRef(0);
     const [grandma, setGrandma] = useState(false);
@@ -486,12 +486,11 @@ const GamePage = () => {
             setActualStreak(0);
             actualScapes.current = (1);
             healthSteal.current = (false);
-            ricochet.current = (false)
+            setRicochet(false)
             enemyDmgMultiplier.current = (1);
             enemyExtraDmg.current = (0)
             spadesExtraTakedDmg.current = (0);
             clubsExtraTakedDmg.current = (0);
-            ricochet.current = (false);
             goldMultiplier.current = (1)
             setMaxScapes(1)
             userExtraDmg.current = (0)
@@ -1053,7 +1052,7 @@ const GamePage = () => {
             const canUseWeapon = weapon && (
                 slainMonsters.length === 0 ||
                 card?.valor < lastSlainCard?.valor ||
-                (ricochet.current && card?.valor <= lastSlainCard?.valor)
+                (ricochet && card?.valor <= lastSlainCard?.valor)
             );
 
             // Resolución de Ramas de Combate
@@ -1270,7 +1269,7 @@ const GamePage = () => {
                     setHealth(prev => prev + effect.value)
                     break;
                 case "ricochet":
-                    ricochet.current = true;
+                    setRicochet(true);
                     break;
                 case 'gold_multiplier':
                     goldMultiplier.current = effect.value
