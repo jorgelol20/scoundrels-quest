@@ -452,30 +452,37 @@ const GamePage = () => {
         }
 
         const scape = () => {
-            if (canScape.current) {
-                isScapingRef.current = true;
-                let blockedCards = [];
-                const nonBlocked = room.map((card) => {
-                    const tempEffect = card?.efectos;
-                    const cardEffect = Array.isArray(tempEffect) ? tempEffect : [tempEffect];
-                    if (cardEffect[0]?.name === 'blocked') {
-                        blockedCards.push(card)
-                    } else {
-                        return card
-                    }
+            if (!canScape.current) return;
 
-                })
-                setDungeon(prev => [...nonBlocked, ...prev]);
-                setRoom(blockedCards);
-                fillRoom();
-                if (actualScapes.current - 1 > 0) {
-                    actualScapes.current -= 1;
+            isScapingRef.current = true;
+
+            const blockedCards = [];
+            const nonBlocked = [];
+
+            room.forEach((card) => {
+                const tempEffect = card?.efectos;
+                const cardEffect = Array.isArray(tempEffect)
+                    ? tempEffect
+                    : [tempEffect];
+
+                if (cardEffect[0]?.name === 'blocked') {
+                    blockedCards.push(card);
                 } else {
-                    canScape.current = false;
+                    nonBlocked.push(card);
                 }
-                if (character?.habilidad_personaje?.id === 1 && !canScape.current) {
-                    setAvailableAbility(false);
-                }
+            });
+
+            setDungeon(prev => [...nonBlocked, ...prev]);
+            setRoom(blockedCards);
+
+            if (actualScapes.current - 1 > 0) {
+                actualScapes.current -= 1;
+            } else {
+                canScape.current = false;
+            }
+
+            if (character?.habilidad_personaje?.id === 1 && !canScape.current) {
+                setAvailableAbility(false);
             }
         };
 
@@ -596,7 +603,7 @@ const GamePage = () => {
                     startPlaceCardSound();
                     setTimeout(() => {
                         setRoom(prevRoom => {
-                            const exists = prevRoom.some(existingCard => existingCard.key === card?.key);
+                            const exists = prevRoom.some(existingCard => existingCard?.key === card?.key);
                             return exists ? prevRoom : [...prevRoom, card];
                         });
                         if (i === actualToDraw - 1) {
@@ -855,7 +862,7 @@ const GamePage = () => {
         // =====================================================
 
         const applyCardEffect = (effect, cardValue) => {
-            switch (effect.name) {
+            switch (effect?.name) {
                 case 'restore_ability':
                     if (!isGambler) {
                         sealTurns.current = 0
@@ -864,36 +871,36 @@ const GamePage = () => {
                     currentHeal.current = 0;
                     break
                 case 'heal':
-                    currentHeal.current = effect.value;
+                    currentHeal.current = effect?.value;
                     break;
                 case 'dmg_reduction':
-                    dmgReduction.current = effect.value
+                    dmgReduction.current = effect?.value
                     break;
                 case 'heal_roulete':
                     heal_roulete(true)
                     handleNewAchievement(16) //Lanzar logro cubo slime
                     break;
                 case 'progresive_heal':
-                    progresiveHeal.current = effect.value
+                    progresiveHeal.current = effect?.value
                     break;
                 case 'progresive_heal_turns':
-                    progresiveHealTurns.current = effect.value
+                    progresiveHealTurns.current = effect?.value
                     break;
                 case 'weapon_dmg':
-                    weaponDmg.current = effect.value
+                    weaponDmg.current = effect?.value
                     break;
                 case 'invincibility_turns':
-                    invincibilityTurns.current = effect.value
+                    invincibilityTurns.current = effect?.value
                     break;
                 case 'revive':
                     revive.current = true;
                     break;
                 case 'revive_health':
-                    reviveHealth.current = effect.value
+                    reviveHealth.current = effect?.value
                     break;
                 case 'health_steal':
                     weaponHealthSteal.current = true;
-                    weaponHealthStealQuantity.current = effect.value;
+                    weaponHealthStealQuantity.current = effect?.value;
                     break;
                 case 'antiheal':
                     antiheal.current = true;
@@ -903,7 +910,7 @@ const GamePage = () => {
                     breakWeapon.current = true;
                     break;
                 case 'poison':
-                    poison.current = effect.value;
+                    poison.current = effect?.value;
                     break;
                 case 'thorny':
                     applyThorny()
@@ -956,7 +963,7 @@ const GamePage = () => {
 
         const handleHeal = (card) => {
             currentHeal.current = card?.valor;
-            if (card.especial) {
+            if (card?.especial) {
                 handleCardEffect(card)
             }
             if (!healedRef.current && !antiheal.current) {
@@ -1028,7 +1035,7 @@ const GamePage = () => {
 
         const handleCombat = (card) => {
             // Comprobación inicial de efectos en la carta 
-            if (card.especial) {
+            if (card?.especial) {
                 handleCardEffect(card);
             }
 
@@ -1057,7 +1064,7 @@ const GamePage = () => {
                 } else if (health - dmg <= 0 && lifeward) {
                     setHealth(1);
                     setLifeward(false)
-                    logsRef.current.push(`${nextLogIndex} - Tu ángel guardián te ha salvado la vida.`);
+                    logsRef.current.push(`${logsRef.current.length + 1} - Tu ángel guardián te ha salvado la vida.`);
                 } else {
                     setHealth(prev => Math.max(0, prev - dmg));
                 }
@@ -1121,8 +1128,7 @@ const GamePage = () => {
 
             // Actualizar racha global, logs y durabilidad del arma
             setActualStreak(prev => prev + 1);
-            const nextLogIndex = logsRef.current.length + 1;
-            logsRef.current.push(`${nextLogIndex} - ${card?.valor} de ${card?.palo} te ha hecho ${finalDmg} de daño.`);
+            logsRef.current.push(`${logsRef.current.length + 1} - ${card?.valor} de ${card?.palo} te ha hecho ${finalDmg} de daño.`);
             if (breakWeapon.current) {
                 weaponBreaker();
             }
@@ -1253,22 +1259,22 @@ const GamePage = () => {
         // =====================================================
 
         const applyEffect = (effect) => {
-            switch (effect.name) {
+            switch (effect?.name) {
                 case "chest_rewards":
-                    const weaponValue = lodash.shuffle(effect.value)[0];
+                    const weaponValue = lodash.shuffle(effect?.value)[0];
                     setModifierWeapon(weaponValue);
                     break;
                 case "pentakill_target_number":
                     // Lógica para registrar cuántas muertes se necesitan (ej: 3)
-                    if (pentakillTargetNumber < effect.value) {
-                        setPentakillTargetNumber(effect.value)
+                    if (pentakillTargetNumber < effect?.value) {
+                        setPentakillTargetNumber(effect?.value)
                     }
                     break;
 
                 case "pentakill_dmg":
                     // Lógica para aplicar el daño extra
-                    if (pentakillDmg < effect.value) {
-                        setPentakillDmg(effect.value)
+                    if (pentakillDmg < effect?.value) {
+                        setPentakillDmg(effect?.value)
                     }
                     break;
 
@@ -1925,7 +1931,7 @@ const GamePage = () => {
 
                                     {dungeon.toReversed().slice(0, 4).toReversed().map((card, i) => (
                                         <Card
-                                            key={card.key}
+                                            key={card?.key}
                                             cardInfo={card}
                                             x={7}
                                             y={isWizard ? 5 + (i * (overDungeonZone ? 100 : 0)) : 5}
@@ -1948,7 +1954,7 @@ const GamePage = () => {
                                     <Text text="DESCARTES" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={WEAPON_ZONE.height * 0.05} x={WEAPON_ZONE.width * 0.08} />
                                     {discardPile.toReversed().slice(0, 1).map((card, i) => (
                                         <Card
-                                            key={card.key}
+                                            key={card?.key}
                                             cardInfo={card}
                                             x={5}
                                             y={5}
@@ -1967,7 +1973,7 @@ const GamePage = () => {
                                     <Text text="ZONA DE EQUIPO" fontFamily="Alagard" fontSize={40} fill="white" y={WEAPON_ZONE.height * 0.4} x={WEAPON_ZONE.width * 0.12} />
                                     {weapon && <Card
                                         ref={el => cardRefs.current[weapon.key] = el}
-                                        key={weapon.key}
+                                        key={weapon?.key}
                                         cardInfo={weapon}
                                         x={10}
                                         y={10}
@@ -1979,8 +1985,8 @@ const GamePage = () => {
                                     />}
                                     {slainMonsters.map((card, i) => (
                                         <Card
-                                            ref={el => cardRefs.current[card.key] = el}
-                                            key={card.key}
+                                            ref={el => cardRefs.current[card?.key] = el}
+                                            key={card?.key}
                                             cardInfo={card}
                                             x={150 + (i * 20)}
                                             y={10 + (i * 10)}
@@ -1999,11 +2005,11 @@ const GamePage = () => {
                             <Layer ref={layerRef}>
                                 {room.map((card, index) => (
                                     <Card
-                                        ref={el => cardRefs.current[card.key] = el}
-                                        key={card.key}
+                                        ref={el => cardRefs.current[card?.key] = el}
+                                        key={card?.key}
                                         cardInfo={card}
-                                        x={card.x + (index * (140))}
-                                        y={card.y + 10}
+                                        x={card?.x + (index * (140))}
+                                        y={card?.y + 10}
                                         onDragEnd={handleDragEnd}
                                         onClick={gameOn ? processCardAction : () => { }}
                                         canBeClicked={canBeClicked}
@@ -2042,21 +2048,6 @@ const GamePage = () => {
                 <div>
                     <div className="gameOver-menu">
                         <h1 className="lose">ERROR</h1>
-                        <button onClick={(event) => {
-                            setRestart(true)
-                        }}>
-                            'JUGAR OTRA'
-                        </button>
-
-                        <button onClick={(event) => {
-                            setChangeCharacter(true)
-                            setRestart(true)
-                        }}>
-                            CAMBIAR PERSONAJE
-                        </button>
-
-                        <button onClick={(event) => { startButtonSound(true); navigate('/') }}>INICIO</button>
-                        <button onClick={(event) => { startButtonSound(true); navigate(`/perfil/${user ? user.nick : ''}`) }}>PERFIL</button>
                         <button
                             onClick={() => {
                                 const newBugInfo = {
@@ -2071,6 +2062,27 @@ const GamePage = () => {
                         >
                             REPORTAR ERROR
                         </button>
+                        <button onClick={(event) => {
+                            endGame(user.id, timeRef.current, gameWin, rounds, totalEarnedGold.current, healedLife.current, enemysDefeated)
+                        }}>
+                            GUARDAR PARTIDA
+                        </button>
+                        <button onClick={(event) => {
+                            setRestart(true)
+                        }}>
+                            JUGAR OTRA
+                        </button>
+
+                        <button onClick={(event) => {
+                            setChangeCharacter(true)
+                            setRestart(true)
+                        }}>
+                            CAMBIAR PERSONAJE
+                        </button>
+
+                        <button onClick={(event) => { startButtonSound(true); navigate('/') }}>INICIO</button>
+                        <button onClick={(event) => { startButtonSound(true); navigate(`/perfil/${user ? user.nick : ''}`) }}>PERFIL</button>
+
                         <div className="final-match-info">
                             <p><span>{formatedTimeRef?.current?.textContent ?? ""}</span></p>
                             <p>Rondas: <span>{rounds}</span></p>
