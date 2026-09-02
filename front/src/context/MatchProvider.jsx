@@ -36,6 +36,10 @@ const healthCardEffectList = [
     //Ninguno por ahora
 ];
 
+const generateCardKey = (id) => {
+    return `${id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+};
+
 const MatchProvider = (props) => {
     // Hooks de datos externos
     const {
@@ -139,7 +143,7 @@ const MatchProvider = (props) => {
                 ...card,
                 x: 200,
                 y: 0,
-                key: Date.now() * card?.id
+                key: generateCardKey()
             }));
         setBaseDeck(tempCards);
         setAvailableCharacters(characters);
@@ -155,7 +159,7 @@ const MatchProvider = (props) => {
         const shuffledDeck = lodash.shuffle(baseDeck).map(card => (
             {
                 ...card,
-                key: Date.now() * card?.id
+                key: generateCardKey()
             }));
         setMatchDeck(shuffledDeck);
         setCharacter(undefined);
@@ -375,7 +379,7 @@ const MatchProvider = (props) => {
                 efectos: typeof card?.efectos === 'string' ? JSON.parse(card.efectos) : card?.efectos,
                 x: 200,
                 y: 0,
-                key: Date.now() * card?.id
+                key: generateCardKey()
             };
             setMatchDeck(prevDeck => [...prevDeck, newCard]);
             if (checkWeapons()) {
@@ -417,7 +421,7 @@ const MatchProvider = (props) => {
                 ...card,
                 x: 200,
                 y: 0,
-                key: Date.now() * card?.id,
+                key: generateCardKey(),
                 especial: appliedEffect !== null ? true : false,
                 efectos: appliedEffect
             };
@@ -480,8 +484,7 @@ const MatchProvider = (props) => {
                 x: 200,
                 y: 0,
                 efectos: typeof card?.efectos === 'string' ? JSON.parse(card.efectos) : card?.efectos,
-                // Añadir aquí el crypto hace que NUNCA se repita (otra vez no porfa)
-                key: Date.now() * card?.id
+                key: generateCardKey()
             };
         }
     };
@@ -500,7 +503,7 @@ const MatchProvider = (props) => {
                 x: 200,
                 y: 0,
                 efectos: typeof card?.efectos === 'string' ? JSON.parse(card.efectos) : card?.efectos,
-                key: crypto.randomUUID()
+                key: generateCardKey()
             };
         }
     };
