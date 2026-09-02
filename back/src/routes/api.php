@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartaController;
+use App\Http\Controllers\Api\ComentarioReporteBugController as ComentarioReporteBugApiController;
+use App\Http\Controllers\Api\ReporteBugController as ReporteBugApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UsuariosController as UsuarioApiController;
@@ -21,8 +23,7 @@ Route::get('/user', function (Request $request) {
 // Rutas protegidas por Sanctum
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Rutas para obtener el perfil y cerrar sesión. 
-    Route::post('/logout', [AuthController::class, 'logout']);
+    // Rutas para obtener el perfil
     Route::get('/perfil', [AuthController::class, 'me']);
 
     // Rutas de jugadores activos
@@ -33,10 +34,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/usuarios/eliminar-foto/{nick}', [UsuarioApiController::class, 'borrarFotoPerfil']);
 
     // Rutas de comentarios
-    Route::post('/usuarios/comentario/', [UsuarioApiController::class, 'storeComentario'])->name('api.usuarios.comentario');
     Route::delete('/usuarios/comentario/{id}', [UsuarioApiController::class, 'destroyComentario'])->name('api.usuarios.comentario.eliminar');
     Route::put('/usuarios/comentario/{id}', [UsuarioApiController::class, 'updateComentario'])->name('api.usuarios.comentario.actualizar');
 
+
+
+    //Rutas de reportes bugs
+    Route::apiResource('reportes-bugs', ReporteBugApiController::class)->parameter('reportes-bugs', 'reporte_bug');
+    Route::patch('/reportes-bugs/{reporte_bug}/estado', [ReporteBugApiController::class, 'updateEstado']);
+    Route::apiResource('reportes-bugs.comentarios', ComentarioReporteBugApiController::class)
+        ->parameters([
+            'reportes-bugs' => 'reporte_bug',
+            'comentarios' => 'comentario',
+        ]);
+});
+
+// Rutas de creación con limitante de 5 peticiones por minuto y autenticación por Sanctum
+Route::middleware(['auth:sanctum', 'throttle:5,1'])->group(function () {
+    // Rutas de comentarios
+    Route::post('/usuarios/comentario/', [UsuarioApiController::class, 'storeComentario'])->name('api.usuarios.comentario');
+    
     //Rutas logros
     Route::post('/nuevo-logro', [UsuarioApiController::class, 'registrarLogro'])->name('api.usuarios.logro');
 });

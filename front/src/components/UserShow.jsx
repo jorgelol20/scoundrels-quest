@@ -49,7 +49,6 @@ const UserShow = ({ userInfo, admin = false }) => {
                 title="Cambiar Rol de Administrador"
                 message={adminChangeMessage}
             />
-            {console.log(userInfo)}
             <div className={admin ? "show-admin" : "show"}>
                 <img
                     className="show-avatar"

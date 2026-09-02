@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node get-git-date.js",
     "dev": "vite",
+    "prebuild": "node get-git-date.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

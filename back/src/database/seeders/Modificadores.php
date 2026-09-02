@@ -165,7 +165,7 @@ class Modificadores extends Seeder
                 'imagen' => "/storage/modificadores/MMA3.webp",
                 'nivel' => 3,
                 'efectos' => json_encode([
-                    ['name' => 'ricochet', 'value' => true],
+                    ['name' => 'mma', 'value' => 3],
                 ])
             ],
             [

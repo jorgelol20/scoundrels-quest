@@ -9,6 +9,7 @@ import useImage from "use-image";
 import { matchContext } from "../../context/MatchProvider.jsx";
 import { settingsContext } from "../../context/SettingsProvider.jsx";
 import { useUser } from "../../hooks/useUser.js";
+import { bugReportContext } from "../../context/BugReportProvider.jsx";
 
 // 3. Componentes de tu aplicación
 import Banner from "../structure/Banner";
@@ -61,6 +62,7 @@ import MMA1Icon from '/images/cardEffects/MMA1.webp';
 import MMA2Icon from '/images/cardEffects/MMA2.webp';
 import MMA3Icon from '/images/cardEffects/MMA3.webp';
 
+
 const GamePage = () => {
     // =====================================================
     // CAPA 1 — ESTADO BASE (sin funciones propias)
@@ -70,6 +72,7 @@ const GamePage = () => {
     const { startButtonSound, startPlayCardSound, startPlaceCardSound, showLogs } = useContext(settingsContext)
     const { matchDeck, character, activeModifiers: modifiers, setNewDeck, setNewCharacter, startNewGame, addCardToMatchDeck, gameLoading, availableCharacters, getWeapon, getHealItem, endGame, updateActualGame, setCharacter, setActiveModifiers, setGameLoading, addEnemysToMatchDeck, addEnemyToMatchDeck, handleNewAchievement } = useContext(matchContext);
     const { user } = useUser();
+    const { openBugReport } = useContext(bugReportContext);
 
     // Imagen por defecto
     const [defaultImage] = useImage(DefaultCardImage);
@@ -1223,6 +1226,7 @@ const GamePage = () => {
 
         const handleUseAbility = () => {
             if (!availableAbility) return;
+
             const handler = ABILITY_HANDLERS[character?.habilidad_personaje?.codigo];
             handler?.();
         };
@@ -1621,6 +1625,7 @@ const GamePage = () => {
                 </Fragment>
             )
         }
+
         if (selectModifier && !gameOver) {
             return (
                 <Fragment>
@@ -1683,7 +1688,7 @@ const GamePage = () => {
                 return 0
             }
         }
-
+        throw new Error("ERROR DE PRUEBA");
         return (
             <Fragment>
                 <div className="game">
@@ -2032,6 +2037,7 @@ const GamePage = () => {
             </Fragment>
         );
     } catch (error) {
+
         return (
             <Fragment>
                 <div>
@@ -2052,7 +2058,20 @@ const GamePage = () => {
 
                         <button onClick={(event) => { startButtonSound(true); navigate('/') }}>INICIO</button>
                         <button onClick={(event) => { startButtonSound(true); navigate(`/perfil/${user ? user.nick : ''}`) }}>PERFIL</button>
-                        <button>REPORTAR ERROR</button>
+                        <button
+                            onClick={() => {
+                                const newBugInfo = {
+                                    modificadores: modifiers,
+                                    error: error.message,
+                                    personaje: character.nombre,
+                                    logs: logsRef.current.join('\n'),
+                                }
+                                openBugReport(JSON.stringify(newBugInfo))
+                            }
+                            }
+                        >
+                            REPORTAR ERROR
+                        </button>
                         <div className="final-match-info">
                             <p><span>{formatedTimeRef?.current?.textContent ?? ""}</span></p>
                             <p>Rondas: <span>{rounds}</span></p>

@@ -1,0 +1,88 @@
+.bug-form,.bug-form-success{
+    position: fixed;
+    justify-self: center;
+    z-index: 1000;
+    background-color: var(--main-color);
+    padding: 1em;
+    border: 5px groove var(--main-gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 20%;
+    color: var(--main-white);
+    text-align: center;
+    h2{
+        color: var(--main-white);
+    }
+    label{
+        color: var(--main-gold);
+    }
+    .bug-form-field{
+        display: flex;
+        flex-direction: column;
+        width:90%;
+    }
+    textarea{
+        background: var(--second-color);
+        color: var(--main-white);
+        resize: none;
+        margin-bottom: 10px;
+    }
+    
+}
+.custom-file-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+
+    /* Escondemos el input real */
+    input[type="file"] {
+        display: none;
+    }
+
+    .file-button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: var(--main-color);
+        color: var(--main-white);
+        padding: 10px 20px;
+        border: 2px solid var(--main-color);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        font-family: inherit;
+        font-weight: bold;
+        box-shadow: 2px 2px 0px var(--second-gold);
+        img {
+            background: none;
+        }
+    }
+
+    .file-button:hover {
+        background-color: var(--second-color);
+        border-color: var(--main-gold);
+        transform: scale(1.02);
+    }
+
+    .file-button:active {
+        transform: scale(0.98);
+        box-shadow: none;
+    }
+
+    .file-status {
+        color: var(--main-white);
+        font-size: 0.9em;
+        font-style: italic;
+        opacity: 0.8;
+        overflow-x: auto;
+        text-wrap-mode: nowrap;
+        text-wrap-style:pretty;
+        text-overflow: ellipsis;
+        width: 100%;
+        text-align: center;
+    }
+}

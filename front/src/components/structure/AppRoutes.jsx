@@ -12,7 +12,8 @@ const MatchPage = lazy(() => import('../pages/MatchPage.jsx'));
 const Tutorial = lazy(() => import('../pages/Tutorial.jsx'));
 const CreditPage = lazy(()=> import("../pages/CreditPage.jsx"));
 const AdminPanel = lazy(()=> import("../pages/AdminPanel.jsx"))
-import GoogleCallback from "./GoogleCallback.jsx";
+const GoogleCallback = lazy(()=> import("./GoogleCallback.jsx"))
+const BugReportPage = lazy(()=> import("../pages/BugReportPage.jsx"))
 
 const AppRoutes = () => {
     return (
@@ -39,6 +40,8 @@ const AppRoutes = () => {
                     <Route path="/auth/callback" element={<GoogleCallback/>}/>
 
                     <Route path="/admin-panel" element={<AdminPanel/>}/>
+
+                    <Route path="/reportes-bug/:id" element={<BugReportPage/>}/>
                     
                     <Route path="/*" element={<MainPage/>}/>
                 </Routes>

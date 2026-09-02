@@ -1,8 +1,8 @@
 # Nombre del proyecto
-Scoundrel's Quest
+Scoundrel's Quest - Juego Roguelike de cartas Web. **(TOTALMENTE GRATIS)**
 
 ## Funcionalidades
-**Scoundrel's Quest** se trata de un juego web desarrollado como trabajo de fin de grado para el curso de 2º de DAW (2025/2026) de IES Enric Valor Monóvar
+**Scoundrel's Quest** se trata de un juego web desarrollado como trabajo de fin de grado para el curso de 2º de DAW (2025/2026) de IES Enric Valor Monóvar y que sigue en desarrollo activo tras la finalización del grado.
 
 ## Requisitos previos
 - Docker instalado localmente.
@@ -18,9 +18,9 @@ Scoundrel's Quest
 1. Clonar el repositorio
 2. Ejecutar el `start-dev.sh` que se encuentra en la raiz del repositorio
 ---
-### Otros
+### Manualmente
 1. Clonar el repositorio
-2. Ejecutar `npm run dev` dentro de la carpeta **/front**.
+2. Ejecutar `pnpm run dev` dentro de la carpeta **/front**.
 3. Levantar los contenedores desde la carpeta **/back** con `docker compose up -d --build`.
 4. Acceder al contenedor de **PHP** y ejecutar los siguientes comandos:
     - `php artisan migrate`
@@ -47,6 +47,8 @@ back/
     \---uploads.ini
 \---src/
     +---app/
+    |   +---Console/
+    |   |   \---Commands/
     |   +---Http/
     |   |   +---Controllers/
     |   |   |   \---Api/
@@ -56,7 +58,8 @@ back/
     |   |       +---Modificadores/
     |   |       +---Partidas/
     |   |       +---Personajes/
-    |   |       \---Usuarios/
+    |   |       +---Usuarios/
+    |   |       \---Logros/
     |   +---Models/
     |   \---Providers/
     +---bootstrap/
@@ -79,7 +82,8 @@ back/
     |   |       +---habilidades/
     |   |       +---modificadores/
     |   |       +---personajes/
-    |   |       \---usuarios/
+    |   |       +---usuarios/
+    |   |        \---logros/
     |   +---framework/
     |   |   +---cache/
     |   |   |   \---data/
@@ -121,9 +125,12 @@ front/
 ```
 
 ## Contribución
-1. Hacer un fork del repositorio.
-2. Crear la rama correspondiente con el formato `feature/funcionalidad` o `fix/arreglo`
+1. Crear la rama correspondiente con el formato `feature/funcionalidad` o `fix/arreglo` desde la rama `develope`
  ```bash
  git checkout -b feature/nueva-funcionalidad
 ```
-3. Una vez finalices de implementar los cambios, se deberá realizar un pull request y solicitar un merge.
+2. Una vez finalices de implementar los cambios, se deberá realizar un pull request y solicitar un merge.
+
+## Documentación
+El código debe, en la medida de lo posible, ir comentado con el estándard JSDoc (para el front) y PHPDoc (para el backend). Esto facilitará la legibilidad del código y las futuras implementaciones.  
+Además, sustituyendo en la URL del repositorio `github` por `deepwiki` encontrarás una documentación automática generada por inteligencia artificial a la que podrás consultar distinta información del repositorio. 
