@@ -250,7 +250,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
                     <button className="continue-button" style={{ marginTop: '20px' }}
                         onClick={() => {
                             if(refund){
-                                setGold(prev => prev + usedGold)
+                                setGold(prev => prev + Math.floor(usedGold));
                             }
                             setShopAvailable(false)
                         }}>

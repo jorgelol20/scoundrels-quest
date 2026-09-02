@@ -622,7 +622,7 @@ const GamePage = () => {
 
             if (antihealTurns.current > 0) {
                 antiheal.current = true;
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Turnos restantes de anticura: ${antiheal.current}.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Turnos restantes de anticura: ${antihealTurns.current}.`)
                 antihealTurns.current -= 1;
             } else {
                 antiheal.current = false;
@@ -632,7 +632,7 @@ const GamePage = () => {
                 setHealth(prev => Math.min(maxHealth, prev + progresiveHeal.current));
                 healAnimation(progresiveHeal.current);
                 healedLife.current += progresiveHeal.current;
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Te has curado ${progresiveHeal.current}.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Te has curado ${progresiveHealTurns.current}.`)
                 progresiveHealTurns.current -= 1;
             }
             if (souleaterTurns.current > 0) {
@@ -884,13 +884,13 @@ const GamePage = () => {
                     progresiveHeal.current = effect?.value
                     break;
                 case 'progresive_heal_turns':
-                    progresiveHealTurns.current = effect?.value
+                    progresiveHealTurns.current += effect?.value
                     break;
                 case 'weapon_dmg':
                     weaponDmg.current = effect?.value
                     break;
                 case 'invincibility_turns':
-                    invincibilityTurns.current = effect?.value
+                    invincibilityTurns.current += effect?.value
                     break;
                 case 'revive':
                     revive.current = true;
@@ -904,7 +904,7 @@ const GamePage = () => {
                     break;
                 case 'antiheal':
                     antiheal.current = true;
-                    antihealTurns.current = 2;
+                    antihealTurns.current += 2;
                     break;
                 case 'weapon_breaker':
                     breakWeapon.current = true;
@@ -1057,13 +1057,18 @@ const GamePage = () => {
             };
 
             const processDamageAndRevive = (dmg) => {
-                if (health - dmg <= 0 && revive.current) {
-                    setHealth(reviveHealth.current);
-                    revive.current = false;
-                    reviveHealth.current = 0;
-                } else if (health - dmg <= 0 && lifeward) {
-                    setHealth(1);
-                    setLifeward(false)
+                if (health - dmg <= 0 && revive.current || lifeward) {
+                    if (reviveHealth?.current !== 0) {
+                        setHealth(reviveHealth?.current);
+                    } else{
+                        setHealth(1);
+                    }
+                    if (lifeward) {
+                        setLifeward(false)
+                    } else {
+                        revive.current = false;
+                        reviveHealth.current = 0;
+                    }
                     logsRef.current.push(`${logsRef.current.length + 1} - Tu ángel guardián te ha salvado la vida.`);
                 } else {
                     setHealth(prev => Math.max(0, prev - dmg));
@@ -1494,7 +1499,7 @@ const GamePage = () => {
 
         // Pasivas de personaje (primera selección / cambio de personaje)
         useEffect(() => {
-            applyCharacterPassive(character);
+            if (rounds === 1) applyCharacterPassive(character);
         }, [character, gameOn]);
 
         // Inicialización
