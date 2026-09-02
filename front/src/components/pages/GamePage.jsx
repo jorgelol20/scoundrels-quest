@@ -1057,13 +1057,18 @@ const GamePage = () => {
             };
 
             const processDamageAndRevive = (dmg) => {
-                if (health - dmg <= 0 && revive.current) {
-                    setHealth(reviveHealth.current);
-                    revive.current = false;
-                    reviveHealth.current = 0;
-                } else if (health - dmg <= 0 && lifeward) {
-                    setHealth(1);
-                    setLifeward(false)
+                if (health - dmg <= 0 && revive.current || lifeward) {
+                    if (reviveHealth?.current !== 0) {
+                        setHealth(reviveHealth?.current);
+                    } else{
+                        setHealth(1);
+                    }
+                    if (lifeward) {
+                        setLifeward(false)
+                    } else {
+                        revive.current = false;
+                        reviveHealth.current = 0;
+                    }
                     logsRef.current.push(`${logsRef.current.length + 1} - Tu ángel guardián te ha salvado la vida.`);
                 } else {
                     setHealth(prev => Math.max(0, prev - dmg));
@@ -1494,7 +1499,7 @@ const GamePage = () => {
 
         // Pasivas de personaje (primera selección / cambio de personaje)
         useEffect(() => {
-            if(rounds === 1) applyCharacterPassive(character);
+            if (rounds === 1) applyCharacterPassive(character);
         }, [character, gameOn]);
 
         // Inicialización
