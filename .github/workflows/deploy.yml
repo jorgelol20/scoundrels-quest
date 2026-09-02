@@ -43,3 +43,5 @@ jobs:
             docker compose exec -T php php artisan db:seed --class=Personajes --force
             docker compose exec -T php php artisan db:seed --class=Cartas --force
             docker compose exec -T php php artisan db:seed --class=Modificadores --force
+
+            docker compose exec -T php php artisan optimize
