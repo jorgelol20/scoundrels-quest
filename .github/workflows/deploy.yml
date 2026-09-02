@@ -28,7 +28,7 @@ jobs:
             cd ../back
             docker compose down
             docker compose up -d --build
-
+          
             echo "Waiting for database..."
             for i in $(seq 1 30); do
               docker compose exec -T db mysqladmin ping -h localhost --silent && break

@@ -166,7 +166,6 @@ export const useUser = () => {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['authUser'] });
-            user.nick == data.nick? queryClient.setQueryData(['authUser'], data) : null;
             window.location.replace(`/perfil/`);
         }
     });
@@ -183,7 +182,6 @@ export const useUser = () => {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['authUser'] });
-            queryClient.setQueryData(['authUser'], data.usuario);
         }
     });
 
@@ -213,7 +211,6 @@ export const useUser = () => {
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['authUser'] });
-            queryClient.setQueryData(['authUser'], data.usuario);
         }
     });
 

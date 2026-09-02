@@ -27,6 +27,7 @@
     width: 100%;
     border-radius: 15px;
     color: var(--main-white);
+    font-size: 1cqw;
     h1{
         font-size: 1.5em;
         text-align: start;
@@ -40,6 +41,10 @@
     }
     .show-buttons{
         display: flex;
+        width: 85%;
+        button{
+            font-size: 1cqw;
+        }
     }
     .admin{
         color: var(--main-gold);
