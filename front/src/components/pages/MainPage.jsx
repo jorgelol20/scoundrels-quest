@@ -11,12 +11,14 @@ import GameIcon from '/images/banner_menu.webp';
 import { useCard } from "../../hooks/useCard.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import { useModifier } from "../../hooks/useModifier.js";
+import { bugReportContext } from "../../context/BugReportProvider.jsx";
 
 const MainPage = () => {
     const { user, isLoading: userIsLoading } = useUser()
-    const {isLoading: cardIsLoading} = useCard();
-    const {isLoading: achievementsIsLoading} = useAchievements();
-    const {isLoading: modifierIsLoading} = useModifier();
+    const { isLoading: cardIsLoading } = useCard();
+    const { isLoading: achievementsIsLoading } = useAchievements();
+    const { isLoading: modifierIsLoading } = useModifier();
+    const {openBugReport} = useContext(bugReportContext)
     const { matches, isLoading: matchIsLoading } = useMatch();
     const { startButtonSound } = useContext(settingsContext)
     const navigate = useNavigate();
@@ -38,6 +40,7 @@ const MainPage = () => {
                     <button onClick={(event) => { startButtonSound(true); user ? navigate(`/jugar/tutorial`) : navigate('/login') }}>CÓMO JUGAR</button>
                     <button onClick={(event) => { startButtonSound(true); navigate('/ajustes') }}>AJUSTES</button>
                     <button onClick={(event) => { startButtonSound(true); user ? navigate(`/perfil/${user ? user.nick : ''}`) : navigate('/login') }}>PERFIL</button>
+                    <button onClick={() => openBugReport()}>REPORTAR ERROR</button>
                     {
                         navigator.userAgent.indexOf("Firefox") > -1 ?
                             <div className="advise">
@@ -53,7 +56,7 @@ const MainPage = () => {
             </article>
             <article>
                 <div className="last-matches">
-                    <h1>Últimas partidas ( Totales: {matches?.total_jugadas??""} )</h1>
+                    <h1>Últimas partidas ( Totales: {matches?.total_jugadas ?? ""} )</h1>
                     <div tabIndex={1} className="match-history">
                         {matches?.partidas?.map((match) => {
                             return <div tabIndex={1} key={match.id}
