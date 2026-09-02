@@ -40,7 +40,9 @@ const MainPage = () => {
                     <button onClick={(event) => { startButtonSound(true); user ? navigate(`/jugar/tutorial`) : navigate('/login') }}>CÓMO JUGAR</button>
                     <button onClick={(event) => { startButtonSound(true); navigate('/ajustes') }}>AJUSTES</button>
                     <button onClick={(event) => { startButtonSound(true); user ? navigate(`/perfil/${user ? user.nick : ''}`) : navigate('/login') }}>PERFIL</button>
-                    <button onClick={() => openBugReport()}>REPORTAR ERROR</button>
+                    {
+                        user?<button onClick={() => openBugReport()}>REPORTAR ERROR</button>:<></>
+                    }
                     {
                         navigator.userAgent.indexOf("Firefox") > -1 ?
                             <div className="advise">
