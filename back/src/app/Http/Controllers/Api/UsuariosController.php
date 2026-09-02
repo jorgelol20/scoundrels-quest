@@ -257,7 +257,7 @@ class UsuariosController extends Controller
         $logro = Logros::findOrFail($request->logro_id);
         $usuarioId = $request->user()->id;
 
-        // 1. Logro sin meta
+        // Logro sin meta
         if (is_null($logro->meta)) {
             $logro->obtenido_por()->syncWithoutDetaching([
                 $usuarioId => ['obtenido' => true]
@@ -269,7 +269,7 @@ class UsuariosController extends Controller
             ]);
         }
 
-        // 2. Logro con meta -> Verificar o crear el registro inicial
+        // Logro con meta -> Verificar o crear el registro inicial
         $pivot = $logro->obtenido_por()->wherePivot('usuario_id', $usuarioId)->first();
 
         if (!$pivot) {
@@ -280,16 +280,16 @@ class UsuariosController extends Controller
             ]);
             $progresoActual = 0;
         } else {
-            // Ya existe: extraemos el progreso guardado
+            // Si ya existe: extraemos el progreso guardado
             $progresoActual = (int) $pivot->pivot->progreso;
         }
 
-        // 3. Calcular el nuevo progreso
+        // Calcular el nuevo progreso
         $incremento = (int) $request->input('incremento', 1);
         $nuevoProgreso = min($progresoActual + $incremento, (int) $logro->meta);
         $obtenido = $nuevoProgreso >= (int) $logro->meta;
 
-        // 4. Actualizar explícitamente la fila existente
+        // Actualizar explícitamente la fila existente
         $logro->obtenido_por()->updateExistingPivot($usuarioId, [
             'progreso' => $nuevoProgreso,
             'obtenido' => $obtenido,

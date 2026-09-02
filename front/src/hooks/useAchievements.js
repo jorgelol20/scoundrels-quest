@@ -36,9 +36,7 @@ export const useAchievements = () => {
             return data;
         },
         onSuccess: (data) => {
-            console.log(data)
             queryClient.invalidateQueries({ queryKey: ['authUser'] });
-            queryClient.setQueryData(['authUser'], data.usuario);
         }
     });
 

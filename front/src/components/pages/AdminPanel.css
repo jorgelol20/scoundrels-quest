@@ -1,24 +1,173 @@
-.users-panel{
-    width: 60%;
-    height: 30%;
-    max-height: 25em;
-    overflow: auto;
-    overflow-y: scroll;
-    background-color: var(--second-color-light);
-    padding: 1em;
-}
-.admin-panel{
+.admin-panel {
     display: flex;
+    flex-direction: row;
     justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    align-items: flex-start;
     width: 100%;
     background-color: var(--main-color);
-    height: 80%;
-    padding-bottom: 1em;
-    padding-top: 1em;
-    input{
+    min-height: 80%;
+    padding: 1em;
+    gap: 1.5em;
+
+    input {
         border: groove 0.3em var(--second-color-dark);
-        width: 60%;
+        background-color: var(--second-color-light);
+        color: var(--main-white);
+        width: 100%;
+        padding: 0.4em;
+        margin-bottom: 1em;
+    }
+
+    select {
+        background-color: var(--second-color-light);
+        border: 2px groove var(--second-color-dark);
+        color: var(--main-white);
+        padding: 0.3em;
+    }
+}
+
+.users {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.users-panel {
+    width: 100%;
+    max-height: 25em;
+    overflow-y: scroll;
+    background-color: var(--second-color-light);
+    border: 5px groove var(--second-color-dark);
+    border-radius: 5px;
+    padding: 1em;
+
+    .user-row {
+        border-bottom: 2px groove var(--second-color-dark);
+        padding: 0.5em 0;
+    }
+
+    .user-row:last-child {
+        border-bottom: none;
+    }
+}
+
+.bug-reports {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--second-color);
+    border: 5px groove var(--second-color-dark);
+    border-radius: 5px;
+    padding: 1em;
+    max-height: 40em;
+
+    .bug-reports-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1em;
+        border-bottom: 5px groove var(--second-color-dark);
+        padding-bottom: 0.5em;
+
+        h3 {
+            margin: 0;
+            color: var(--main-gold);
+        }
+    }
+
+    .bug-reports-error {
+        color: #d16060;
+        text-align: center;
+    }
+
+    .bug-reports-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6em;
+        overflow-y: scroll;
+        padding-right: 0.3em;
+    }
+
+    .bug-report-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8em;
+        background-color: var(--second-color-light);
+        border: 2px groove var(--second-color-dark);
+        border-radius: 5px;
+        padding: 0.6em 0.8em;
+        cursor: pointer;
+        transition: border-color 0.2s ease;
+
+        .bug-report-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-width: 0;
+
+            .bug-report-titulo {
+                font-weight: bold;
+                color: var(--main-white);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .bug-report-tipo {
+                align-self: flex-start;
+                font-size: 0.7em;
+                text-transform: capitalize;
+                border: 2px groove var(--second-color-dark);
+                border-radius: 5px;
+                padding: 0.05em 0.5em;
+                margin: 0.2em 0;
+                background-color: var(--second-color);
+            }
+
+            .bug-report-descripcion {
+                font-size: 0.8em;
+                margin: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            a {
+                font-size: 0.75em;
+                color: var(--main-gold);
+            }
+        }
+
+        .bug-report-actions {
+            flex-shrink: 0;
+        }
+    }
+
+    .bug-report-row:hover {
+        border-color: var(--main-gold);
+    }
+}
+
+@media (max-width: 1080px) {
+    .admin-panel {
+        flex-direction: column;
+        align-items: center;
+
+        input {
+            width: 90%;
+        }
+    }
+
+    .users,
+    .bug-reports {
+        width: 90%;
+    }
+
+    .bug-reports {
+        max-height: 25em;
     }
 }
