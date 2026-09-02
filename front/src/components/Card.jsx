@@ -128,7 +128,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
         const palos = ['Diamante', 'Corazon'];
         if (cardInfo?.valor > 10 && palos.indexOf(cardInfo?.palo) !== -1) {
             if (cardInfo?.valor !== 14) {
-                cardInfo?.valor = 10;
+                cardInfo.valor = 10;
             }
         }
         setHasEffect(!!cardInfo?.efectos);

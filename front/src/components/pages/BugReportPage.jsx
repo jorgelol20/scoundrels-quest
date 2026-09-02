@@ -135,7 +135,6 @@ const BugReportPage = () => {
                     </div>
 
                     <p className="bug-report-descripcion">{reporte.descripcion}</p>
-                    {console.log(logsData)}
                     {logsData && (
                         <div className="bug-report-tecnico">
                             <h4>Información técnica</h4>
