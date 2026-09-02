@@ -1688,7 +1688,6 @@ const GamePage = () => {
                 return 0
             }
         }
-        throw new Error("ERROR DE PRUEBA");
         return (
             <Fragment>
                 <div className="game">
