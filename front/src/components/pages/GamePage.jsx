@@ -183,7 +183,7 @@ const GamePage = () => {
     const [thanatophobia, setThanatophobia] = useState(false);
     const [thanatophobiaActivated, setThanatophobiaActivated] = useState(false);
     const [lifeward, setLifeward] = useState(false)
-    const [refund, setRefund] = useState(false);
+    const refund= useRef(false);
 
     // Efectos de cartas
     const currentHeal = useRef(0);
@@ -749,7 +749,7 @@ const GamePage = () => {
                 let newEnemys = [];
                 if (rounds >= 1 && gameOn) {
                     if (interest !== 0) {
-                        setGold(prev => prev + (prev / interest));
+                        setGold(prev => prev + Math.floor((prev / interest)));
                     }
                     newEnemys = await addEnemys()
                     setShopAvailable(true)
@@ -1041,6 +1041,9 @@ const GamePage = () => {
 
             // Cálculos base de combate y modificadores
             const criticalMultiplier = Math.floor(Math.random() * 100) <= criticalPercentage.current ? 1.5 : 1;
+            if(criticalMultiplier > 1){
+                logsRef.current.push(`${logsRef.current.length + 1} - ¡Crítico! Multiplicador de ${criticalMultiplier}`);
+            }
             const pentakill = actualStreak >= pentakillTargetNumber ? pentakillDmg : 0;
             const enemyBaseDmg = Math.floor(card?.valor * enemyDmgMultiplier.current) + enemyExtraDmg.current - dmgReduction.current;
             const extraSuitDmg = card?.palo === 'Pica' ? spadesExtraTakedDmg.current : clubsExtraTakedDmg.current;
@@ -1190,7 +1193,9 @@ const GamePage = () => {
                     if (Math.floor(Math.random() * 100) <= 10) {
                         if (Math.floor(Math.random() * 100) > 50) {
                             userExtraDmg.current += 1;
+                            logsRef.current.push(`${logsRef.current.length + 1} - Carroñero te da 1 de daño extra en la siguiente acción.`);
                         } else {
+                            logsRef.current.push(`${logsRef.current.length + 1} - Carroñero te ha curado 1 de vida.`);
                             setHealth(prev => prev + 1)
                             healAnimation(1)
                         }
@@ -1356,7 +1361,7 @@ const GamePage = () => {
                     setLifeward(true);
                     break;
                 case 'refund':
-                    setRefund(true);
+                    refund.current = true;
                 default:
                     return false;
             }
@@ -1666,7 +1671,7 @@ const GamePage = () => {
                         healthIcon={healthIcon}
                         character={character}
                         round={rounds}
-                        refund={refund}
+                        refund={refund.current}
                     />
                 </Fragment>
             )

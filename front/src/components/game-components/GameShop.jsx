@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useState, useEffect } from "react";
+import React, { Fragment, useContext, useState, useEffect, useRef } from "react";
 import './GameShop.css';
 import { matchContext } from "../../context/MatchProvider.jsx";
 import GoldIcon from '/images/gold.webp';
@@ -25,7 +25,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
 
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
-    let usedGold = 0;
+    const usedGold = useRef(0);
 
     const calculateWeaponPrice = (valor, multiplicador) => {
         const base = valor <= 10
@@ -127,7 +127,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
         // 1. Restar el oro al jugador
         setGold(prevGold => prevGold - item.price);
 
-        usedGold += item.price;
+        usedGold.current += item.price;
 
         // 2. Añadir el ítem al jugador según su tipo
         if (item.type === 'modifier') {
@@ -144,6 +144,15 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
         });
     };
 
+    const closeShop = async () => {
+        if (refund) {
+            console.log(refund)
+            console.log(usedGold.current)
+            await setGold(prev => prev + Math.floor((usedGold.current / 10)));
+        }
+        setShopAvailable(false)
+    }
+
     return (
         <Fragment>
             <div className="game-shop">
@@ -151,6 +160,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
                     <div className="game-hud-text">
                         <h1 className="player-health"><img src={healthIcon} />{health}/{maxHealth}</h1>
                         <h1 className="player-gold"><img src={GoldIcon} />{gold}</h1>
+                        <h1 className="player-gold">Reembolso: {Math.floor(usedGold.current / 10)}</h1>
                         <h1>RONDA {round}</h1>
                         <h2 ref={formatedTimeRef}>Tiempo: 00:00</h2>
                     </div>
@@ -249,10 +259,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
                     </div>
                     <button className="continue-button" style={{ marginTop: '20px' }}
                         onClick={() => {
-                            if(refund){
-                                setGold(prev => prev + Math.floor(usedGold));
-                            }
-                            setShopAvailable(false)
+                                closeShop()
                         }}>
                         Seguir
                     </button>
