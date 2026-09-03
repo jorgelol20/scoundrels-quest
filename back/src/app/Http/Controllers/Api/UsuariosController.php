@@ -69,6 +69,7 @@ class UsuariosController extends Controller
                   ->withCount('comentarios');
         },
         'logros',
+        'reportesBug'
     ]);
         return response()->json(['usuario' => $usuario], 201);
     }
