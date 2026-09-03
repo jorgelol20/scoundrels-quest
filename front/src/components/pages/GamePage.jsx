@@ -1293,10 +1293,10 @@ const GamePage = () => {
                     healthSteal.current = true;
                     break;
                 case "user_clubs_dmg":
-                    clubsExtraTakedDmg.current = effect.value
+                    clubsExtraTakedDmg.current += effect.value
                     break;
                 case "user_spades_dmg":
-                    spadesExtraTakedDmg.current = effect.value
+                    spadesExtraTakedDmg.current += effect.value
                     break;
                 case "enemy_dmg_multiplier":
                     enemyDmgMultiplier.current = enemyDmgMultiplier.current * effect.value
