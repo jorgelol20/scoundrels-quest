@@ -54,7 +54,7 @@ const UserRanking = () => {
                     <h1 id={`num-${index + 1}`}>#{index + 1}</h1>
                     <img style={{ borderColor: userInfo.color }} src={userInfo.avatar} alt={`Avatar de ${userInfo.nick}`} title={`${userInfo.nick}`}/>
                 </div>
-                <h1 className={userInfo.es_admin ? 'admin' : 'user'}>{userInfo.nick}</h1>
+                <h1 className={userInfo.es_admin ? 'admin' : userInfo.is_tester?'tester':'user'}>{userInfo.nick}</h1>
                 <h1>Total: <strong style={{ color: 'var(--main-white)' }}>{userInfo.tiene_jugadas_count}</strong></h1>
                 <h1>V: <strong style={{ color: 'var(--main-gold)' }}>{userInfo.total_victorias}</strong></h1>
                 <h1>WR: <strong style={{ color: 'var(--main-gold)' }}>{Math.floor((userInfo.total_victorias / userInfo.tiene_jugadas_count) * 100)}%</strong></h1>
@@ -68,7 +68,7 @@ const UserRanking = () => {
                     <h1 id={`num-${index + 1}`}>#{index + 1}</h1>
                     <img style={{ borderColor: userInfo.color }} src={userInfo.avatar} alt={`Avatar de ${userInfo.nick}`} title={`${userInfo.nick}`}/>
                 </div>
-                <h1 className={userInfo.es_admin ? 'admin' : 'user'}>{userInfo.nick}</h1>
+                <h1 className={userInfo.es_admin ? 'admin' : userInfo.is_tester?'tester':'user'}>{userInfo.nick}</h1>
                 <h1>Record Rondas: <strong style={{ color: 'var(--main-gold)' }}>{userInfo.record_rondas}</strong></h1>
             </div>
         )
@@ -86,7 +86,7 @@ const UserRanking = () => {
                 </div>
                 <h1>Rondas: <strong style={{ color: 'var(--main-white)' }}>{matchInfo.rondas}</strong></h1>
                 <h1>Enemigos derrotados: <strong style={{ color: 'var(--main-red)', filter: 'brightness(1.5)' }}>{matchInfo.enemigos_enfrentados}</strong></h1>
-                <h1 className={matchInfo.jugador.es_admin ? 'admin' : 'user'}>{matchInfo.jugador.nick}</h1>
+                <h1 className={matchInfo.jugador.es_admin ? 'admin' : matchInfo.jugador.is_tester?'tester':'user'}>{matchInfo.jugador.nick}</h1>
             </div>
         )
     }
