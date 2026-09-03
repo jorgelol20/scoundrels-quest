@@ -5,7 +5,6 @@ import './App.css'
 import ContentPage from './components/pages/ContentPage.jsx';
 import Banner from './components/structure/Banner.jsx';
 import Footer from './components/structure/Footer.jsx';
-import GAListener from './components/structure/GAListener.jsx';
 
 function App() {
 
@@ -14,7 +13,7 @@ function App() {
 
     <Fragment>
       <BrowserRouter>
-        <GAListener />
+
         <Navbar className="navbar" />
 
         <Banner />
