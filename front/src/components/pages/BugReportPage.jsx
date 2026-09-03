@@ -146,7 +146,7 @@ const BugReportPage = () => {
                                 <div className="bug-report-tecnico-grid">
                                     {logsData.personaje && (
                                         <div className="bug-report-tecnico-item">
-                                            <span className="label">Personaje</span>
+                                            <span className="label">Personaje: </span>
                                             <span className="value">{logsData.personaje}</span>
                                         </div>
                                     )}
@@ -170,7 +170,26 @@ const BugReportPage = () => {
                                             </div>
                                         </div>
                                     )}
-                                    
+                                    {Array.isArray(logsData.room) && logsData.room.length > 0 && (
+                                        <div className="bug-report-tecnico-item full">
+                                            <span className="label">Cartas en mano: ({logsData.room.length})</span>
+                                            <div className="room-list">
+                                                {logsData.room.map((card,index) => (
+                                                    <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos??'Sin efectos')}</pre>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {Array.isArray(logsData.dungeon) && logsData.dungeon.length > 0 && (
+                                        <div className="bug-report-tecnico-item full">
+                                            <span className="label">Cartas en baraja: ({logsData.dungeon.length})</span>
+                                            <div className="dungeon-list">
+                                                {logsData.dungeon.map((card,index) => (
+                                                    <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos??'Sin efectos')}</pre>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     {logsData.logs && (
                                         <div className="bug-report-tecnico-item full">
                                             <span className="label">Logs de consola</span>
