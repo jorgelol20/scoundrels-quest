@@ -140,6 +140,16 @@
             }
         }
     }
+    .dungeon-list{
+        height: 400px;
+        overflow-y: auto;
+        border: 3px groove var(--main-black);
+    }
+    .room-list{
+        height: 200px;
+        overflow-y: auto;
+        border: 3px groove var(--main-black);
+    }
 
     .bug-report-comentarios {
         display: flex;

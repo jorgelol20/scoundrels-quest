@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import './SelectModifier.css'
 import { matchContext } from "../../context/MatchProvider.jsx";
 import Modifier from "../Modifier.jsx";
