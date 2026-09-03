@@ -10,10 +10,10 @@ class CleanUnusedUserImages extends Command
 {
     protected $signature = 'images:clean-unused {--dry-run : Solo muestra qué se borraría, sin borrar nada}';
 
-    protected $description = 'Elimina archivos de avatar que ya no están referenciados por ningún usuario';
+    protected $description = 'Elimina archivos de avatar y banner que ya no están referenciados por ningún usuario';
 
     /**
-     * Ajusta estos dos valores a como guardas tus avatares.
+     * Ajusta estos valores a como guardas tus imágenes.
      */
     protected string $disk = 'public';
     protected string $directory = 'usuarios';
@@ -27,10 +27,21 @@ class CleanUnusedUserImages extends Command
             return Command::SUCCESS;
         }
 
-        $usedFiles = Usuarios::query()
+        // Obtener archivos de 'avatar' en uso
+        $avatars = Usuarios::query()
             ->whereNotNull('avatar')
             ->where('avatar', '!=', '')
-            ->pluck('avatar')
+            ->pluck('avatar');
+
+        // Obtener archivos de 'banner' en uso
+        $banners = Usuarios::query()
+            ->whereNotNull('banner')
+            ->where('banner', '!=', '')
+            ->pluck('banner');
+
+        // Combinar ambas colecciones, extraer solo el nombre del archivo y mapear para búsqueda rápida
+        $usedFiles = $avatars->concat($banners)
+            ->filter()
             ->map(fn ($path) => basename($path))
             ->unique()
             ->flip();

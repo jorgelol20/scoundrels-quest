@@ -24,6 +24,7 @@ class UpdateUsuarioRequest extends FormRequest
             'es_admin' => 'sometimes|boolean',
             'is_tester' => 'sometimes|boolean',
             'avatar' => 'sometimes|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+            'banner' => 'sometimes|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
             'color' => [
                 'sometimes',
                 'string',
@@ -41,6 +42,9 @@ class UpdateUsuarioRequest extends FormRequest
             'avatar.image' => 'Solo se admiten los formatos JPG, JPEG, PNG, WEBP y GIF',
             'avatar.mimes' => 'Solo se admiten los formatos JPG, JPEG, PNG, WEBP y GIF',
             'avatar.max' => 'Tamaño máximo de la imagen: 2MB',
+            'banner.image' => 'Solo se admiten los formatos JPG, JPEG, PNG, WEBP y GIF',
+            'banner.mimes' => 'Solo se admiten los formatos JPG, JPEG, PNG, WEBP y GIF',
+            'banner.max' => 'Tamaño máximo de la imagen: 2MB',
             'color.regex' => 'El formato del color debe ser hexadecimal',
         ];
     }
