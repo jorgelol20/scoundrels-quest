@@ -18,7 +18,7 @@ class UsuariosController extends Controller
 {
     public function index()
     {
-        $usuarios = Usuarios::select('id', 'es_admin', 'is_tester' ,'nick', 'avatar', 'color', 'created_at', 'ultima_vez_visto')
+        $usuarios = Usuarios::select('id', 'es_admin', 'is_tester', 'nick', 'avatar','banner', 'color', 'created_at', 'ultima_vez_visto')
             ->withCount([
                 'tiene_jugadas as total_victorias' => function ($query) {
                     $query->where('victoria', true);
@@ -28,7 +28,7 @@ class UsuariosController extends Controller
                 },
                 'logros',
                 'tiene_jugadas'
-                
+
             ])
             ->get();
         return response()->json(['usuario' => $usuarios]);
@@ -51,6 +51,7 @@ class UsuariosController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'avatar' => $archivoPath,
+            'banner' => config('app.backend_url') . "/storage/banner.webp",
             'color' => $request->color
         ]);
         $token = $usuario->createToken('auth_token')->plainTextToken;
@@ -62,22 +63,22 @@ class UsuariosController extends Controller
 
     public function show(string $nick)
     {
-        $usuario = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar', 'color', 'created_at', 'ultima_vez_visto')->where('nick', '=', $nick)->get();
+        $usuario = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar','banner', 'color', 'created_at', 'ultima_vez_visto')->where('nick', '=', $nick)->get();
         $usuario->load([
-        'tiene_jugadas' => function ($query) {
-            $query->with(['modificadores', 'personaje'])
-                  ->withCount('comentarios');
-        },
-        'logros',
-        'reportesBug'
-    ]);
+            'tiene_jugadas' => function ($query) {
+                $query->with(['modificadores', 'personaje'])
+                    ->withCount('comentarios');
+            },
+            'logros',
+            'reportesBug'
+        ]);
         return response()->json(['usuario' => $usuario], 201);
     }
 
     // Buscar usuarios por coincidencia en el nick
     public function search(string $search)
     {
-        $usuarios = Usuarios::select('id', 'nick', 'email', 'es_admin','is_tester', 'avatar', 'color', 'created_at', 'ultima_vez_visto')->where('nick', 'LIKE', '%' . $search . '%')->limit(3)->get();
+        $usuarios = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar', 'color')->where('nick', 'LIKE', '%' . $search . '%')->limit(3)->get();
         return response()->json(['usuarios' => $usuarios], 201);
     }
 
@@ -97,6 +98,12 @@ class UsuariosController extends Controller
         } elseif (isset($data['avatar']) && str_contains($data['avatar'], 'googleusercontent.com')) {
         } else {
             unset($data['avatar']);
+        }
+        if ($request->hasFile('banner')) {
+            $path = $request->file('banner')->store('usuarios');
+            $data['banner'] = Storage::url($path);
+        } else {
+            unset($data['banner']);
         }
         if ($request->has('es_admin')) {
             $currentUser = $request->user();
@@ -130,7 +137,24 @@ class UsuariosController extends Controller
                 'avatar' => $archivoPath
             ]
         );
+    }
 
+    // Función para eliminar ÚNICAMENTE el banner del perfil
+    // La solicitud solo se efectuará si el usuario que la realiza es admin.
+    public function borrarBannerPerfil(Request $request, $nick)
+    {
+        if (!$request->user()->es_admin) {
+            return response()->json([
+                'message' => 'No tienes los permisos necesarios para acceder a este recurso.'
+            ], 403);
+        }
+        $usuario = Usuarios::where('nick', $nick)->firstOrFail();
+        $archivoPath = config('app.backend_url') . "/storage/banner.webp";
+        $usuario->update(
+            [
+                'banner' => $archivoPath
+            ]
+        );
     }
 
     public function destroy(Request $request, $id)
@@ -201,7 +225,7 @@ class UsuariosController extends Controller
     // Función para obtener el ranking de usuarios por victoria
     public function ranking_victorias()
     {
-        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'created_at', 'es_admin','is_tester', 'ultima_vez_visto')
+        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'es_admin', 'is_tester')
             ->withCount([
                 'tiene_jugadas as total_victorias' => function ($query) {
                     $query->where('victoria', true);
@@ -220,7 +244,7 @@ class UsuariosController extends Controller
     // Función para obtener el ranking de usuarios por record de rondas
     public function ranking_rondas()
     {
-        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'created_at', 'es_admin','is_tester', 'ultima_vez_visto')
+        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'es_admin', 'is_tester')
             ->withMax('tiene_jugadas as record_rondas', 'rondas')
             ->withCount([
                 'tiene_jugadas as total_partidas'

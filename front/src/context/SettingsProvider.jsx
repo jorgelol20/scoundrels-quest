@@ -5,10 +5,16 @@ import AchievementSound from '/sounds/achievement-sound.aac';
 import PlayCardSound from '/sounds/play-card-sound.aac'
 import PlaceCardSound from '/sounds/place-card-sound.aac'
 import ShuffleDeckSound from '/sounds/shuffle-deck-sound.aac'
+import { useUser } from "../hooks/useUser";
+import DefaultBanner from '/images/banner.webp'
+import { useLocation } from "react-router-dom";
 
 export const settingsContext = createContext();
 
 const SettingsProvider = ({ children }) => {
+    const location = useLocation();
+    const { user } = useUser();
+
     // Estados audio
     const [effectsVolume, setEffectsVolume] = useState(50);
     const [effectsMuted, setEffectsMuted] = useState(false);
@@ -18,6 +24,9 @@ const SettingsProvider = ({ children }) => {
     // Estados ajustes avanzados
     const [showFPS, setShowFPS] = useState(false);
     const [showLogs, setShowLogs] = useState(false);
+
+    // Estado del banner
+    const [bannerImage, setBannerImage] = useState();
 
     // Refs
     const musicRef = useRef(null);
@@ -154,6 +163,24 @@ const SettingsProvider = ({ children }) => {
         setShowLogs(show);
     };
 
+    useEffect(() => {
+        if (user == null || user.banner == null) {
+            setBannerImage(DefaultBanner)
+        } else {
+            setBannerImage(user.banner)
+        }
+    }, [user])
+
+    useEffect(() => {
+        if (!location.pathname.startsWith('/perfil/')) {
+            if (user == null || user.banner == null) {
+                setBannerImage(DefaultBanner)
+            } else {
+                setBannerImage(user.banner)
+            }
+        }
+    }, [location])
+
     const value = {
         effectsVolume,
         musicVolume,
@@ -161,6 +188,7 @@ const SettingsProvider = ({ children }) => {
         musicMuted,
         showFPS,
         showLogs,
+        bannerImage,
         changeEffectsSound,
         changeMusicSound,
         startButtonSound,
@@ -171,7 +199,8 @@ const SettingsProvider = ({ children }) => {
         muteEffects,
         muteMusic,
         changeShowFPS,
-        changeShowLogs
+        changeShowLogs,
+        setBannerImage
     };
 
     return (

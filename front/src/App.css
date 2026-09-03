@@ -2,3 +2,6 @@
     position:sticky;
     top: -10px;
 }
+.main{
+    z-index: 1000;
+}

@@ -16,7 +16,7 @@ import Achievement from '../Achievement.jsx';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
-    const { startButtonSound } = useContext(settingsContext)
+    const { startButtonSound, setBannerImage } = useContext(settingsContext)
 
     const { user, getUsuario, logout, isLoading, isError, error, update, deleteProfilePhoto, isDeletingProfilePhoto } = useUser();
     const { achievements } = useAchievements();
@@ -163,6 +163,9 @@ const ProfilePage = () => {
             });
 
             setUserAchievements(tempAchievements);
+        }
+        if(userInfo?.banner){
+            setBannerImage(userInfo?.banner);
         }
     }, [userInfo])
 

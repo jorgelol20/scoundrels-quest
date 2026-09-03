@@ -18,7 +18,7 @@
         position: relative;
         height: 100%;
         width: 100%;
-        top: -5em;
+        top: -1em;
 
         .user-profile {
             background-color: var(--background-profile-color);
