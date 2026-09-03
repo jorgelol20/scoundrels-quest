@@ -44,6 +44,17 @@
                 color: var(--main-white);
                 height: 5%;
             }
+            .userNick{
+                margin-bottom: 15px;
+            }
+            .titles{
+                text-align: start;
+            }
+            h3{
+                margin: 1px;
+                color: white;
+                font-size: 1.5em;
+            }
 
             p {
                 color: white;
@@ -137,7 +148,9 @@
             h1 {
                 text-align: center;
                 color: var(--main-gold);
+                
             }
+            
 
             .user-achievements {
                 overflow: auto;
