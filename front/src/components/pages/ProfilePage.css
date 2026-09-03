@@ -44,13 +44,16 @@
                 color: var(--main-white);
                 height: 5%;
             }
-            .userNick{
+
+            .userNick {
                 margin-bottom: 15px;
             }
-            .titles{
+
+            .titles {
                 text-align: start;
             }
-            h3{
+
+            h3 {
                 margin: 1px;
                 color: white;
                 font-size: 1.5em;
@@ -145,16 +148,17 @@
             align-items: center;
             background-color: var(--second-color);
             width: 30%;
+
             h1 {
                 text-align: center;
                 color: var(--main-gold);
-                
+
             }
-            
+
 
             .user-achievements {
                 overflow: auto;
-                overflow-x:hidden;
+                overflow-x: hidden;
                 position: relative;
                 background-color: var(--background-profile-color);
                 padding: 0px 1em;
@@ -182,6 +186,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        height: 100%;
 
         .userInfo {
             flex-direction: column;
@@ -265,4 +270,115 @@
 
         }
     }
+}
+
+.user-reports {
+    border: 2px groove var(--second-color-dark);
+    margin-top: 1em;
+    width: 90%;
+    padding: 1em;
+    align-self: center;
+    justify-self: center;
+    background-color: var(--second-color);
+    h1{
+        color: var(--main-gold);
+    }
+}
+
+.user-reports-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    /* Ancho deseado para las 3 tarjetas */
+    margin: 0 auto;
+    margin-bottom: 10%;
+}
+
+.tipo-error {
+    color: #d16060;
+    text-align: center;
+}
+
+.abierto {
+    color: #d16060;
+}
+
+.en_revision {
+    color: rgb(255, 217, 0);
+}
+
+.solucionado {
+    color: rgb(1, 150, 1);
+}
+
+.duplicado {
+    color: rgb(199, 20, 190);
+}
+
+.bug-report-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8em;
+    background-color: var(--second-color-light);
+    border: 2px groove var(--second-color-dark);
+    border-radius: 5px;
+    padding: 0.6em 0.8em;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    min-width: 400px;
+    transition: 0.5s;
+    flex: 0 0 calc(30% - 10px);
+    /* Fuerza máximo 3 columnas */
+
+    .bug-report-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-width: 0;
+
+        .bug-report-titulo {
+            font-weight: bold;
+            color: var(--main-white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bug-report-tipo {
+            align-self: flex-start;
+            font-size: 0.7em;
+            text-transform: capitalize;
+            border: 2px groove var(--second-color-dark);
+            border-radius: 5px;
+            padding: 0.05em 0.5em;
+            margin: 0.2em 0;
+            background-color: var(--second-color);
+        }
+
+        .bug-report-descripcion {
+            font-size: 0.8em;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--main-white);
+        }
+
+        a {
+            font-size: 0.75em;
+            color: var(--main-gold);
+        }
+    }
+
+    .bug-report-actions {
+        flex-shrink: 0;
+    }
+}
+
+.bug-report-row:hover {
+    filter: brightness(1.1);
+    transition: 0.5s;
 }

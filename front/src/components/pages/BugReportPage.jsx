@@ -34,7 +34,7 @@ const parseLogsPartida = (logsPartida) => {
 };
 
 const BugReportPage = () => {
-    
+
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useUser();
@@ -65,7 +65,7 @@ const BugReportPage = () => {
     const [isSendingComentario, setIsSendingComentario] = useState(false);
 
     useEffect(() => {
-        if (!user || !user?.es_admin) {
+        if (!user || (!user.es_admin && user.id !== reporte?.usuario?.id)) {
             navigate('/');
         }
     }, [user]);
@@ -114,7 +114,6 @@ const BugReportPage = () => {
     if (isLoadingReporte) return <Loading />;
     if (reporteError) return <p className="bug-report-page-error">No se ha podido cargar el reporte.</p>;
     if (!reporte) return null;
-
     const logsData = parseLogsPartida(reporte.logs_partida);
 
     return (
@@ -169,8 +168,8 @@ const BugReportPage = () => {
                                         <div className="bug-report-tecnico-item full">
                                             <span className="label">Cartas en mano: ({logsData.room.length})</span>
                                             <div className="room-list">
-                                                {logsData.room.map((card,index) => (
-                                                    <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos??'Sin efectos')}</pre>
+                                                {logsData.room.map((card, index) => (
+                                                    <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos ?? 'Sin efectos')}</pre>
                                                 ))}
                                             </div>
                                         </div>
@@ -179,8 +178,8 @@ const BugReportPage = () => {
                                         <div className="bug-report-tecnico-item full">
                                             <span className="label">Cartas en baraja: ({logsData.dungeon.length})</span>
                                             <div className="dungeon-list">
-                                                {logsData.dungeon.map((card,index) => (
-                                                    <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos??'Sin efectos')}</pre>
+                                                {logsData.dungeon.map((card, index) => (
+                                                    <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos ?? 'Sin efectos')}</pre>
                                                 ))}
                                             </div>
                                         </div>
