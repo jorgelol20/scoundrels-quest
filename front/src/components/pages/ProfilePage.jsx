@@ -173,7 +173,7 @@ const ProfilePage = () => {
             </div>
         );
     }
-
+    console.log(userInfo)
     return (
         <Fragment>
             <div style={{ display: "flex", justifyContent: 'center' }}>
@@ -185,7 +185,7 @@ const ProfilePage = () => {
                                 {user.es_admin ? <button className="delete-button" onClick={() => { confirm("Se eliminará la foto de perfil") ? handleDelete() : null }}><img className="delete-icon" src={DeleteIcon} alt="" /></button> : <></>}
                                 <h1 className={userInfo?.es_admin ? 'admin userNick' : userInfo.is_tester ? 'tester userNick' : 'user userNick'}>{userInfo.nick}</h1>
                                 <div className='titles'>
-                                     {userInfo?.es_admin ? <h3 title='Título por ser admin'>➤ <span className='admin'>Administrador</span></h3> : <></>}
+                                    {userInfo?.es_admin ? <h3 title='Título por ser admin'>➤ <span className='admin'>Administrador</span></h3> : <></>}
                                     {userInfo?.is_tester ? <h3 title='Título por ser tester' >➤ <span className='tester'>{userInfo.nick === "krm2707" ? 'Beater' : 'Tester'}</span></h3> : <></>}
                                 </div>
                             </div>
@@ -237,6 +237,22 @@ const ProfilePage = () => {
                             </div>
                         </div>
                     </div>
+                    {canEdit || user?.es_admin ?
+                        <div className='user-reports'>
+                            <h1>Reportes de usuario</h1>
+                            <div className='user-reports-list'>
+                                {userInfo.reportes_bug.map((reporte) => (
+                                <div key={reporte.id} className="bug-report-row"  onClick={()=>{navigate(`/reportes-bug/${reporte.id}`)}}>
+                                    <div className="bug-report-info">
+                                        <span className="bug-report-titulo">{reporte.titulo}</span>
+                                        <div><span className={`bug-report-tipo tipo-${reporte.tipo}`}>{reporte.tipo}</span><span className={`bug-report-tipo ${reporte.estado}`}>{reporte.estado}</span></div>
+                                        <p className="bug-report-descripcion">{reporte.descripcion}</p>
+                                    </div>
+                                </div>
+                            ))}
+                            </div>
+                        </div>
+                        : <></>}
                 </div>
             </div>
         </Fragment>

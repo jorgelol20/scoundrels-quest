@@ -15,6 +15,9 @@ use App\Http\Controllers\Api\LogrosController as LogrosApiController;
 # Registro y logeo
 Route::post('/signup', [UsuarioApiController::class, 'store']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/login', function () {
+    return response()->json(['message' => 'Unauthenticated.'], 401);
+})->name('login');
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -53,14 +56,23 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'throttle:5,1'])->group(function () {
     // Rutas de comentarios
     Route::post('/usuarios/comentario/', [UsuarioApiController::class, 'storeComentario'])->name('api.usuarios.comentario');
-    
+
     //Rutas logros
     Route::post('/nuevo-logro', [UsuarioApiController::class, 'registrarLogro'])->name('api.usuarios.logro');
 });
 
 // Controlador Usuarios.
-Route::apiResource('/usuarios', UsuarioApiController::class)->names('api.usuarios');
+// Rutas públicas
+Route::apiResource('/usuarios', UsuarioApiController::class)
+    ->except(['show'])
+    ->names('api.usuarios');
 Route::get('/usuarios/search/{search}', [UsuarioApiController::class, 'search'])->name('api.usuarios.search');
+
+// Ruta 'show' protegida con el middleware
+Route::get('/usuarios/{usuario}', [UsuarioApiController::class, 'show'])
+    ->middleware('auth:sanctum')
+    ->name('api.usuarios.show');
+
 
 
 // Rankings
