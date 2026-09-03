@@ -20,11 +20,6 @@ const SEVERIDADES = [
     { value: 'critica', label: 'Crítica' },
 ];
 
-/**
- * Intenta parsear logs_partida como el JSON que genera el juego
- * ({ modificadores, error, personaje, logs }). Si no es JSON válido
- * (reportes antiguos o manuales), lo devuelve como texto plano.
- */
 const parseLogsPartida = (logsPartida) => {
     if (!logsPartida) return null;
     try {
@@ -39,6 +34,7 @@ const parseLogsPartida = (logsPartida) => {
 };
 
 const BugReportPage = () => {
+    
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useUser();
