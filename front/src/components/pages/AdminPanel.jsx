@@ -74,7 +74,7 @@ const AdminPanel = () => {
                 </div>
                 <div className="bug-reports">
                     <div className="bug-reports-header">
-                        <h3>Reportes de bugs</h3>
+                        <h3>Reportes de bugs ({reportes?.data?.length??0})</h3>
                         <select
                             value={filtroEstado}
                             onChange={(e) => setFiltroEstado(e.target.value)}
@@ -99,7 +99,7 @@ const AdminPanel = () => {
                                 <div key={reporte.id} className="bug-report-row"  onClick={()=>{navigate(`/reportes-bug/${reporte.id}`)}}>
                                     <div className="bug-report-info">
                                         <span className="bug-report-titulo">{reporte.titulo}</span>
-                                        <span className={`bug-report-tipo tipo-${reporte.tipo}`}>{reporte.tipo}</span>
+                                        <div><span className={`bug-report-tipo tipo-${reporte.tipo}`}>{reporte.tipo}</span><span className={`bug-report-tipo ${reporte.estado}`}>{reporte.estado}</span></div>
                                         <p className="bug-report-descripcion">{reporte.descripcion}</p>
                                     </div>
                                 </div>

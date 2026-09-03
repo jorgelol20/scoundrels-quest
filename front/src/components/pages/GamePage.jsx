@@ -183,7 +183,7 @@ const GamePage = () => {
     const [thanatophobia, setThanatophobia] = useState(false);
     const [thanatophobiaActivated, setThanatophobiaActivated] = useState(false);
     const [lifeward, setLifeward] = useState(false)
-    const refund= useRef(false);
+    const refund = useRef(false);
 
     // Efectos de cartas
     const currentHeal = useRef(0);
@@ -1041,7 +1041,7 @@ const GamePage = () => {
 
             // Cálculos base de combate y modificadores
             const criticalMultiplier = Math.floor(Math.random() * 100) <= criticalPercentage.current ? 1.5 : 1;
-            if(criticalMultiplier > 1){
+            if (criticalMultiplier > 1) {
                 logsRef.current.push(`${logsRef.current.length + 1} - ¡Crítico! Multiplicador de ${criticalMultiplier}`);
             }
             const pentakill = actualStreak >= pentakillTargetNumber ? pentakillDmg : 0;
@@ -1063,7 +1063,7 @@ const GamePage = () => {
                 if (health - dmg <= 0 && revive.current || lifeward) {
                     if (reviveHealth?.current !== 0) {
                         setHealth(reviveHealth?.current);
-                    } else{
+                    } else {
                         setHealth(1);
                     }
                     if (lifeward) {
@@ -2048,6 +2048,23 @@ const GamePage = () => {
                                 : <></>
                         }
                     </div>
+                    <button
+                        className="reportBug-button"
+                        onClick={() => {
+                            const newBugInfo = {
+                                modificadores: modifiers,
+                                error: "",
+                                personaje: character.nombre,
+                                logs: logsRef.current.join('\n'),
+                                room: room,
+                                dungeon: dungeon
+                            }
+                            openBugReport(JSON.stringify(newBugInfo))
+                        }
+                        }
+                    >
+                        REPORTAR ERROR
+                    </button>
                 </div>
             </Fragment>
         );
@@ -2065,6 +2082,8 @@ const GamePage = () => {
                                     error: error.message,
                                     personaje: character.nombre,
                                     logs: logsRef.current.join('\n'),
+                                    room: room,
+                                    dungeon: dungeon
                                 }
                                 openBugReport(JSON.stringify(newBugInfo))
                             }
