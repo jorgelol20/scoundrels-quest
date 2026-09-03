@@ -30,9 +30,9 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
     const calculateWeaponPrice = (valor, multiplicador) => {
         const base = valor <= 10
             ? valor * 5
-            : ((valor - 4) * 5) + ((valor >= 14 ? 15 : 10) * (valor - 8));
+            : ((valor - 4) * 5) + (5 * (valor - 8));
 
-        return Math.max(20, base) * multiplicador;
+        return Math.floor(Math.max(10, base) * multiplicador);
     };
 
     const calculateHealPrice = (valor, multiplicador) => {
@@ -40,7 +40,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
             ? valor * 5
             : ((valor - 4) * 5) + (10 * (valor - 8));
 
-        return Math.max(5, base) * multiplicador;
+        return Math.floor(Math.max(10, base) * multiplicador);
     };
 
 
@@ -50,7 +50,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
         const items = [];
 
         // Multiplicador de precio corregido
-        const multiplicador = currentRound > 10 ? currentRound % 10 == 0 ? Math.min(10, currentRound - 10) / 2 : Math.min(20, currentRound - 10) : 1;
+        const multiplicador = currentRound > 10 ? currentRound % 10 == 0 ? Math.min(5, currentRound - 10) / 2 : Math.min(20, currentRound - 10) : 1;
 
         // Agregar modificadores si existen
         mods.forEach((mod, index) => {
@@ -160,7 +160,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
                     <div className="game-hud-text">
                         <h1 className="player-health"><img src={healthIcon} />{health}/{maxHealth}</h1>
                         <h1 className="player-gold"><img src={GoldIcon} />{gold}</h1>
-                        <h1 className="player-gold">Reembolso: {Math.floor(usedGold.current / 10)}</h1>
+                        {refund?<h1 className="player-gold">Reembolso: {Math.floor(usedGold.current / 10)}</h1>:<></>}
                         <h1>RONDA {round}</h1>
                         <h2 ref={formatedTimeRef}>Tiempo: 00:00</h2>
                     </div>

@@ -747,7 +747,7 @@ const GamePage = () => {
             else if (rounds !== maxRounds || continueMatch) {
                 setSelectModifier(true)
                 let newEnemys = [];
-                if (rounds >= 1 && gameOn) {
+                if (rounds >= 1 && (gameOn || continueMatch)) {
                     if (interest !== 0) {
                         setGold(prev => prev + Math.floor((prev / interest)));
                     }
