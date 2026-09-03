@@ -1692,7 +1692,15 @@ const GamePage = () => {
             );
         }
 
-        const extraDmgEffects = userExtraDmg.current + (weapon ? blacksmithDmg : 0) + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0);
+        const extraDmgEffects = () => {
+            if(userDmgMultiplier != 1){
+                return `${userExtraDmg.current + (weapon ? blacksmithDmg : 0) + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0)} y un mult de ${userDmgMultiplier.current}.`
+            }else{
+                return userExtraDmg.current + (weapon ? blacksmithDmg : 0) + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0);
+            }
+        }
+        
+
         const calcExtraGold = () => {
             if (isGambler && goldMultiplier.current != 1) {
                 return `5 más ${goldMultiplier.current}% del total por enemigo`
@@ -1760,7 +1768,7 @@ const GamePage = () => {
                                 {isGambler ? lastGamblerEffect !== null ? <p className="gambler-text">Última apuesta: <br /> <span>{lastGamblerEffect}</span></p> : <p>Aún no has apostado.</p> : <></>}
                             </div>
                             <div className="game-character">
-                                <img className="character-avatar" style={{ borderColor: user.color }} src={character?.imagen} alt={character?.nombre} title={character?.nombre} />
+                                <img className={`character-avatar ${isWarrior && health <= maxHealth / 2 ? 'passiveActive':''}`} style={{ borderColor: user.color }} src={character?.imagen} alt={character?.nombre} title={character?.nombre} />
                                 <img className={availableAbility ? "character-ability available" : "character-ability"} src={character?.habilidad_personaje?.icono} style={null} />
                             </div>
                             <div className="extra">
@@ -1795,7 +1803,7 @@ const GamePage = () => {
                                         size={32}
                                         nombre="Daño extra"
                                         turnos={false}
-                                        valor={extraDmgEffects}
+                                        valor={extraDmgEffects()}
                                         icono={BuffIcon}
                                         onHover={setTooltip}
                                         onLeave={() => setTooltip(null)}
