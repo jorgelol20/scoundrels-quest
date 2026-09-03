@@ -18,7 +18,7 @@ class UsuariosController extends Controller
 {
     public function index()
     {
-        $usuarios = Usuarios::select('id', 'es_admin' ,'nick', 'avatar', 'color', 'created_at', 'ultima_vez_visto')
+        $usuarios = Usuarios::select('id', 'es_admin', 'is_tester' ,'nick', 'avatar', 'color', 'created_at', 'ultima_vez_visto')
             ->withCount([
                 'tiene_jugadas as total_victorias' => function ($query) {
                     $query->where('victoria', true);
@@ -26,7 +26,9 @@ class UsuariosController extends Controller
                 'tiene_jugadas as total_derrotas' => function ($query) {
                     $query->where('victoria', false);
                 },
-                'logros'
+                'logros',
+                'tiene_jugadas'
+                
             ])
             ->get();
         return response()->json(['usuario' => $usuarios]);
@@ -60,7 +62,7 @@ class UsuariosController extends Controller
 
     public function show(string $nick)
     {
-        $usuario = Usuarios::select('id', 'nick', 'es_admin', 'avatar', 'color', 'created_at', 'ultima_vez_visto')->where('nick', '=', $nick)->get();
+        $usuario = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar', 'color', 'created_at', 'ultima_vez_visto')->where('nick', '=', $nick)->get();
         $usuario->load([
         'tiene_jugadas' => function ($query) {
             $query->with(['modificadores', 'personaje'])
@@ -74,7 +76,7 @@ class UsuariosController extends Controller
     // Buscar usuarios por coincidencia en el nick
     public function search(string $search)
     {
-        $usuarios = Usuarios::select('id', 'nick', 'email', 'es_admin', 'avatar', 'color', 'created_at', 'ultima_vez_visto')->where('nick', 'LIKE', '%' . $search . '%')->limit(3)->get();
+        $usuarios = Usuarios::select('id', 'nick', 'email', 'es_admin','is_tester', 'avatar', 'color', 'created_at', 'ultima_vez_visto')->where('nick', 'LIKE', '%' . $search . '%')->limit(3)->get();
         return response()->json(['usuarios' => $usuarios], 201);
     }
 
@@ -99,6 +101,12 @@ class UsuariosController extends Controller
             $currentUser = $request->user();
             if ($currentUser && $currentUser->es_admin) {
                 $data['es_admin'] = filter_var($request->input('es_admin'), FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+        if ($request->has('is_tester')) {
+            $currentUser = $request->user();
+            if ($currentUser && $currentUser->es_admin) {
+                $data['is_tester'] = filter_var($request->input('is_tester'), FILTER_VALIDATE_BOOLEAN);
             }
         }
         $usuario->update($data);
@@ -192,7 +200,7 @@ class UsuariosController extends Controller
     // Función para obtener el ranking de usuarios por victoria
     public function ranking_victorias()
     {
-        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'created_at', 'es_admin', 'ultima_vez_visto')
+        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'created_at', 'es_admin','is_tester', 'ultima_vez_visto')
             ->withCount([
                 'tiene_jugadas as total_victorias' => function ($query) {
                     $query->where('victoria', true);
@@ -211,7 +219,7 @@ class UsuariosController extends Controller
     // Función para obtener el ranking de usuarios por record de rondas
     public function ranking_rondas()
     {
-        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'created_at', 'es_admin', 'ultima_vez_visto')
+        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'created_at', 'es_admin','is_tester', 'ultima_vez_visto')
             ->withMax('tiene_jugadas as record_rondas', 'rondas')
             ->withCount([
                 'tiene_jugadas as total_partidas'

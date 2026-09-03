@@ -156,8 +156,8 @@ const ProfilePage = () => {
 
                 return {
                     ...achievement,
-                    obtained: userAchievement ?userAchievement.pivot?.obtenido : false,
-                    progreso: userAchievement ?userAchievement.pivot?.progreso : 0,
+                    obtained: userAchievement ? userAchievement.pivot?.obtenido : false,
+                    progreso: userAchievement ? userAchievement.pivot?.progreso : 0,
                     created_at: userAchievement ? userAchievement.pivot?.created_at : null
                 };
             });
@@ -183,7 +183,11 @@ const ProfilePage = () => {
                             <div className='user-basic' style={{ position: 'relative' }}>
                                 <img className='user-avatar' style={{ borderColor: userInfo?.color }} src={userInfo?.avatar !== "" && userInfo?.avatar ? userInfo?.avatar : Placeholder} alt={`Avatar de ${userInfo?.nick}`} />
                                 {user.es_admin ? <button className="delete-button" onClick={() => { confirm("Se eliminará la foto de perfil") ? handleDelete() : null }}><img className="delete-icon" src={DeleteIcon} alt="" /></button> : <></>}
-                                <h1 className={userInfo.es_admin ? 'admin' : 'user'}>{userInfo.nick}</h1>
+                                <h1 className={userInfo?.es_admin ? 'admin userNick' : userInfo.is_tester ? 'tester userNick' : 'user userNick'}>{userInfo.nick}</h1>
+                                <div className='titles'>
+                                     {userInfo?.es_admin ? <h3 title='Título por ser admin'>➤ <span className='admin'>Administrador</span></h3> : <></>}
+                                    {userInfo?.is_tester ? <h3 title='Título por ser tester' >➤ <span className='tester'>{userInfo.nick === "krm2707" ? 'Beater' : 'Tester'}</span></h3> : <></>}
+                                </div>
                             </div>
                             <div>
                                 <p>Desde: {new Date(userInfo.created_at).toLocaleDateString('es-ES')}</p>

@@ -50,10 +50,12 @@ class ReporteBugController extends Controller
         $data = $request->validated();
         $data['usuario_id'] = $request->user()->id;
 
+        $archivoPath = "";
         if ($request->hasFile('screenshot')) {
-            $data['screenshot_url'] = $request->file('screenshot')
-                ->store('reportes_bugs/screenshots', 'public');
+            $archivoPath = $request->file('screenshot')->store('reportes_bugs');
+            $archivoPath = Storage::url($archivoPath);
         }
+        $data['screenshot_url'] = $archivoPath;
 
         $reporte = ReporteBug::create($data);
 
@@ -64,13 +66,13 @@ class ReporteBugController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->hasFile('screenshot')) {
-            if ($reporte_bug->screenshot_url) {
-                Storage::disk('public')->delete($reporte_bug->screenshot_url);
-            }
-            $data['screenshot_url'] = $request->file('screenshot')
-                ->store('reportes_bugs/screenshots', 'public');
-        }
+        // if ($request->hasFile('screenshot')) {
+        //     if ($reporte_bug->screenshot_url) {
+        //         Storage::disk('public')->delete($reporte_bug->screenshot_url);
+        //     }
+        //     $data['screenshot_url'] = $request->file('screenshot')
+        //         ->store('reportes_bugs/screenshots', 'public');
+        // }
 
         $reporte_bug->update($data);
 
