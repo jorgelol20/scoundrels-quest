@@ -136,7 +136,6 @@ const BugReportPage = () => {
                             <h4>Información técnica</h4>
 
                             {logsData.raw ? (
-                                // Fallback: no era el JSON esperado, se muestra tal cual
                                 <pre>{logsData.raw}</pre>
                             ) : (
                                 <div className="bug-report-tecnico-grid">
