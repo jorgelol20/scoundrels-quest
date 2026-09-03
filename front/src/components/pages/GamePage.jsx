@@ -878,7 +878,7 @@ const GamePage = () => {
                     break;
                 case 'heal_roulete':
                     heal_roulete(true)
-                    handleNewAchievement(16) //Lanzar logro cubo slime
+                    handleNewAchievement(16) 
                     break;
                 case 'progresive_heal':
                     progresiveHeal.current = effect?.value
@@ -1554,7 +1554,7 @@ const GamePage = () => {
                     (areEnemys, currentValue) => areEnemys = ((currentValue.palo === 'Trebol' || currentValue.palo === 'Pica') && areEnemys),
                     true,);
                 if (allEnemys && !thanatophobiaActivated) {
-                    canScape.current = true;
+                    actualScapes.current += 1;
                     setThanatophobiaActivated(true);
                 }
             }

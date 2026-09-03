@@ -71,37 +71,6 @@ const MatchProvider = (props) => {
         isLoading: isLoadingAchievements,
         error: achievementsError
     } = useAchievements();
-
-    // console.log("===== MATCH PROVIDER =====");
-    // console.log("CARDS:", {
-    //     data: cards,
-    //     loading: isLoadingCard,
-    //     error: cardError
-    // });
-
-    // console.log("CHARACTERS:", {
-    //     data: characters,
-    //     loading: isLoadingCharacter,
-    //     error: characterError
-    // });
-
-    // console.log("MODIFIERS:", {
-    //     data: modifiers,
-    //     loading: isLoadingModifier,
-    //     error: modifierError
-    // });
-
-    // console.log("ACHIEVEMENTS:", {
-    //     data: achievements,
-    //     loading: isLoadingAchievements,
-    //     error: achievementsError
-    // });
-
-    // console.log("USER:", {
-    //     data: user,
-    //     loading: isLoadingUser,
-    //     error: userError
-    // });
     const { newAchievement } = useAchievements();
     const { saveMatch, updateMatch } = useMatch();
 
@@ -254,7 +223,7 @@ const MatchProvider = (props) => {
             await handleNewAchievement(2)
         }
         // Logro ronda 20
-        if (round === 20) {
+        if (round >= 20) {
             await handleNewAchievement(17)
         }
         // Logro primera partida
