@@ -13,6 +13,7 @@
     label{
         color: var(--main-white);
     }
+    z-index: 1000;
 }
 .settings{
     width: 100%;

@@ -1,5 +1,4 @@
-import { Fragment, useState, useRef } from 'react'
-import { BrowserRouter } from 'react-router-dom';
+import { Fragment } from 'react'
 import Navbar from './components/structure/Navbar.jsx';
 import './App.css'
 import ContentPage from './components/pages/ContentPage.jsx';
@@ -12,7 +11,6 @@ function App() {
   return (
 
     <Fragment>
-      <BrowserRouter>
 
         <Navbar className="navbar" />
 
@@ -21,7 +19,7 @@ function App() {
           <ContentPage />
         </main>
         <Footer />
-      </BrowserRouter>
+      
     </Fragment>
 
   )
