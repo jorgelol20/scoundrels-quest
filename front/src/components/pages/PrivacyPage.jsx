@@ -287,7 +287,7 @@ const PrivacyPage = () => {
                 cuenta del responsable, deben establecerse las garantías y
                 acuerdos correspondientes conforme a la normativa aplicable.
                 IONOS ofrece un contrato de tratamiento de datos para sus
-                servicios de servidores y VPS. :contentReference[oaicite:1]{index = 1}
+                servicios de servidores y VPS.
             </p>
 
             <p>
