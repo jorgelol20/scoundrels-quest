@@ -193,6 +193,49 @@ const TermsPage = () => {
                         soporte@scoundrels-quest.com
                     </a>
                 </p>
+                <h2>Contenido generado por los usuarios</h2>
+
+                <p>
+                    Scoundrel's Quest permite a los usuarios personalizar determinados
+                    elementos de su perfil, incluyendo avatares y banners.
+                </p>
+
+                <p>
+                    El usuario es responsable de los contenidos que suba al servicio y
+                    garantiza que dispone de los derechos, permisos o autorizaciones
+                    necesarios para utilizarlos.
+                </p>
+
+                <p>
+                    No está permitido utilizar imágenes, GIFs u otros contenidos que
+                    infrinjan derechos de autor, marcas, derechos de imagen, derechos de
+                    propiedad intelectual o industrial, derechos de privacidad u otros
+                    derechos de terceros.
+                </p>
+
+                <p>
+                    Tampoco está permitido subir contenido ilegal, discriminatorio,
+                    amenazante, abusivo, sexualmente explícito o que pueda resultar
+                    perjudicial para otros usuarios o para el funcionamiento del servicio.
+                </p>
+
+                <p>
+                    Scoundrel's Quest no realiza una revisión previa de todos los contenidos
+                    aportados por los usuarios. No obstante, podrá retirar o impedir el
+                    acceso a contenidos cuando tenga conocimiento de que pueden ser
+                    ilícitos, infringir derechos de terceros o incumplir estos términos.
+                </p>
+
+                <p>
+                    Si consideras que un avatar, banner u otro contenido infringe tus
+                    derechos o estos términos, puedes comunicarlo mediante:
+                </p>
+
+                <p>
+                    <a href="mailto:soporte@scoundrels-quest.com">
+                        soporte@scoundrels-quest.com
+                    </a>
+                </p>
             </div>
         </Fragment>
     );

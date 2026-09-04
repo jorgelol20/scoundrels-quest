@@ -8,11 +8,13 @@ use App\Models\Usuarios;
 use App\Http\Requests\Usuarios\StoreUsuarioRequest;
 use App\Http\Requests\Usuarios\UpdateUsuarioRequest;
 use App\Models\Logros;
+use App\Notifications\RegistroNotificacionUsuario;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Hash;
+use Notification;
 
 class UsuariosController extends Controller
 {
@@ -55,6 +57,7 @@ class UsuariosController extends Controller
             'color' => $request->color
         ]);
         $token = $usuario->createToken('auth_token')->plainTextToken;
+        Notification::route('mail', $usuario->email)->notify(new RegistroNotificacionUsuario($usuario));
         return response()->json([
             "usuario" => $usuario,
             "access_token" => $token,
