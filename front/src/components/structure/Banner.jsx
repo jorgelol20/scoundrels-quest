@@ -4,10 +4,7 @@ import { settingsContext } from "../../context/SettingsProvider";
 
 const Banner = () => {
     const {bannerImage} = useContext(settingsContext)
-    
-    
-    
-    
+
     return (
         <Fragment>
             <div className="banner">
