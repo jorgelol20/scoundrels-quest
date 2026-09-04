@@ -9,6 +9,7 @@
     border-style: groove;
     overflow: hidden; /* Importante: recorta las esquinas del border-radius */
     margin-bottom: -30em;
+    z-index: -1;
 }
 
 .banner img {

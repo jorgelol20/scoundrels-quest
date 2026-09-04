@@ -9,7 +9,6 @@
     border-radius: 5px;
     justify-content: center;
     align-items: center;
-
     button {
         margin-bottom: 1cqh;
         margin-top: 1cqh;
@@ -99,7 +98,9 @@ article {
         min-height: 5cqw;
     }
 }
-
+.matches-history{
+    padding-bottom: 5%;
+}
 @media (max-width: 900px) {
     article {
         margin-top: 10cqw;

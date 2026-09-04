@@ -56,7 +56,7 @@ const MainPage = () => {
                     <UserRanking />
                 </div>
             </article>
-            <article>
+            <article className="matches-history">
                 <div className="last-matches">
                     <h1>Últimas partidas ( Totales: {matches?.total_jugadas ?? ""} )</h1>
                     <div tabIndex={1} className="match-history">
