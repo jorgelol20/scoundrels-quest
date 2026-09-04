@@ -9,7 +9,7 @@ const LegalPage = () => {
                     <h1>Información legal</h1>
 
                     <p className="legal-updated">
-                        Última actualización: 3 de septiembre de 2026
+                        Última actualización: 4 de septiembre de 2026
                     </p>
 
                     <h2>1. Identificación del proyecto</h2>

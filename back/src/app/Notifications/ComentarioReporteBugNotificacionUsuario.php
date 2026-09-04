@@ -2,20 +2,20 @@
 
 namespace App\Notifications;
 
-use App\Models\ReporteBug;
+use App\Models\ComentarioReporteBug;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NuevoReporteBugNotificacionUsuario extends Notification
+class ComentarioReporteBugNotificacionUsuario extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(public ReporteBug $reporteBug)
+    public function __construct(public ComentarioReporteBug $comentario)
     {
         //
     }
@@ -36,12 +36,10 @@ class NuevoReporteBugNotificacionUsuario extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Reporte recibido.")
-            ->greeting("¡Gracias por tu reporte!")
-            ->line("Gracias por tu reporte de {$this->reporteBug->tipo}")
-            ->line("Los administradores revisarán el reporte y te llegará una notificación cuando el reporte cambie de estado.")
-            ->line("Puedes acceder al resto de tus reportes desde tu perfil.")
-            ->action("Ver la página del reporte", config('app.frontend_url') . "/reportes-bug/{$this->reporteBug->id}");
+            ->subject("Actualización de tu reporte.")
+            ->greeting("Alguien ha comentado en tu reporte")
+            ->line("Un administrador ha dejado un comentario en tu reporte.")
+            ->action("Ver la página del reporte", config('app.frontend_url') . "/reportes-bug/{$this->comentario->reporte->id}");
     }
 
     /**

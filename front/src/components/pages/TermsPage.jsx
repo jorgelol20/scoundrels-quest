@@ -8,7 +8,7 @@ const TermsPage = () => {
                 <h1>Términos de Uso</h1>
 
                 <p className="legal-updated">
-                    Última actualización: 3 de septiembre de 2026
+                    Última actualización: 4 de septiembre de 2026
                 </p>
 
                 <h2>1. Objeto</h2>
