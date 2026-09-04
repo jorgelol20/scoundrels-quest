@@ -40,8 +40,7 @@ class CambioEstadoReporteBugNotificacionUsuario extends Notification
             ->greeting("Tu reporte ha cambiado de estado.")
             ->line("Recientemente, tu reporte ha pasado a: {$this->reporteBug->estado}")
             ->line("Puedes acceder al resto de tus reportes desde tu perfil.")
-            ->action("Ver la página del reporte", config('app.frontend_url') . "/reportes-bug/{$this->reporteBug->id}")
-            ->line("Att: El equipo de Scoundrel's Quest");
+            ->action("Ver la página del reporte", config('app.frontend_url') . "/reportes-bug/{$this->reporteBug->id}");
     }
 
     /**

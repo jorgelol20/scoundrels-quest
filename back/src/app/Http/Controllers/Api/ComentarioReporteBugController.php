@@ -7,7 +7,9 @@ use App\Http\Requests\ReportesBugs\StoreComentarioReporteBugRequest;
 use App\Http\Requests\ReportesBugs\UpdateComentarioReporteBugRequest;
 use App\Models\ComentarioReporteBug;
 use App\Models\ReporteBug;
+use App\Notifications\ComentarioReporteBugNotificacionUsuario;
 use Illuminate\Http\Request;
+use Notification;
 
 class ComentarioReporteBugController extends Controller
 {
@@ -28,6 +30,13 @@ class ComentarioReporteBugController extends Controller
             'usuario_id' => $request->user()->id,
             'comentario' => $request->validated('comentario'),
         ]);
+        $usuarioReporte = $reporte_bug->usuario;
+        if ($request->user()->id !== $usuarioReporte?->id) {
+            Notification::route('mail', $usuarioReporte->email)
+                ->notify(
+                    new ComentarioReporteBugNotificacionUsuario($comentario)
+                );
+        }
 
         return response()->json($comentario->load('usuario'), 201);
     }
