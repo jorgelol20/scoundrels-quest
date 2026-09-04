@@ -81,7 +81,7 @@ class UsuariosController extends Controller
     // Buscar usuarios por coincidencia en el nick
     public function search(string $search)
     {
-        $usuarios = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar', 'color')->where('nick', 'LIKE', '%' . $search . '%')->limit(3)->get();
+        $usuarios = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar', 'banner', 'color')->where('nick', 'LIKE', '%' . $search . '%')->limit(3)->get();
         return response()->json(['usuarios' => $usuarios], 201);
     }
 

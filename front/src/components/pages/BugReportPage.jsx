@@ -178,9 +178,23 @@ const BugReportPage = () => {
                                         <div className="bug-report-tecnico-item full">
                                             <span className="label">Cartas en baraja: ({logsData.dungeon.length})</span>
                                             <div className="dungeon-list">
-                                                {logsData.dungeon.map((card, index) => (
+                                                {logsData.map((card, index) => (
                                                     <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos ?? 'Sin efectos')}</pre>
                                                 ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {console.log(logsData)}
+                                    {logsData[0].nick && (
+                                        <div className="bug-report-tecnico-item full">
+                                            <span className="label">Información del usuario</span>
+                                            <div className="user-info">
+                                                <pre>Nick: {logsData[0]?.nick}</pre>
+                                                <pre>Id: {logsData[0]?.id}</pre>
+                                                <pre>Es admin: {logsData[0]?.es_admin ? 'Si' : 'No'}</pre>
+                                                <pre>Es tester: {logsData[0]?.is_tester ? 'Si' : 'No'}</pre>
+                                                <img src={logsData[0]?.avatar} alt="" width={"50px"} height={"50px"}/>
+                                                <img src={logsData[0]?.banner} alt="" width={"200px"} height={"80px"}/>
                                             </div>
                                         </div>
                                     )}

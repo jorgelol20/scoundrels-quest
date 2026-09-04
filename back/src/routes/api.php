@@ -50,6 +50,10 @@ Route::middleware('auth:sanctum')->group(function () {
             'reportes-bugs' => 'reporte_bug',
             'comentarios' => 'comentario',
         ]);
+
+    // Controlador Usuarios.
+    Route::apiResource('/usuarios', UsuarioApiController::class)->names('api.usuarios');
+    Route::get('/usuarios/search/{search}', [UsuarioApiController::class, 'search'])->name('api.usuarios.search');
 });
 
 // Rutas de creación con limitante de 5 peticiones por minuto y autenticación por Sanctum
@@ -61,17 +65,8 @@ Route::middleware(['auth:sanctum', 'throttle:5,1'])->group(function () {
     Route::post('/nuevo-logro', [UsuarioApiController::class, 'registrarLogro'])->name('api.usuarios.logro');
 });
 
-// Controlador Usuarios.
-// Rutas públicas
-Route::apiResource('/usuarios', UsuarioApiController::class)
-    ->except(['show'])
-    ->names('api.usuarios');
-Route::get('/usuarios/search/{search}', [UsuarioApiController::class, 'search'])->name('api.usuarios.search');
 
-// Ruta 'show' protegida con el middleware
-Route::get('/usuarios/{usuario}', [UsuarioApiController::class, 'show'])
-    ->middleware('auth:sanctum')
-    ->name('api.usuarios.show');
+
 
 
 
