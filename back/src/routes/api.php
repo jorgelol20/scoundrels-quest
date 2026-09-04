@@ -99,4 +99,22 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 Route::middleware(['web'])->group(function () {
     Route::get('/auth/x/redirect', [AuthController::class, 'redirectToX']);
     Route::get('/auth/x/callback', [AuthController::class, 'handleXCallback']);
+
+
+    Route::get('/test-discord', function () {
+        $reporte = \App\Models\ReporteBug::first();
+
+        if (!$reporte) {
+            return response()->json(['error' => 'No hay reportes'], 404);
+        }
+
+        $service = new \App\Services\DiscordReporteBugService($reporte);
+        $result = $service->send();
+
+        return response()->json([
+            'success' => $result,
+            'reporte_id' => $reporte->id,
+            'message' => $result ? 'Enviado a Discord ✅' : 'Error al enviar ❌'
+        ]);
+    });
 });

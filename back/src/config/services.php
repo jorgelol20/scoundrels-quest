@@ -45,5 +45,8 @@ return [
         'client_secret' => env('TWITTER_CLIENT_SECRET'),
         'redirect' => env('TWITTER_REDIRECT_URI'),
     ],
+    'discord' => [
+        'webhook_url' => env('DISCORD_WEBHOOK_URL')
+    ],
 
 ];
