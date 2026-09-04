@@ -9,8 +9,15 @@ class ReporteBug extends Model
     protected $table = 'reportes_bugs';
 
     protected $fillable = [
-        'usuario_id', 'titulo', 'descripcion', 'logs_partida',
-        'tipo', 'severidad', 'estado', 'plataforma', 'screenshot_url',
+        'usuario_id',
+        'titulo',
+        'descripcion',
+        'logs_partida',
+        'tipo',
+        'severidad',
+        'estado',
+        'plataforma',
+        'screenshot_url',
     ];
 
     protected static function booted()
@@ -24,8 +31,8 @@ class ReporteBug extends Model
     {
         $tipo = ucfirst($reporte->tipo);
         $fecha = now()->format('d-m-Y H:i');
+
         $usuario = $reporte->usuario?->nick
-            ?? Usuarios::find($reporte->usuario_id)?->nick
             ?? "Usuario#{$reporte->usuario_id}";
 
         return "{$tipo} - {$fecha} - {$usuario}";
@@ -33,7 +40,7 @@ class ReporteBug extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(Usuarios::class);
+        return $this->belongsTo(Usuarios::class, 'usuario_id');
     }
 
     public function comentarios()
