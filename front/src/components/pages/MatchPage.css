@@ -4,9 +4,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    .match-body{
-        z-index: 1000;
-    }
     .match-info {
         width: 100%;
         min-width: 50cqw;
@@ -19,7 +16,6 @@
         background-color: var(--main-color);
         margin-left: 0;
         padding: 0;
-        z-index: 1000;
 
 
         .match-parameters {
@@ -29,7 +25,6 @@
             width: 75%;
             padding-left: 1%;
             border-right: 5px groove var(--second-color-dark);
-            z-index: 1000;
             img {
                 margin-right: 5px;
             }
@@ -68,7 +63,6 @@
 
         .info {
             display: flex;
-            z-index: 1000;
             h2 {
                 margin-right: 1cqw;
             }
@@ -94,7 +88,6 @@
             text-wrap: wrap;
             height: 100%;
             width: 25%;
-            z-index: 1000;
             img {
                 width: 8cqw;
                 height: 8cqw;
@@ -127,7 +120,6 @@
         border: 5px groove var(--second-color-dark);
         border-top: 0;
         overflow-y: scroll;
-        z-index: 1000;
         .comments { 
             width: 100%;
         }
@@ -168,11 +160,9 @@
     .match {
         display: flex;
         justify-content: center;
-        z-index: 1000;
         .match-info {
             width: 80cqw;
             flex-direction: column-reverse;
-            z-index: 1000;
             .player-info {
                 margin-top: 1em;
                 display: flex;

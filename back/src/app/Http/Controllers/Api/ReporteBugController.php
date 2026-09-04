@@ -7,8 +7,13 @@ use App\Http\Requests\ReportesBugs\StoreReporteBugRequest;
 use App\Http\Requests\ReportesBugs\UpdateReporteBugRequest;
 use App\Http\Requests\ReportesBugs\UpdateEstadoReporteBugRequest;
 use App\Models\ReporteBug;
+use App\Notifications\CambioEstadoReporteBugNotificacionUsuario;
+use App\Notifications\NuevoReporteBugNotificacion;
+use App\Notifications\NuevoReporteBugNotificacionUsuario;
+use App\Models\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Notification;
 
 class ReporteBugController extends Controller
 {
@@ -48,7 +53,9 @@ class ReporteBugController extends Controller
     public function store(StoreReporteBugRequest $request)
     {
         $data = $request->validated();
-        $data['usuario_id'] = $request->user()->id;
+        $usuario= $request->user();
+
+        $data['usuario_id'] = $usuario->id;
 
         $archivoPath = "";
         if ($request->hasFile('screenshot')) {
@@ -58,7 +65,8 @@ class ReporteBugController extends Controller
         $data['screenshot_url'] = $archivoPath;
 
         $reporte = ReporteBug::create($data);
-
+        Notification::route('mail', 'soporte@scoundrels-quest.com')->notify(new NuevoReporteBugNotificacion($reporte));
+        Notification::route('mail', $usuario->email)->notify(new NuevoReporteBugNotificacionUsuario($reporte));
         return response()->json($reporte, 201);
     }
 
@@ -66,15 +74,11 @@ class ReporteBugController extends Controller
     {
         $data = $request->validated();
 
-        // if ($request->hasFile('screenshot')) {
-        //     if ($reporte_bug->screenshot_url) {
-        //         Storage::disk('public')->delete($reporte_bug->screenshot_url);
-        //     }
-        //     $data['screenshot_url'] = $request->file('screenshot')
-        //         ->store('reportes_bugs/screenshots', 'public');
-        // }
-
         $reporte_bug->update($data);
+
+        $usuario= $reporte_bug->usuario;
+
+        Notification::route('mail', $usuario->email)->notify(new CambioEstadoReporteBugNotificacionUsuario($reporte_bug));
 
         return response()->json($reporte_bug->fresh());
     }
