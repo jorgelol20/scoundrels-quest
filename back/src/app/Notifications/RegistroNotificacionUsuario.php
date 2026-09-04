@@ -39,8 +39,7 @@ class RegistroNotificacionUsuario extends Notification
             ->subject("¡Bienvenido a Scoundrel's Quest!")
             ->line("¿Preparado para este desafio?")
             ->action("Ver mi perfil", config('app.frontend_url') . "/perfil/{$this->usuario->nick}")
-            ->line("Muchas gracias por registarte.")
-            ->line("Att: El equipo de Scoundrel's Quest");
+            ->line("Muchas gracias por registarte.");
     }
 
     /**

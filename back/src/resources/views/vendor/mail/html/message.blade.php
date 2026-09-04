@@ -10,13 +10,11 @@
     {!! $slot !!}
 
     {{-- Subcopy --}}
-    @isset($subcopy)
-        <x-slot:subcopy>
-            <x-mail::subcopy>
-                {!! $subcopy !!}
-            </x-mail::subcopy>
-        </x-slot:subcopy>
-    @endisset
+    <x-slot:subcopy>
+        <div style="text-align: center; margin-top: 20px;">
+            Att: El equipo de Scoundrel's Quest
+        </div>
+    </x-slot:subcopy>
 
     {{-- Footer --}}
     <x-slot:footer>

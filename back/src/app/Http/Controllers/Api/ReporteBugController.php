@@ -86,6 +86,9 @@ class ReporteBugController extends Controller
     public function updateEstado(UpdateEstadoReporteBugRequest $request, ReporteBug $reporte_bug)
     {
         $reporte_bug->update($request->validated());
+        
+        $usuario= $reporte_bug->usuario;
+        Notification::route('mail', $usuario->email)->notify(new CambioEstadoReporteBugNotificacionUsuario($reporte_bug));
 
         return response()->json($reporte_bug->fresh());
     }
