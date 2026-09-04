@@ -176,7 +176,6 @@ const ProfilePage = () => {
             </div>
         );
     }
-    console.log(userInfo)
     return (
         <Fragment>
             <div style={{ display: "flex", justifyContent: 'center' }}>

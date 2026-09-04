@@ -146,8 +146,6 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
 
     const closeShop = async () => {
         if (refund) {
-            console.log(refund)
-            console.log(usedGold.current)
             await setGold(prev => prev + Math.floor((usedGold.current / 10)));
         }
         setShopAvailable(false)

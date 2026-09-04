@@ -19,7 +19,7 @@ class StoreReporteBugRequest extends FormRequest
             'tipo' => [
                 'required',
                 'string',
-                'in:visual,jugabilidad,rendimiento,error,otro'
+                'in:visual,jugabilidad,rendimiento,error,usuario,otro'
             ],
             'severidad' => [
                 'sometimes',

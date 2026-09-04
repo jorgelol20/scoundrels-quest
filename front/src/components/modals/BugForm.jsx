@@ -1,14 +1,17 @@
-import { Fragment, useState, useMemo } from 'react';
+import { Fragment, useState, useMemo, useEffect } from 'react';
 import { useReportBugs } from './../../hooks/useReportBugs.js';
 import './BugForm.css';
 
 import Folder from '/images/folder.svg'
+import { useLocation } from 'react-router-dom';
+import { useUser } from '../../hooks/useUser.js';
 
 const TIPOS = [
     { value: 'visual', label: 'Visual' },
     { value: 'jugabilidad', label: 'Jugabilidad' },
     { value: 'rendimiento', label: 'Rendimiento' },
     { value: 'error', label: 'Error' },
+    { value: 'usuario', label: 'Usuario' },
     { value: 'otro', label: 'Otro' },
 ];
 
@@ -17,7 +20,6 @@ const TIPOS = [
  * sin pedirle nada al usuario.
  */
 const detectarPlataforma = () => {
-
     const ua = navigator.userAgent;
 
     let so = 'Desconocido';
@@ -41,6 +43,7 @@ const detectarPlataforma = () => {
  * Si no es JSON válido (bugInfo null o formato inesperado), devuelve null.
  */
 const parseBugInfo = (bugInfo) => {
+    
     if (!bugInfo) return null;
     try {
         const parsed = JSON.parse(bugInfo);
@@ -53,12 +56,18 @@ const parseBugInfo = (bugInfo) => {
 const BugForm = ({ bugInfo, onClose }) => {
     const { newReporte } = useReportBugs();
 
+    const { searchUsuario } = useUser();
+    const [reportedUserInfo, setReportedUserInfo] = useState(null);
+
     const parsedBugInfo = useMemo(() => parseBugInfo(bugInfo), [bugInfo]);
 
     const [formData, setFormData] = useState({
         tipo: 'error',
         descripcion: parsedBugInfo?.error ?? '',
     });
+
+    const location = useLocation();
+
     const [screenshot, setScreenshot] = useState(null);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,7 +94,8 @@ const BugForm = ({ bugInfo, onClose }) => {
             payload.append('descripcion', formData.descripcion);
             payload.append('plataforma', detectarPlataforma());
             // Se envía el JSON completo tal cual llegó, para conservar modificadores/personaje/logs
-            if (bugInfo) payload.append('logs_partida', bugInfo);
+            if (bugInfo) payload.append('logs_partida', bugInfo)
+                else payload.append('logs_partida', JSON.stringify(reportedUserInfo));
             if (screenshot) payload.append('screenshot', screenshot);
 
             await newReporte(payload);
@@ -101,6 +111,21 @@ const BugForm = ({ bugInfo, onClose }) => {
         }
     };
 
+    const handleReportUser = async () => {
+        setFormData((prev) => ({ ...prev, ["tipo"]: "usuario" }));
+        const temp = location.pathname.split('/');
+        const user = temp[temp.length - 1]
+        const reportedUser = await searchUsuario(user);
+        setReportedUserInfo(reportedUser);
+        setFormData((prev) => ({ ...prev, ["descripcion"]: `El usuario '${reportedUser[0]['nick']}' inclumple la normativa de imagenes de avatar/banner.` }));
+    }
+
+    useEffect(() => {
+        if (location.pathname.startsWith('/perfil/')) {
+            handleReportUser();
+        }
+    }, [location])
+
     if (success) {
         return (
             <Fragment>
@@ -115,7 +140,7 @@ const BugForm = ({ bugInfo, onClose }) => {
     return (
         <Fragment>
             <form className="bug-form" onSubmit={handleSubmit}>
-                <h2>Reportar un bug</h2>
+                <h2>Reportar</h2>
 
                 {parsedBugInfo?.personaje && (
                     <p className="bug-form-context">
@@ -132,7 +157,7 @@ const BugForm = ({ bugInfo, onClose }) => {
                         onChange={handleChange}
                     >
                         {TIPOS.map((t) => (
-                            <option key={t.value} value={t.value}>{t.label}</option>
+                            <option key={t.label} value={t.value}>{t.label}</option>
                         ))}
                     </select>
                     {errors.tipo && <span className="bug-form-error">{errors.tipo[0]}</span>}
@@ -149,7 +174,7 @@ const BugForm = ({ bugInfo, onClose }) => {
                         rows={5}
                         placeholder="Describe qué ha pasado, qué esperabas que pasara y cómo reproducirlo"
                         required
-                        
+
                     />
                     {errors.descripcion && <span className="bug-form-error">{errors.descripcion[0]}</span>}
                 </div>
@@ -165,7 +190,7 @@ const BugForm = ({ bugInfo, onClose }) => {
                         <span id="file-name" className="file-status">{screenshot?.name}</span>
                     </div>
                 </div>
-                
+
 
                 {parsedBugInfo?.logs && (
                     <div className="bug-form-field">
