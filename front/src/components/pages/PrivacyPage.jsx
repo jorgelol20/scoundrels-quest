@@ -11,17 +11,18 @@ const PrivacyPage = () => {
             </p>
 
             <p>
-                En Scoundrel's Quest nos tomamos la privacidad de los usuarios
-                en serio. Esta política explica qué datos personales podemos
-                tratar, para qué los utilizamos, cómo los protegemos y qué
-                derechos tienen los usuarios.
+                En <strong>Scoundrel's Quest</strong> nos tomamos la privacidad
+                de los usuarios en serio. Esta Política de Privacidad explica
+                qué datos personales podemos tratar, para qué los utilizamos,
+                con qué proveedores pueden ser tratados y qué derechos pueden
+                ejercer los usuarios.
             </p>
 
             <p>
                 Scoundrel's Quest es un proyecto independiente y gratuito,
                 desarrollado como proyecto personal. Actualmente no incluye
-                publicidad ni utiliza los datos de los usuarios con fines
-                publicitarios.
+                publicidad, no utiliza Google Analytics y no utiliza los datos
+                de los usuarios con fines publicitarios.
             </p>
 
             <h2>1. Responsable del tratamiento</h2>
@@ -35,9 +36,15 @@ const PrivacyPage = () => {
                 <li>
                     <strong>Responsable:</strong> Jorge Colomer
                 </li>
+
                 <li>
                     <strong>Proyecto:</strong> Scoundrel's Quest
                 </li>
+
+                <li>
+                    <strong>Dominio:</strong> scoundrels-quest.com
+                </li>
+
                 <li>
                     <strong>Correo de contacto:</strong>{" "}
                     <a href="mailto:soporte@scoundrels-quest.com">
@@ -55,57 +62,84 @@ const PrivacyPage = () => {
             <h2>2. Datos que tratamos</h2>
 
             <p>
-                Dependiendo del método de registro, autenticación y funciones utilizadas,
-                Scoundrel's Quest puede tratar las siguientes categorías de datos:
+                Dependiendo del método de registro, autenticación y
+                funcionalidades utilizadas, Scoundrel's Quest puede tratar las
+                siguientes categorías de datos:
             </p>
 
             <ul>
                 <li>
-                    <strong>Cuenta:</strong> dirección de correo electrónico, nombre de
-                    usuario y contraseña almacenada mediante un mecanismo de hash.
+                    <strong>Datos de cuenta:</strong> dirección de correo
+                    electrónico, nombre de usuario y contraseña almacenada
+                    mediante mecanismos de hash.
                 </li>
+
                 <li>
-                    <strong>Perfil:</strong> avatar y otros elementos de personalización
-                    que el usuario decida proporcionar.
+                    <strong>Datos de autenticación externa:</strong> información
+                    proporcionada por Google o X mediante las integraciones de
+                    autenticación disponibles.
                 </li>
+
                 <li>
-                    <strong>Datos del juego:</strong> partidas, progreso, logros y otra
-                    información necesaria para proporcionar las funcionalidades del juego.
+                    <strong>Datos de perfil:</strong> avatar, banner y otros
+                    elementos de personalización que el usuario decida
+                    proporcionar.
                 </li>
+
                 <li>
-                    <strong>Interacciones:</strong> comentarios y otra información que el
-                    usuario proporcione voluntariamente dentro del servicio.
+                    <strong>Datos del juego:</strong> partidas, progreso,
+                    logros y otra información necesaria para proporcionar las
+                    funcionalidades del juego.
                 </li>
+
                 <li>
-                    <strong>Autenticación:</strong> tokens necesarios para mantener y
-                    gestionar las sesiones autenticadas.
+                    <strong>Interacciones:</strong> comentarios y otra
+                    información que el usuario proporcione voluntariamente
+                    dentro del servicio.
                 </li>
+
                 <li>
-                    <strong>Datos técnicos:</strong> información técnica necesaria para
-                    proporcionar y proteger el servicio.
+                    <strong>Reportes y soporte:</strong> información
+                    proporcionada por el usuario al enviar un reporte de error
+                    o solicitar asistencia.
+                </li>
+
+                <li>
+                    <strong>Autenticación y sesiones:</strong> tokens necesarios
+                    para mantener y gestionar sesiones autenticadas.
+                </li>
+
+                <li>
+                    <strong>Datos técnicos:</strong> información técnica que
+                    pueda resultar necesaria para proporcionar, mantener y
+                    proteger el servicio.
                 </li>
             </ul>
 
             <h2>3. Contraseñas</h2>
 
             <p>
-                Las contraseñas de las cuentas no se almacenan en texto plano.
+                Las contraseñas de las cuentas creadas mediante el sistema
+                propio de Scoundrel's Quest no se almacenan en texto plano.
+            </p>
+
+            <p>
                 Se almacenan mediante mecanismos de hash destinados a evitar
                 que la contraseña original pueda recuperarse directamente a
                 partir de la información almacenada.
             </p>
 
             <p>
-                Nunca debes proporcionar tu contraseña a otra persona ni
-                utilizar una contraseña que hayas compartido con terceros.
+                Scoundrel's Quest no solicita las contraseñas utilizadas para
+                acceder a las cuentas de Google o X.
             </p>
 
             <h2>4. Finalidades del tratamiento</h2>
 
             <p>
-                Los datos personales se utilizan únicamente en la medida
-                necesaria para proporcionar y mantener las funciones de
-                Scoundrel's Quest.
+                Los datos personales se utilizan en la medida necesaria para
+                proporcionar, mantener, proteger y mejorar las funcionalidades
+                de Scoundrel's Quest.
             </p>
 
             <p>Entre las principales finalidades se encuentran:</p>
@@ -114,65 +148,88 @@ const PrivacyPage = () => {
                 <li>
                     Crear y gestionar cuentas de usuario.
                 </li>
+
                 <li>
-                    Permitir el inicio de sesión y mantener la sesión del
-                    usuario.
+                    Permitir el inicio de sesión y mantener las sesiones
+                    autenticadas.
                 </li>
+
                 <li>
-                    Asociar y conservar las partidas y el progreso del usuario.
+                    Asociar y conservar partidas, progreso y logros.
                 </li>
+
                 <li>
                     Permitir la personalización del perfil mediante avatar y
                     banner.
                 </li>
+
                 <li>
-                    Gestionar consultas y solicitudes de soporte.
+                    Gestionar comentarios y otras interacciones realizadas
+                    dentro del servicio.
                 </li>
+
                 <li>
-                    Recibir y gestionar reportes de errores o bugs.
+                    Recibir y gestionar reportes de errores.
                 </li>
+
                 <li>
-                    Enviar comunicaciones relacionadas con la cuenta y el
-                    funcionamiento del servicio.
+                    Atender solicitudes de soporte.
                 </li>
+
                 <li>
-                    Mantener la seguridad, prevenir usos indebidos y detectar
-                    problemas técnicos.
+                    Enviar comunicaciones funcionales relacionadas con la
+                    cuenta y el servicio.
+                </li>
+
+                <li>
+                    Mantener la seguridad y prevenir usos indebidos.
+                </li>
+
+                <li>
+                    Detectar y solucionar problemas técnicos.
                 </li>
             </ul>
 
-            <h2>5. Comunicaciones por correo electrónico</h2>
+            <h2>5. Correos electrónicos automáticos</h2>
 
             <p>
-                La dirección de correo electrónico asociada a la cuenta puede
-                utilizarse para enviar comunicaciones relacionadas con el
-                servicio.
+                La dirección de correo electrónico asociada a una cuenta puede
+                utilizarse para enviar comunicaciones necesarias para la
+                prestación y gestión del servicio.
             </p>
 
-            <p>Actualmente estas comunicaciones pueden incluir:</p>
+            <p>
+                Actualmente, estas comunicaciones pueden incluir:
+            </p>
 
             <ul>
                 <li>
-                    Confirmaciones o comunicaciones relacionadas con el
-                    registro de la cuenta.
+                    <strong>Correo de bienvenida:</strong> cuando se crea una
+                    cuenta, Scoundrel's Quest puede enviar automáticamente un
+                    correo de bienvenida.
                 </li>
+
                 <li>
-                    Comunicaciones relacionadas con solicitudes de soporte.
+                    <strong>Soporte:</strong> comunicaciones relacionadas con
+                    solicitudes realizadas por el usuario.
                 </li>
+
                 <li>
-                    Confirmaciones relacionadas con reportes de errores
-                    enviados por el usuario.
+                    <strong>Reportes de errores:</strong> confirmaciones
+                    relacionadas con reportes enviados por el usuario.
                 </li>
+
                 <li>
-                    Comunicaciones necesarias para la gestión, seguridad o
-                    funcionamiento de la cuenta.
+                    <strong>Funcionamiento de la cuenta:</strong> otras
+                    comunicaciones necesarias para gestionar, proteger o
+                    mantener la cuenta y el servicio.
                 </li>
             </ul>
 
             <p>
-                Estas comunicaciones son de carácter funcional y no constituyen
-                comunicaciones publicitarias ni se utilizan para crear listas
-                de marketing.
+                Estas comunicaciones son de carácter funcional. Actualmente no
+                se utilizan para enviar newsletters, publicidad, promociones
+                ni comunicaciones comerciales de terceros.
             </p>
 
             <h2>6. Base jurídica</h2>
@@ -180,70 +237,73 @@ const PrivacyPage = () => {
             <p>
                 Dependiendo del tratamiento concreto, la base jurídica puede
                 ser la ejecución de la relación solicitada por el usuario,
-                cuando el tratamiento sea necesario para proporcionar las
-                funciones de la cuenta y del juego.
+                cuando el tratamiento sea necesario para crear y gestionar la
+                cuenta o proporcionar las funcionalidades solicitadas.
             </p>
 
             <p>
                 Determinados tratamientos relacionados con la seguridad,
-                prevención de usos indebidos, mantenimiento y protección de
-                la infraestructura pueden basarse en el interés legítimo del
-                responsable, siempre que dicho interés sea aplicable y no
-                prevalezcan los derechos y libertades del usuario.
+                prevención de usos indebidos, mantenimiento y protección de la
+                infraestructura pueden basarse en el interés legítimo del
+                responsable, cuando dicho interés sea aplicable y no prevalezcan
+                los derechos y libertades del usuario.
             </p>
 
             <p>
                 Cuando un tratamiento requiera consentimiento, este se
-                solicitará de forma específica y podrá retirarse de acuerdo
-                con la normativa aplicable.
+                solicitará de forma específica y podrá retirarse conforme a la
+                normativa aplicable.
             </p>
 
-            <h2>7. Inicio de sesión mediante terceros</h2>
+            <h2>7. Registro y autenticación mediante Google y X</h2>
 
             <p>
-                Scoundrel's Quest permite crear o utilizar una cuenta mediante servicios
-                de autenticación de terceros, actualmente Google y X.
-            </p>
-
-            <p>
-                Cuando utilizas uno de estos métodos de autenticación, el proveedor puede
-                proporcionar a Scoundrel's Quest determinados datos asociados a tu cuenta,
-                de acuerdo con la información y permisos disponibles en la integración.
+                Scoundrel's Quest permite crear o utilizar una cuenta mediante
+                servicios de autenticación de terceros, actualmente Google y X.
             </p>
 
             <p>
-                Dependiendo del proveedor y de los datos disponibles, estos pueden incluir
-                un identificador de usuario, dirección de correo electrónico, nombre de
-                usuario y fotografía o imagen de perfil.
+                Cuando utilizas uno de estos métodos de autenticación, el
+                proveedor puede proporcionar a Scoundrel's Quest determinados
+                datos asociados a tu cuenta, de acuerdo con la información y
+                permisos disponibles en la integración.
             </p>
 
             <p>
-                Estos datos se utilizan para crear o asociar la cuenta de Scoundrel's Quest
-                y permitir el inicio de sesión.
+                Dependiendo del proveedor y de la información disponible, estos
+                datos pueden incluir identificadores de usuario, dirección de
+                correo electrónico, nombre de usuario y fotografía o imagen de
+                perfil.
             </p>
 
             <p>
-                Scoundrel's Quest no recibe ni almacena la contraseña que utilizas para
-                acceder a Google o X.
+                Estos datos se utilizan para crear o asociar la cuenta de
+                Scoundrel's Quest y permitir el inicio de sesión.
             </p>
 
             <p>
-                El tratamiento realizado por Google o X se encuentra sujeto a las
-                respectivas políticas de privacidad de dichos proveedores.
+                Scoundrel's Quest no recibe ni almacena la contraseña utilizada
+                para acceder a tu cuenta de Google o X.
+            </p>
+
+            <p>
+                El tratamiento realizado directamente por Google o X se
+                encuentra sujeto a las respectivas políticas de privacidad de
+                dichos proveedores.
             </p>
 
             <h2>8. Datos de partidas y progreso</h2>
 
             <p>
-                Para que el usuario pueda conservar sus partidas y continuar
+                Para permitir que el usuario conserve sus partidas y continúe
                 jugando posteriormente, Scoundrel's Quest puede almacenar
-                información relacionada con sus partidas y progreso.
+                información relacionada con sus partidas, progreso y logros.
             </p>
 
             <p>
-                Estos datos se asocian a la cuenta correspondiente con la
-                finalidad de proporcionar la funcionalidad de persistencia del
-                juego.
+                Estos datos se asocian a la cuenta correspondiente cuando sea
+                necesario para proporcionar la funcionalidad de persistencia
+                del juego.
             </p>
 
             <h2>9. Avatares, banners e imágenes subidas por los usuarios</h2>
@@ -268,44 +328,75 @@ const PrivacyPage = () => {
             </p>
 
             <p>
-                Scoundrel's Quest podrá retirar o impedir el acceso a
-                contenidos cuando tenga conocimiento de que pueden ser ilícitos,
-                infringir derechos de terceros o incumplir los Términos de uso.
+                Scoundrel's Quest podrá retirar o impedir el acceso a contenidos
+                cuando tenga conocimiento de que pueden ser ilícitos, infringir
+                derechos de terceros o incumplir los Términos de Uso.
             </p>
 
-            <h2>10. Proveedores y almacenamiento</h2>
+            <h2>10. Comentarios y contenido proporcionado por usuarios</h2>
 
             <p>
-                Los datos de las cuentas y de las partidas se almacenan en una
-                base de datos MySQL alojada en un servidor VPS proporcionado por
-                IONOS.
+                Cuando el usuario utiliza funcionalidades que permiten
+                proporcionar contenido dentro del servicio, como comentarios,
+                Scoundrel's Quest puede almacenar y mostrar dicho contenido
+                asociado a la cuenta correspondiente.
+            </p>
+
+            <p>
+                El usuario debe evitar incluir en comentarios información
+                personal innecesaria, contraseñas, tokens de autenticación,
+                datos bancarios o información confidencial de terceros.
+            </p>
+
+            <h2>11. Reportes de errores y soporte</h2>
+
+            <p>
+                Scoundrel's Quest puede tratar la información que el usuario
+                proporcione al enviar un reporte de error o solicitar soporte.
+            </p>
+
+            <p>
+                Esta información puede incluir el contenido del reporte y otros
+                datos necesarios para investigar y gestionar el problema.
+            </p>
+
+            <p>
+                Los datos relacionados con soporte y reportes se utilizan para
+                atender la solicitud, investigar errores y mantener un registro
+                razonable de las incidencias comunicadas.
+            </p>
+
+            <h2>12. Almacenamiento e infraestructura</h2>
+
+            <p>
+                Los datos de las cuentas, partidas y demás información necesaria
+                para el funcionamiento del servicio se almacenan en una base de
+                datos MySQL alojada en un servidor VPS proporcionado por IONOS.
             </p>
 
             <p>
                 IONOS proporciona la infraestructura necesaria para alojar el
-                servidor. Cuando un proveedor trata datos personales por
-                cuenta del responsable, deben establecerse las garantías y
-                acuerdos correspondientes conforme a la normativa aplicable.
-                IONOS ofrece un contrato de tratamiento de datos para sus
-                servicios de servidores y VPS.
+                servidor y puede tratar los datos necesarios para prestar sus
+                servicios de infraestructura.
             </p>
 
             <p>
-                Puedes consultar información adicional sobre el tratamiento de
-                datos de IONOS en su documentación de privacidad.
+                Cuando resulte aplicable, se adoptarán las garantías y acuerdos
+                correspondientes para el tratamiento de datos personales por
+                parte de proveedores.
             </p>
 
-            <h2>11. Servicio de correo</h2>
+            <h2>13. Servicio de correo electrónico</h2>
 
             <p>
-                Las comunicaciones automáticas por correo electrónico se
-                realizan mediante el servicio de correo asociado al dominio
-                de Scoundrel's Quest.
+                Las comunicaciones automáticas de Scoundrel's Quest se realizan
+                mediante infraestructura de correo asociada al dominio del
+                proyecto.
             </p>
 
             <p>
                 Actualmente se utiliza infraestructura de correo de IONOS para
-                enviar las comunicaciones desde la dirección:
+                enviar comunicaciones desde:
             </p>
 
             <p>
@@ -321,27 +412,27 @@ const PrivacyPage = () => {
                 asociados a la transmisión.
             </p>
 
-            <h2>12. Cloudflare</h2>
+            <h2>14. Cloudflare</h2>
 
             <p>
-                Scoundrel's Quest utiliza Cloudflare como proveedor de DNS y proxy para
-                determinadas conexiones con el servicio.
+                Scoundrel's Quest utiliza Cloudflare como proveedor de DNS y
+                proxy para determinadas conexiones con el servicio.
             </p>
 
             <p>
-                Esta configuración puede implicar el tratamiento de información técnica
-                asociada a las solicitudes realizadas al sitio, como la dirección IP,
-                información de conexión y datos técnicos necesarios para gestionar y
-                proteger el tráfico.
+                Esta configuración puede implicar el tratamiento de información
+                técnica asociada a las solicitudes realizadas al sitio, como
+                dirección IP, información de conexión y otros datos técnicos
+                necesarios para gestionar y proteger el tráfico.
             </p>
 
             <p>
-                Cloudflare no se utiliza en Scoundrel's Quest para realizar publicidad
-                personalizada ni para realizar analítica de comportamiento dentro del
-                juego.
+                Cloudflare no se utiliza actualmente en Scoundrel's Quest para
+                realizar publicidad personalizada ni analítica de
+                comportamiento dentro del juego.
             </p>
 
-            <h2>13. Google Search Console</h2>
+            <h2>15. Google Search Console</h2>
 
             <p>
                 Scoundrel's Quest utiliza Google Search Console para tareas de
@@ -354,71 +445,73 @@ const PrivacyPage = () => {
                 como mecanismo de analítica de comportamiento dentro del juego.
             </p>
 
-            <h2>14. Google Analytics y publicidad</h2>
+            <h2>16. Google Analytics y publicidad</h2>
 
             <p>
                 Actualmente Scoundrel's Quest no utiliza Google Analytics.
             </p>
 
             <p>
-                Tampoco utiliza publicidad ni cookies publicitarias para
-                mostrar anuncios o realizar perfiles publicitarios de los
-                usuarios.
+                Tampoco utiliza publicidad ni herramientas destinadas a crear
+                perfiles publicitarios de los usuarios.
             </p>
 
-            <h2>15. Cookies y tecnologías similares</h2>
+            <h2>17. Cookies y tecnologías similares</h2>
 
             <p>
-                Scoundrel's Quest utiliza únicamente cookies y tecnologías
-                similares necesarias para proporcionar determinadas funciones
-                del servicio.
+                Scoundrel's Quest utiliza cookies y tecnologías similares que
+                resultan necesarias para determinadas funciones del servicio.
             </p>
 
-            <p>Estas pueden utilizarse, entre otras cosas, para:</p>
+            <p>
+                Estas pueden utilizarse, entre otras cosas, para:
+            </p>
 
             <ul>
                 <li>
                     Mantener la sesión iniciada.
                 </li>
+
                 <li>
                     Gestionar la autenticación.
                 </li>
+
                 <li>
                     Recordar determinadas preferencias o configuraciones.
                 </li>
+
                 <li>
                     Proporcionar funciones de seguridad.
                 </li>
             </ul>
 
             <p>
-                Para obtener información más detallada sobre las cookies
-                utilizadas por Scoundrel's Quest, consulta nuestra{" "}
+                Para obtener información más detallada, consulta nuestra{" "}
                 <a href="/cookies">Política de Cookies</a>.
             </p>
 
-            <h2>16. Conservación de los datos</h2>
+            <h2>18. Conservación de los datos</h2>
 
             <p>
                 Los datos se conservarán durante el tiempo necesario para
-                proporcionar las funciones de la cuenta y del servicio.
+                proporcionar las funcionalidades de la cuenta y del servicio.
             </p>
 
             <p>
                 Cuando los datos ya no sean necesarios para dichas finalidades,
-                podrán eliminarse o anonimizarse, salvo que exista una
-                obligación legal que requiera su conservación durante un
-                período adicional.
+                podrán eliminarse o anonimizarse cuando corresponda, salvo que
+                exista una obligación legal que requiera su conservación durante
+                un período adicional.
             </p>
 
             <p>
-                Los mensajes y datos relacionados con solicitudes de soporte
-                podrán conservarse durante el tiempo necesario para gestionar
-                la solicitud y mantener un registro razonable de la atención
-                realizada.
+                Los datos relacionados con solicitudes de soporte y reportes de
+                errores podrán conservarse durante el tiempo necesario para
+                gestionar la solicitud y mantener un registro razonable de las
+                incidencias.
             </p>
 
-            <h2>17. Seguridad</h2>
+            <h2>19. Seguridad</h2>
 
             <p>
                 Se aplican medidas técnicas y organizativas razonables para
@@ -437,24 +530,23 @@ const PrivacyPage = () => {
                 garantizar una seguridad absoluta.
             </p>
 
-            <h2>18. Datos de menores</h2>
+            <h2>20. Menores</h2>
 
             <p>
-                Scoundrel's Quest no solicita deliberadamente datos personales
-                especialmente protegidos ni pretende recopilar información
-                adicional de menores que no sea necesaria para el funcionamiento
-                del servicio.
+                Scoundrel's Quest no está específicamente diseñado para
+                recopilar datos personales adicionales de menores que no sean
+                necesarios para proporcionar el servicio.
             </p>
 
             <p>
-                Si eres menor de edad, utiliza el servicio con la participación
-                o supervisión de tu padre, madre o tutor cuando sea necesario
-                conforme a la legislación aplicable.
+                Los usuarios deben utilizar el servicio de acuerdo con las
+                normas de edad y capacidad aplicables en su jurisdicción.
             </p>
 
             <p>
-                Si consideras que se ha recopilado información de un menor de
-                forma indebida, puedes contactar con nosotros en:
+                Si un padre, madre, tutor o representante considera que se han
+                tratado datos personales de un menor de forma indebida, puede
+                contactar mediante:
             </p>
 
             <p>
@@ -463,32 +555,39 @@ const PrivacyPage = () => {
                 </a>
             </p>
 
-            <h2>19. Derechos de los usuarios</h2>
+            <h2>21. Derechos de los usuarios</h2>
 
             <p>
-                Los usuarios pueden ejercer, cuando resulten aplicables, los
-                siguientes derechos:
+                Cuando resulten aplicables, los usuarios pueden ejercer los
+                derechos reconocidos por la normativa de protección de datos,
+                incluyendo:
             </p>
 
             <ul>
                 <li>
                     Derecho de acceso a sus datos personales.
                 </li>
+
                 <li>
                     Derecho de rectificación de datos inexactos.
                 </li>
+
                 <li>
                     Derecho de supresión.
                 </li>
+
                 <li>
                     Derecho a solicitar la limitación del tratamiento.
                 </li>
+
                 <li>
                     Derecho de oposición a determinados tratamientos.
                 </li>
+
                 <li>
                     Derecho a la portabilidad de los datos cuando sea aplicable.
                 </li>
+
                 <li>
                     Derecho a retirar el consentimiento cuando un tratamiento
                     se base en el consentimiento.
@@ -496,7 +595,7 @@ const PrivacyPage = () => {
             </ul>
 
             <p>
-                Para ejercer tus derechos, puedes contactar con:
+                Para ejercer tus derechos puedes contactar mediante:
             </p>
 
             <p>
@@ -506,12 +605,12 @@ const PrivacyPage = () => {
             </p>
 
             <p>
-                Para proteger las cuentas frente a solicitudes fraudulentas,
-                podremos solicitar información razonable que permita verificar
-                la identidad del solicitante cuando sea necesario.
+                Cuando sea necesario para proteger una cuenta frente a
+                solicitudes fraudulentas, podremos solicitar información
+                razonable para verificar la identidad del solicitante.
             </p>
 
-            <h2>20. Reclamaciones ante la autoridad de control</h2>
+            <h2>22. Reclamaciones ante la autoridad de control</h2>
 
             <p>
                 Si consideras que el tratamiento de tus datos personales
@@ -525,19 +624,18 @@ const PrivacyPage = () => {
                 Protección de Datos (AEPD).
             </p>
 
-            <h2>21. No venta de datos personales</h2>
+            <h2>23. No venta de datos personales</h2>
 
             <p>
-                Scoundrel's Quest no vende los datos personales de sus usuarios
-                ni los utiliza para elaborar perfiles publicitarios.
+                Scoundrel's Quest no vende los datos personales de sus usuarios.
             </p>
 
             <p>
-                Tampoco utiliza los datos de las cuentas para enviar publicidad
-                de terceros.
+                Tampoco utiliza actualmente los datos de las cuentas para crear
+                perfiles publicitarios ni para enviar publicidad de terceros.
             </p>
 
-            <h2>22. Donaciones mediante Ko-fi</h2>
+            <h2>24. Donaciones mediante Ko-fi</h2>
 
             <p>
                 Scoundrel's Quest permite realizar donaciones voluntarias
@@ -552,44 +650,52 @@ const PrivacyPage = () => {
             <p>
                 Los pagos y los datos asociados a ellos son gestionados por
                 Ko-fi y, en su caso, por los proveedores de pago utilizados por
-                dicha plataforma. Scoundrel's Quest no necesita almacenar los
-                datos completos de las tarjetas de pago para recibir estas
-                donaciones.
-            </p>
-
-            <h2>23. Enlaces a servicios de terceros</h2>
-
-            <p>
-                Scoundrel's Quest puede contener enlaces a servicios o sitios
-                web de terceros. Estos servicios disponen de sus propias
-                políticas de privacidad y condiciones de uso.
+                dicha plataforma.
             </p>
 
             <p>
-                No somos responsables del contenido ni de las prácticas de
-                privacidad de sitios web externos que no estén bajo nuestro
-                control.
+                Scoundrel's Quest no necesita almacenar los datos completos de
+                las tarjetas de pago para recibir estas donaciones.
             </p>
 
-            <h2>24. Cambios en esta política</h2>
+            <h2>25. Enlaces y servicios de terceros</h2>
+
+            <p>
+                Scoundrel's Quest puede contener enlaces o integraciones con
+                servicios y sitios web de terceros.
+            </p>
+
+            <p>
+                Estos servicios disponen de sus propias políticas de privacidad
+                y condiciones de uso, que pueden diferir de las de Scoundrel's
+                Quest.
+            </p>
+
+            <p>
+                No controlamos las prácticas de privacidad de sitios externos
+                que no se encuentren bajo nuestro control directo.
+            </p>
+
+            <h2>26. Cambios en esta política</h2>
 
             <p>
                 Esta Política de Privacidad puede actualizarse cuando cambien
-                las funcionalidades del servicio, los proveedores utilizados o
-                las obligaciones legales aplicables.
+                las funcionalidades del servicio, los proveedores utilizados,
+                los tratamientos de datos o las obligaciones legales
+                aplicables.
             </p>
 
             <p>
-                La versión vigente estará siempre disponible en esta página y
-                mostrará la fecha de su última actualización.
+                La versión vigente estará disponible en esta página y mostrará
+                la fecha de su última actualización.
             </p>
 
-            <h2>25. Contacto</h2>
+            <h2>27. Contacto</h2>
 
             <p>
                 Si tienes cualquier pregunta sobre esta Política de Privacidad,
-                sobre el tratamiento de tus datos o deseas ejercer alguno de
-                tus derechos, puedes contactar con nosotros en:
+                sobre el tratamiento de tus datos o deseas ejercer alguno de tus
+                derechos, puedes contactar con nosotros en:
             </p>
 
             <p>

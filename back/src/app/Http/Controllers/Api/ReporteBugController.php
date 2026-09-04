@@ -11,6 +11,7 @@ use App\Notifications\CambioEstadoReporteBugNotificacionUsuario;
 use App\Notifications\NuevoReporteBugNotificacion;
 use App\Notifications\NuevoReporteBugNotificacionUsuario;
 use App\Models\Usuarios;
+use App\Services\DiscordReporteBugService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Notification;
@@ -57,6 +58,8 @@ class ReporteBugController extends Controller
 
         $data['usuario_id'] = $usuario->id;
 
+        $data['severidad'] = $data['severidad'] ?? 'media';
+
         $archivoPath = "";
         if ($request->hasFile('screenshot')) {
             $archivoPath = $request->file('screenshot')->store('reportes_bugs');
@@ -67,6 +70,10 @@ class ReporteBugController extends Controller
         $reporte = ReporteBug::create($data);
         Notification::route('mail', 'soporte@scoundrels-quest.com')->notify(new NuevoReporteBugNotificacion($reporte));
         Notification::route('mail', $usuario->email)->notify(new NuevoReporteBugNotificacionUsuario($reporte));
+
+        $discordService = new DiscordReporteBugService($reporte);
+        $discordService->send();
+
         return response()->json($reporte, 201);
     }
 
