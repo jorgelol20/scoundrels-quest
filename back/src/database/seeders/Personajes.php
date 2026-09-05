@@ -70,6 +70,13 @@ class Personajes extends Seeder
                 'activo' => true,
                 'habilidad_id' => 8
             ],
+            [
+                'id' => 9,
+                'nombre' => 'Domador',
+                'descripcion' => 'Criado con lobos y entrenado por la naturaleza. Es capaz de apaciguar hasta las más temibles bestias para que luchen por él.',
+                'activo' => true,
+                'habilidad_id' => 9
+            ],
             
         ];
 
