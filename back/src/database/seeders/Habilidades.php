@@ -85,6 +85,15 @@ class Habilidades extends Seeder
                 'coste_oro' => null,
                 'usos_por_ronda' => 1,
             ],
+            [
+                'nombre' => 'Sacrificio de sangre',
+                'descripcion' => 'Sacrificar un 25% de la vida actual por 5 de daño extra en la siguiente acción. Las curaciones dejan de tener efecto y obtienes robo de vida, cambiando las limitaciones de robo de vida de 3 a 10.',
+                'icono' => '/storage/habilidades/PactoDeSangre.webp',
+                'codigo' => 'vampiro',
+                'efectos' => ['name' => 'life_steal', 'value' => 3],
+                'coste_oro' => null,
+                'usos_por_ronda' => null,
+            ],
         ];
 
         foreach ($habilidadesData as $data) {

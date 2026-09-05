@@ -148,6 +148,9 @@ const GamePage = () => {
     const [isWarrior, setIsWarrior] = useState(false);
     const isScapingRef = useRef(false);
     const canScape = useRef(true);
+    const [isVampire, setIsVampire] = useState(false)
+    const [maxHealthSteal, setMaxHealthSteal] = useState(3);
+
     const [availableAbility, setAvailableAbility] = useState(true);
     const [lastGamblerEffect, setLastGamblerEffect] = useState(null);
     const [blacksmithDmg, setBlacksmishDmg] = useState(0)
@@ -290,6 +293,14 @@ const GamePage = () => {
             }, 300)
         }
 
+        const healthStealAnimation = async (value) => {
+            setHealthAnimationValue("+" + (value))
+            setHealthAnimation(HealthStealIcon)
+            setTimeout(() => {
+                setHealthAnimation(null)
+            }, 300)
+        }
+
         const damageAnimation = async (value, allDamage = false) => {
             setHealthAnimationValue(value * -1)
             if (allDamage) {
@@ -394,7 +405,7 @@ const GamePage = () => {
         };
 
         const warrior = () => {
-            handleNewAchievement(14)
+            handleNewAchievement('habilidad_guerrero')
             logsRef.current.push((logsRef.current.length + 1) + " - " + `Asustas a los enemigos en la sala.`)
             let actualRoom = [...room];
             let currentDungeon = [...dungeon];
@@ -674,6 +685,9 @@ const GamePage = () => {
                 setGold(prev => 50);
             } else if (char?.habilidad_personaje?.codigo === 'herrero') {
                 setBlacksmishDmg(1);
+            } else if (char?.habilidad_personaje?.codigo === 'vampiro') {
+                setIsVampire(true);
+                setMaxHealthSteal(10);
             }
         }, []);
 
@@ -752,6 +766,9 @@ const GamePage = () => {
                         setGold(prev => prev + Math.floor((prev / interest)));
                     }
                     newEnemys = await addEnemys()
+                    if(health <= (maxHealth / 4)){
+                        handleNewAchievement('al_limite')
+                    }
                     setShopAvailable(true)
                 } else {
                     setShopAvailable(false)
@@ -783,7 +800,7 @@ const GamePage = () => {
                 userExtraDmg.current += 10;
                 setLastGamblerEffect(`¡JACKTPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
                 logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ¡JACKTPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
-
+                handleNewAchievement('let_it_ride')
             }
             else if (roll === 1) {
                 setGold(0)
@@ -878,7 +895,7 @@ const GamePage = () => {
                     break;
                 case 'heal_roulete':
                     heal_roulete(true)
-                    handleNewAchievement(16)
+                    handleNewAchievement('gelatina')
                     break;
                 case 'progresive_heal':
                     progresiveHeal.current = effect?.value
@@ -966,7 +983,7 @@ const GamePage = () => {
             if (card?.especial) {
                 handleCardEffect(card)
             }
-            if (!healedRef.current && !antiheal.current) {
+            if (!healedRef.current && !antiheal.current && !isVampire) {
                 if (gluttony) {
                     currentHeal.current += 1;
                 }
@@ -1106,11 +1123,14 @@ const GamePage = () => {
 
                 // Robo de vida (Lifesteal)
 
-                if (!antiheal.current && healthSteal.current && card?.valor < weaponDmg.current) {
+                if (!antiheal.current && ((healthSteal.current || isVampire) && card?.valor < (weaponDmg.current + (isVampire ? userExtraDmg.current : 0)))) {
 
                     // Simplificación matemática exacta de tu lógica original
-                    const heal = Math.min(3, weaponDmg.current - card?.valor);
-                    healAnimation(heal);
+                    let heal = Math.min(maxHealthSteal, (weaponDmg.current + (isVampire ? userExtraDmg.current : 0)) - card?.valor);
+                    if (isVampire) {
+                        handleNewAchievement('chupacabras', heal);
+                    }
+                    healthStealAnimation(heal);
                     setHealth(prev => Math.min(maxHealth, prev + heal));
                 }
                 if (!antiheal.current && weaponHealthSteal.current) {
@@ -1126,6 +1146,13 @@ const GamePage = () => {
                 moveCardToDiscard([card]);
                 damageAnimation(finalDmg, true);
                 processDamageAndRevive(finalDmg);
+
+                if (!antiheal.current && isVampire && card?.valor < finalUserDmg) {
+                    let heal = Math.min(maxHealthSteal, (finalUserDmg) - card?.valor);
+                    handleNewAchievement('chupacabras', heal);
+                    healthStealAnimation(heal);
+                    setHealth(prev => Math.min(maxHealth, prev + heal));
+                }
             }
 
             // Mandar el monstruo a la zona de juego
@@ -1150,6 +1177,9 @@ const GamePage = () => {
 
         const blacksmith = async () => {
             const weaponValue = Math.floor(Math.random() * (14 - 2) + 2);
+            if (weaponValue > 10) {
+                handleNewAchievement('obra_mmaestra');
+            }
             const newWeapon = await getWeapon(weaponValue);
             handleWeapon(newWeapon);
             logsRef.current.push((logsRef.current.length + 1) + " - " + `Has forjado una nueva arma con valor ${weaponValue}.`)
@@ -1227,17 +1257,18 @@ const GamePage = () => {
                 healedLife.current += 5;
                 healAnimation(5);
                 setAvailableAbility(false);
-                handleNewAchievement(13)
+                handleNewAchievement('habilidad_paladin')
             },
-            elfo: () => { elf(); setAvailableAbility(false); handleNewAchievement(12) },
-            mago: () => { shuffleDeck(dungeon); setAvailableAbility(false); handleNewAchievement(11) },
+            elfo: () => { elf(); setAvailableAbility(false); handleNewAchievement('habilidad_elfo') },
+            mago: () => { shuffleDeck(dungeon); setAvailableAbility(false); handleNewAchievement('habilidad_mago') },
             apostador: () => {
                 gambler();
                 coinAnimation(-25);
                 setGold(prev => Math.max(0, prev - 25));
-                handleNewAchievement(10)
+                handleNewAchievement('habilidad_apostador')
             },
-            herrero: () => { blacksmith(); setAvailableAbility(false); handleNewAchievement(15) },
+            herrero: () => { blacksmith(); setAvailableAbility(false); handleNewAchievement('habilidad_herrero') },
+            vampiro: () => { setHealth(prev => prev - Math.floor(prev / 4)); userExtraDmg.current += 5; handleNewAchievement('habilidad_vampiro') },
         };
 
         const handleUseAbility = () => {
@@ -1419,6 +1450,13 @@ const GamePage = () => {
         }, [gameLoading, startNewGame]);
 
         useEffect(() => {
+            if (maxHealth >= 60 && character?.habilidad_personaje?.codigo === 'paladin') {
+                handleNewAchievement('muro_impenetrable');
+            } 
+        }, [maxHealth, character]);
+
+        // Manejo disponibilidad pasiva Guerrero
+        useEffect(() => {
             if (isWarrior && health <= (maxHealth / 2)) {
                 userDmgMultiplier.current = 1.5;
             } else {
@@ -1426,6 +1464,7 @@ const GamePage = () => {
             }
         }, [isWarrior, health, maxHealth]);
 
+        // Manejo disponibilidad habilidad Gambler
         useEffect(() => {
             if (sealTurns.current === 0) {
                 if (isGambler && gold >= 25) {
@@ -1435,6 +1474,17 @@ const GamePage = () => {
                 }
             }
         }, [gold, isGambler]);
+
+        // Manejo disponibilidad habilidad Vampiro
+        useEffect(() => {
+            if (sealTurns.current === 0) {
+                if (isVampire && health > 5) {
+                    setAvailableAbility(true);
+                } else {
+                    setAvailableAbility(false);
+                }
+            }
+        }, [health, isVampire]);
 
         useEffect(() => {
             if (expert.current && extraHealthExpert.current < 10) {
@@ -1693,7 +1743,7 @@ const GamePage = () => {
         }
 
         const extraDmgEffects = () => {
-            if (userDmgMultiplier != 1) {
+            if (userDmgMultiplier.current !== 1) {
                 return `${userExtraDmg.current + (weapon ? blacksmithDmg : 0) + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0)} y un mult de ${userDmgMultiplier.current}.`
             } else {
                 return userExtraDmg.current + (weapon ? blacksmithDmg : 0) + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0);

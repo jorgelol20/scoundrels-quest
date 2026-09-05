@@ -286,11 +286,11 @@ class UsuariosController extends Controller
     public function registrarLogro(Request $request)
     {
         $request->validate([
-            'logro_id' => 'required|integer|exists:logros,id',
+            'logro_codigo' => 'required|string|exists:logros,codigo',
             'incremento' => 'nullable|integer|min:1',
         ]);
 
-        $logro = Logros::findOrFail($request->logro_id);
+        $logro = Logros::where('codigo', $request->logro_codigo)->firstOrFail();
         $usuarioId = $request->user()->id;
 
         // Logro sin meta
