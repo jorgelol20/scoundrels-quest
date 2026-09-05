@@ -183,11 +183,18 @@ class Logros extends Seeder
                 'codigo' => 'al_limite'
             ],
             [
-                'nombre' => 'let_it_ride',
+                'nombre' => 'Let it Ride',
                 'descripcion' => 'Consigue el `jackpot` usando la habilidad de `El Apostador`.',
                 'icono' => '/storage/logros/',
                 'meta' => null,
                 'codigo' => 'let_it_ride'
+            ],
+            [
+                'nombre' => '¿Césped?',
+                'descripcion' => 'Gana una partida sin obtener ningún modificador.',
+                'icono' => '/storage/logros/',
+                'meta' => null,
+                'codigo' => 'cesped'
             ],
         ];
 
