@@ -4,14 +4,12 @@ import './BugForm.css';
 
 import Folder from '/images/folder.svg'
 import { useLocation } from 'react-router-dom';
-import { useUser } from '../../hooks/useUser.js';
 
 const TIPOS = [
     { value: 'visual', label: 'Visual' },
     { value: 'jugabilidad', label: 'Jugabilidad' },
     { value: 'rendimiento', label: 'Rendimiento' },
     { value: 'error', label: 'Error' },
-    { value: 'usuario', label: 'Usuario' },
     { value: 'otro', label: 'Otro' },
 ];
 
@@ -43,7 +41,7 @@ const detectarPlataforma = () => {
  * Si no es JSON válido (bugInfo null o formato inesperado), devuelve null.
  */
 const parseBugInfo = (bugInfo) => {
-    
+
     if (!bugInfo) return null;
     try {
         const parsed = JSON.parse(bugInfo);
@@ -53,11 +51,9 @@ const parseBugInfo = (bugInfo) => {
     }
 };
 
-const BugForm = ({ bugInfo, onClose }) => {
+const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
     const { newReporte } = useReportBugs();
 
-    const { searchUsuario } = useUser();
-    const [reportedUserInfo, setReportedUserInfo] = useState(null);
 
     const parsedBugInfo = useMemo(() => parseBugInfo(bugInfo), [bugInfo]);
 
@@ -72,10 +68,22 @@ const BugForm = ({ bugInfo, onClose }) => {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [detallesTrampas, setDetallesTrampas] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleTrampasChange = (e) => {
+        const detalles = e.target.value;
+        setDetallesTrampas(detalles);
+
+        const baseValue = 'El jugador ha hecho trampas';
+        setFormData(prev => ({
+            ...prev,
+            descripcion: detalles ? `${baseValue}: ${detalles}` : baseValue
+        }));
     };
 
     const handleFileChange = (e) => {
@@ -95,7 +103,7 @@ const BugForm = ({ bugInfo, onClose }) => {
             payload.append('plataforma', detectarPlataforma());
             // Se envía el JSON completo tal cual llegó, para conservar modificadores/personaje/logs
             if (bugInfo) payload.append('logs_partida', bugInfo)
-                else payload.append('logs_partida', JSON.stringify(reportedUserInfo));
+            else payload.append('logs_partida', JSON.stringify(reportedUserInfo));
             if (screenshot) payload.append('screenshot', screenshot);
 
             await newReporte(payload);
@@ -111,20 +119,11 @@ const BugForm = ({ bugInfo, onClose }) => {
         }
     };
 
-    const handleReportUser = async () => {
-        setFormData((prev) => ({ ...prev, ["tipo"]: "usuario" }));
-        const temp = location.pathname.split('/');
-        const user = temp[temp.length - 1]
-        const reportedUser = await searchUsuario(user);
-        setReportedUserInfo(reportedUser);
-        setFormData((prev) => ({ ...prev, ["descripcion"]: `El usuario '${reportedUser[0]['nick']}' inclumple la normativa de imagenes de avatar/banner.` }));
-    }
-
     useEffect(() => {
-        if (location.pathname.startsWith('/perfil/')) {
-            handleReportUser();
+        if (reportUser) {
+            setFormData((prev) => ({ ...prev, ['tipo']: 'usuario' }))
         }
-    }, [location])
+    }, [reportUser])
 
     if (success) {
         return (
@@ -136,7 +135,87 @@ const BugForm = ({ bugInfo, onClose }) => {
             </Fragment>
         );
     }
+    if (reportUser) {
 
+        return (
+            <Fragment>
+
+                <form className="bug-form" onSubmit={handleSubmit}>
+                    <h2>Reportar a {reportedUserInfo.nick}</h2>
+                    <div className="bug-form-field">
+                        <label htmlFor="descripcion">Motivo</label>
+                        <select
+                            id="descripcion"
+                            name="descripcion"
+                            value={formData.descripcion}
+                            onChange={handleChange}
+                        >
+                            <option value="">Selecciona una razón...</option>
+                            <option value="El jugador tiene un banner inapropiado">
+                                El jugador tiene un banner inapropiado
+                            </option>
+                            <option value="El jugador tiene un avatar inapropiado">
+                                El jugador tiene un avatar inapropiado
+                            </option>
+                            <option value="Tanto el avatar como el banner son inapropiados">
+                                Tanto el avatar como el banner son inapropiados
+                            </option>
+                            <option value="El jugador ha hecho trampas">
+                                El jugador ha hecho trampas
+                            </option>
+                            <option value="Otro">
+                                Otro
+                            </option>
+                        </select>
+
+                        {(formData.descripcion.startsWith('El jugador ha hecho trampas') || formData.descripcion.startsWith('Otro')) && (
+                            <textarea
+                                value={detallesTrampas}
+                                onChange={handleTrampasChange}
+                                placeholder="Indique las trampas"
+                                rows="4"
+                                style={{ marginTop: '10px', width: '100%' }}
+                            />
+                        )}
+                    </div>
+
+                    <div className="bug-form-field">
+                        <label htmlFor="screenshot">Captura de pantalla</label>
+                        <div className="custom-file-container">
+                            <label htmlFor="file-upload" className="file-button">
+                                <span className="icon"><img src={Folder} /></span>
+                                <span className="text">Seleccionar Archivo</span>
+                            </label>
+                            <input type="file" id="file-upload" onChange={handleFileChange} />
+                            <span id="file-name" className="file-status">{screenshot?.name}</span>
+                        </div>
+                    </div>
+
+
+                    {parsedBugInfo?.logs && (
+                        <div className="bug-form-field">
+                            <label htmlFor="logs_preview">Logs de la partida (adjuntos automáticamente)</label>
+                            <textarea
+                                id="logs_preview"
+                                value={parsedBugInfo.logs}
+                                rows={4}
+                                readOnly
+                            />
+                        </div>
+                    )}
+
+                    <div className="bug-form-actions">
+                        <button type="button" onClick={onClose} disabled={isSubmitting}>
+                            Cancelar
+                        </button>
+                        <button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Enviando...' : 'Enviar reporte'}
+                        </button>
+                    </div>
+                </form>
+            </Fragment>
+        )
+    }
     return (
         <Fragment>
             <form className="bug-form" onSubmit={handleSubmit}>
