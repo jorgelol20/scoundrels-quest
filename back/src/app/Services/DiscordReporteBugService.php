@@ -50,7 +50,7 @@ class DiscordReporteBugService
         return [
             'embeds' => [
                 [
-                    'title' => "🐛Nuevo Reporte: {$this->reporteBug->titulo}",
+                    'title' => "🐛Nuevo Reporte en Scoundrel's Quest: {$this->reporteBug->titulo}",
                     'description' => $this->reporteBug->descripcion,
                     'color' => $color,
                     'fields' => [
@@ -62,11 +62,6 @@ class DiscordReporteBugService
                         [
                             'name' => 'Severidad',
                             'value' => ucfirst($this->reporteBug->severidad ?? 'N/A'),
-                            'inline' => true
-                        ],
-                        [
-                            'name' => 'Plataforma',
-                            'value' => ucfirst($this->reporteBug->plataforma ?? 'N/A'),
                             'inline' => true
                         ],
                         [

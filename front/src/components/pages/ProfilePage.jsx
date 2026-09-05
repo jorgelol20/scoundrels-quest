@@ -5,18 +5,20 @@ import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { settingsContext } from '../../context/SettingsProvider.jsx';
 
 import Placeholder from '/images/placeholder.webp'
+import ReportUserIcon from '/images/report_user.svg'
 import './ProfilePage.css'
 import Banner from '../structure/Banner.jsx';
 import Loading from '../Loading.jsx';
 import Match from '../Match.jsx';
-import { filter } from 'lodash';
 import DeleteIcon from '/images/delete-icon.svg'
 import { useAchievements } from '../../hooks/useAchievements.js';
 import Achievement from '../Achievement.jsx';
+import { bugReportContext } from '../../context/BugReportProvider.jsx';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
     const { startButtonSound, setBannerImage } = useContext(settingsContext)
+    const {openBugReport} = useContext(bugReportContext);
 
     const { user, getUsuario, logout, isLoading, isError, error, update, deleteProfilePhoto, isDeletingProfilePhoto } = useUser();
     const { achievements } = useAchievements();
@@ -179,6 +181,13 @@ const ProfilePage = () => {
     return (
         <Fragment>
             <div style={{ display: "flex", justifyContent: 'center' }}>
+                <button 
+                className='report-user-button' 
+                title={`Reportar a ${userInfo?.nick}`}
+                onClick={()=>openBugReport(null,true,userInfo)}
+                >
+                    <img src={ReportUserIcon} alt="Reportar usuario"/>
+                </button>
                 <div className='user-background'>
                     <div className='userInfo'>
                         <div className='user-profile'>

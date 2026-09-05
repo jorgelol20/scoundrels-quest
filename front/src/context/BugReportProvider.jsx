@@ -17,6 +17,8 @@ const BugReportProvider = (props) => {
     // Estado del modal de reporte
     const [isOpen, setIsOpen] = useState(false);
     const [bugInfo, setBugInfo] = useState(null);
+    const [reportUser, setReportUser] = useState(false);
+    const [reportedUserInfo, setReportedUserInfo] = useState(null);
 
     // Estado de reportes recién enviados en esta sesión (para feedback tipo "reporte enviado")
     const [sentReports, setSentReports] = useState([]);
@@ -27,9 +29,11 @@ const BugReportProvider = (props) => {
      *
      * @param {{ logs?: string }} info
      */
-    const openBugReport = useCallback((info = null) => {
+    const openBugReport = useCallback((info = null, reportUser = false, reportedUserInfo = null) => {
         setBugInfo(info);
         setIsOpen(true);
+        setReportUser(reportUser)
+        setReportedUserInfo(reportedUserInfo)
     }, []);
 
     /**
@@ -92,6 +96,8 @@ const BugReportProvider = (props) => {
         isOpen,
         bugInfo,
         sentReports,
+        reportUser,
+        reportedUserInfo,
         useReportesList,
         openBugReport,
         closeBugReport,
@@ -106,7 +112,7 @@ const BugReportProvider = (props) => {
                 {props.children}
 
                 {isOpen && (
-                    <BugForm bugInfo={bugInfo} onClose={closeBugReport} />
+                    <BugForm bugInfo={bugInfo} onClose={closeBugReport} reportUser={reportUser} reportedUserInfo={reportedUserInfo}/>
                 )}
             </bugReportContext.Provider>
         </Fragment>
