@@ -806,7 +806,7 @@ const GamePage = () => {
                 userExtraDmg.current += 10;
                 setLastGamblerEffect(`¡JACKTPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
                 logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ¡JACKTPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
-                handleNewAchievement('let_it_ride')
+                handleNewAchievement('desafio_apostador')
             }
             else if (roll === 1) {
                 setGold(0)
@@ -1141,7 +1141,7 @@ const GamePage = () => {
                     // Simplificación matemática exacta de tu lógica original
                     let heal = Math.min(maxHealthSteal, (weaponDmg.current + (isVampire ? userExtraDmg.current : 0)) - card?.valor);
                     if (isVampire) {
-                        handleNewAchievement('chupacabras', heal);
+                        handleNewAchievement('desafio_vampiro', heal);
                     }
                     healedLife.current += heal;
                     healthStealAnimation(heal);
@@ -1164,7 +1164,7 @@ const GamePage = () => {
                 if (!antiheal.current && isVampire && card?.valor < finalUserDmg) {
                     let heal = Math.min(maxHealthSteal, (finalUserDmg) - card?.valor);
                     healedLife.current += heal;
-                    handleNewAchievement('chupacabras', heal);
+                    handleNewAchievement('desafio_vampiro', heal);
                     healthStealAnimation(heal);
                     setHealth(prev => Math.min(maxHealth, prev + heal));
                 }
@@ -1193,7 +1193,7 @@ const GamePage = () => {
         const blacksmith = async () => {
             const weaponValue = Math.floor(Math.random() * (14 - 2) + 2);
             if (weaponValue > 10) {
-                handleNewAchievement('obra_mmaestra');
+                handleNewAchievement('desafio_herrero');
             }
             const newWeapon = await getWeapon(weaponValue);
             handleWeapon(newWeapon);
@@ -1468,7 +1468,7 @@ const GamePage = () => {
 
         useEffect(() => {
             if (maxHealth >= 60 && character?.habilidad_personaje?.codigo === 'paladin') {
-                handleNewAchievement('muro_impenetrable');
+                handleNewAchievement('desafio_paladin');
             }
         }, [maxHealth, character]);
 
