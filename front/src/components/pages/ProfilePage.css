@@ -382,3 +382,18 @@
     filter: brightness(1.1);
     transition: 0.5s;
 }
+.report-user-button{
+    position: absolute;
+    top: 10%;
+    right: 2%;
+    width: 50px;
+    height: 50px;
+    background-color: var(--main-white);
+    border-radius: 10px;
+    img{
+        background: none;
+    }
+}
+.report-user-button:hover{
+    background-color: var(--main-red);
+}
