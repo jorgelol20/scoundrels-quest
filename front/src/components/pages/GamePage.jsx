@@ -1621,7 +1621,7 @@ const GamePage = () => {
 
         // Cuando el mazo base de la partida esté listo, se carga en el mazo de juego.
         useEffect(() => {
-            if (matchDeck && matchDeck.length > 0 && dungeon.length == 0 && room.length == 0) {
+            if (matchDeck && matchDeck.length > 0 && dungeon.length == 0 && room.length == 0 && !isScapingRef.current) {
                 startNewRound();
             }
         }, [matchDeck, dungeon, room]);
@@ -1696,7 +1696,7 @@ const GamePage = () => {
             return (
                 <Fragment>
                     <div>
-                        <SelectModifier rounds={rounds} setSelectModifier={setSelectModifier} />
+                        <SelectModifier rounds={rounds} setSelectModifier={setSelectModifier} setModifiersLoading={setModifiersLoading}/>
                     </div>
                 </Fragment>
             )
@@ -1823,10 +1823,12 @@ const GamePage = () => {
                             </div>
                             <div className="extra">
                                 <div className="game-modifiers">
-                                    {
+                                    {   
+                                        modifiers.length > 0 ?
                                         modifiers.map((modifierInfo) => (
                                             <Modifier key={crypto.randomUUID()} modifierInfo={modifierInfo} />
                                         ))
+                                        : <h1>Sin modificadores</h1>
                                     }
                                 </div>
                                 <div className="game-buttons">

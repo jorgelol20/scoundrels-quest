@@ -38,3 +38,7 @@
         margin-bottom: -15cqh;
     }
 }
+.skip-modifiers{
+    position: absolute;
+    top: 100px;
+}

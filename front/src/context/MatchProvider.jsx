@@ -245,6 +245,9 @@ const MatchProvider = (props) => {
         if (character && activeModifiers.length > 0) {
             await loadAchievements(victoria, rondas);
             const gameModifiers = activeModifiers.map((modifier) => modifier.id);
+            if(victoria && gameModifiers.length === 0){
+                handleNewAchievement('cesped');
+            }
             const payload = {
                 usuario_id: user_id,
                 personaje_id: character.id,
