@@ -158,21 +158,22 @@ const MatchProvider = (props) => {
     /**
      * 
      * @param {int} achievementId Id del logro
+     * @param {int} increment Incremento que tendrá el logro al ser actualizado 
+     * @returns 
      */
-    const handleNewAchievement = async (achievementId) => {
-        // 1. Safe lookup using optional chaining
+    const handleNewAchievement = async (achievementCode, increment = 1) => {
         const alreadyUnlocked = user?.logros?.some(
-            (logro) => logro.id === achievementId && logro.pivot.obtenido
+            (logro) => logro.codigo === achievementCode && logro.pivot.obtenido
         );
 
         if (alreadyUnlocked) return;
 
         try {
-            const isUnlocked = await newAchievement({ logro_id: achievementId, incremento: 1 });
+            const isUnlocked = await newAchievement({ logro_codigo: achievementCode, incremento: increment });
 
             if (isUnlocked) {
                 // 2. Lookup by ID instead of array index arithmetic
-                const achievementData = achievementList.find(a => a.id === achievementId);
+                const achievementData = achievementList.find(a => a.codigo === achievementCode);
 
                 if (achievementData) {
                     // 3. Removed unnecessary await from state updater
@@ -192,42 +193,39 @@ const MatchProvider = (props) => {
     const loadAchievements = async (victoria, round = 0) => {
         if (victoria) {
             //Logro victoria
-            await handleNewAchievement(3)
+            await handleNewAchievement('victoria')
             switch (character.id) {
                 case 1:
-                    //
-                    await handleNewAchievement(8)
+                    
+                    await handleNewAchievement('victoria_guerrero')
                     break;
                 case 2:
-                    //
-                    await handleNewAchievement(7)
+                    
+                    await handleNewAchievement('victoria_paladin')
                     break;
                 case 3:
-                    //
-                    await handleNewAchievement(6)
+                    await handleNewAchievement('victoria_elfo')
                     break;
                 case 4:
-                    //
-                    await handleNewAchievement(5)
+                    await handleNewAchievement('victoria_mago')
                     break;
                 case 5:
-                    //
-                    await handleNewAchievement(4)
+                    await handleNewAchievement('victoria_apostador')
                     break;
                 case 6:
-                    await handleNewAchievement(9)
+                    await handleNewAchievement('victoria_herrero')
                     break;
             }
         } else {
             // Logro derrota
-            await handleNewAchievement(2)
+            await handleNewAchievement('2_derrota')
         }
         // Logro ronda 20
         if (round >= 20) {
-            await handleNewAchievement(17)
+            await handleNewAchievement('ronda_20')
         }
         // Logro primera partida
-        await handleNewAchievement(1)
+        await handleNewAchievement('1_bienvenido')
     };
 
 

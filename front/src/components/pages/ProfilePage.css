@@ -397,3 +397,6 @@
 .report-user-button:hover{
     background-color: var(--main-red);
 }
+.profile-container{
+    padding-bottom: 10%;
+}

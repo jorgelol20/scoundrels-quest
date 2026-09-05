@@ -63,6 +63,13 @@ class Personajes extends Seeder
                 'activo' => false,
                 'habilidad_id' => 7
             ],
+            [
+                'id' => 8,
+                'nombre' => 'Vampiro',
+                'descripcion' => 'Caminante de la noche, sofisticado y culto, cuya compostura oculta a un depredador implacable. Se alimenta de la sangre de sus enemigos para revitalizarse y desatar la verdadera ferocidad que aguarda tras sus modales de caballero.',
+                'activo' => true,
+                'habilidad_id' => 8
+            ],
             
         ];
 
