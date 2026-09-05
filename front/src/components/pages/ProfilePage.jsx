@@ -180,7 +180,7 @@ const ProfilePage = () => {
     }
     return (
         <Fragment>
-            <div style={{ display: "flex", justifyContent: 'center' }}>
+            <div className='profile-container' style={{ display: "flex", justifyContent: 'center' }}>
                 <button 
                 className='report-user-button' 
                 title={`Reportar a ${userInfo?.nick}`}
@@ -244,11 +244,12 @@ const ProfilePage = () => {
                         <div className='achievements'>
                             <h1>Logros</h1>
                             <div className='user-achievements'>
-                                {userAchievements.map(achievement => <Achievement key={achievement.nombre} achievementInfo={achievement} />)}
+                                {console.log(userAchievements)}
+                                {userAchievements.sort((a, b) => a.codigo.localeCompare(b.codigo)).map(achievement => <Achievement key={achievement.nombre} achievementInfo={achievement} />)}
                             </div>
                         </div>
                     </div>
-                    {canEdit || user?.es_admin ?
+                    {canEdit || user?.es_admin && userInfo.reportes_bug.lenth > 0 ?
                         <div className='user-reports'>
                             <h1>Reportes de usuario</h1>
                             <div className='user-reports-list'>

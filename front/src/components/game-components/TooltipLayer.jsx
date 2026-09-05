@@ -76,7 +76,7 @@ const TooltipLayer = ({ tooltip, onTap }) => {
                         y={tooltip.turnos !== false ? 59 : 40}
                         fontSize={13}
                         fontStyle="bold"
-                        fill={tooltip.valor === 0 ? "#ffd54a" : tooltip.valor > 0 ? "#29973f" : tooltip.valor < 0 ? "#84142D" : "#ffd54a"}
+                        fill={tooltip.valor === 0 ? "#ffd54a" : tooltip.valor > 0 ? "#29973f" : tooltip.valor < 0 ? "#84142D" : "#29973f"}
                         fontFamily="Alagard"
                     />
                     : <></>

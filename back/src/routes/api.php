@@ -54,16 +54,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Controlador Usuarios.
     Route::apiResource('/usuarios', UsuarioApiController::class)->names('api.usuarios');
     Route::get('/usuarios/search/{search}', [UsuarioApiController::class, 'search'])->name('api.usuarios.search');
+
+    //Rutas logros
+    Route::post('/nuevo-logro', [UsuarioApiController::class, 'registrarLogro'])->name('api.usuarios.logro');
 });
 
 // Rutas de creación con limitante de 5 peticiones por minuto y autenticación por Sanctum
 Route::middleware(['auth:sanctum', 'throttle:5,1'])->group(function () {
     // Rutas de comentarios
     Route::post('/usuarios/comentario/', [UsuarioApiController::class, 'storeComentario'])->name('api.usuarios.comentario');
-
-    //Rutas logros
-    Route::post('/nuevo-logro', [UsuarioApiController::class, 'registrarLogro'])->name('api.usuarios.logro');
 });
+
+
 
 
 
@@ -99,22 +101,4 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 Route::middleware(['web'])->group(function () {
     Route::get('/auth/x/redirect', [AuthController::class, 'redirectToX']);
     Route::get('/auth/x/callback', [AuthController::class, 'handleXCallback']);
-
-
-    Route::get('/test-discord', function () {
-        $reporte = \App\Models\ReporteBug::first();
-
-        if (!$reporte) {
-            return response()->json(['error' => 'No hay reportes'], 404);
-        }
-
-        $service = new \App\Services\DiscordReporteBugService($reporte);
-        $result = $service->send();
-
-        return response()->json([
-            'success' => $result,
-            'reporte_id' => $reporte->id,
-            'message' => $result ? 'Enviado a Discord ✅' : 'Error al enviar ❌'
-        ]);
-    });
 });
