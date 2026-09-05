@@ -150,6 +150,8 @@ const GamePage = () => {
     const canScape = useRef(true);
     const [isVampire, setIsVampire] = useState(false)
     const [maxHealthSteal, setMaxHealthSteal] = useState(3);
+    const [isTaming, setIsTaming] = useState(false);
+    const [tameDamage, setTameDamage] = useState(0);
 
     const [availableAbility, setAvailableAbility] = useState(true);
     const [lastGamblerEffect, setLastGamblerEffect] = useState(null);
@@ -633,8 +635,8 @@ const GamePage = () => {
 
             if (antihealTurns.current > 0) {
                 antiheal.current = true;
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Turnos restantes de anticura: ${antihealTurns.current}.`)
                 antihealTurns.current -= 1;
+                logsRef.current.push((logsRef.current.length + 1) + " - " + `Turnos restantes de anticura: ${antihealTurns.current}.`)
             } else {
                 antiheal.current = false;
             }
@@ -688,7 +690,9 @@ const GamePage = () => {
             } else if (char?.habilidad_personaje?.codigo === 'vampiro') {
                 setIsVampire(true);
                 setMaxHealthSteal(10);
-            }
+            } else if(char?.habilidad_personaje?.codigo === 'domador'){
+                setTameDamage(1);
+            }   
         }, []);
 
         const restartFunction = (resetCharacter = false) => {
@@ -709,6 +713,7 @@ const GamePage = () => {
             setIsWizard(false);
             setIsGambler(false);
             setIsWarrior(false);
+            setIsVampire(false);
             setBlacksmishDmg(0)
             setMaxScapes(1);
             setLastGamblerEffect(null);
@@ -797,6 +802,7 @@ const GamePage = () => {
             if (roll === 100) {
                 setGold(prev => prev + 50);
                 setHealth(prev => Math.min(maxHealth, prev + 10));
+                healedLife.current += 10;
                 userExtraDmg.current += 10;
                 setLastGamblerEffect(`¡JACKTPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
                 logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ¡JACKTPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
@@ -832,6 +838,7 @@ const GamePage = () => {
                     damageAnimation(randomHeal)
                 } else {
                     healAnimation(randomHeal)
+                    healedLife.current += randomHeal;
                 }
                 setHealth(prev => Math.min(maxHealth, Math.max(0, prev + randomHeal)));
                 setLastGamblerEffect(`${randomHeal} de vida.`)
@@ -1016,6 +1023,7 @@ const GamePage = () => {
             const healAmount = tacticalChange.current;
             if (healAmount !== 0) {
                 healAnimation(healAmount);
+                healedLife.current += healAmount;
                 setHealth(prev => Math.min(maxHealth, prev + healAmount));
             }
 
@@ -1054,6 +1062,11 @@ const GamePage = () => {
             // Comprobación inicial de efectos en la carta 
             if (card?.especial) {
                 handleCardEffect(card);
+            }
+            if(isTaming){
+                setIsTaming(false);
+                handleWeapon(card);
+                return false;
             }
 
             // Cálculos base de combate y modificadores
@@ -1130,6 +1143,7 @@ const GamePage = () => {
                     if (isVampire) {
                         handleNewAchievement('chupacabras', heal);
                     }
+                    healedLife.current += heal;
                     healthStealAnimation(heal);
                     setHealth(prev => Math.min(maxHealth, prev + heal));
                 }
@@ -1142,13 +1156,14 @@ const GamePage = () => {
                 const finalUserDmg = Math.floor(((pentakill + extraSuitDmg + userExtraDmg.current + mma.current) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
                 finalDmg = Math.max(0, enemyBaseDmg - finalUserDmg);
                 isSlain = false;
-
+                
                 moveCardToDiscard([card]);
                 damageAnimation(finalDmg, true);
                 processDamageAndRevive(finalDmg);
 
                 if (!antiheal.current && isVampire && card?.valor < finalUserDmg) {
                     let heal = Math.min(maxHealthSteal, (finalUserDmg) - card?.valor);
+                    healedLife.current += heal;
                     handleNewAchievement('chupacabras', heal);
                     healthStealAnimation(heal);
                     setHealth(prev => Math.min(maxHealth, prev + heal));
@@ -1226,6 +1241,7 @@ const GamePage = () => {
                             logsRef.current.push(`${logsRef.current.length + 1} - Carroñero te da 1 de daño extra en la siguiente acción.`);
                         } else {
                             logsRef.current.push(`${logsRef.current.length + 1} - Carroñero te ha curado 1 de vida.`);
+                            healedLife.current += 1;
                             setHealth(prev => prev + 1)
                             healAnimation(1)
                         }
@@ -1269,6 +1285,7 @@ const GamePage = () => {
             },
             herrero: () => { blacksmith(); setAvailableAbility(false); handleNewAchievement('habilidad_herrero') },
             vampiro: () => { setHealth(prev => prev - Math.floor(prev / 4)); userExtraDmg.current += 5; handleNewAchievement('habilidad_vampiro') },
+            domador: () => { setIsTaming(true); setAvailableAbility(false); handleNewAchievement('habilidad_domador') },
         };
 
         const handleUseAbility = () => {

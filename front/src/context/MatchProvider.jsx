@@ -215,6 +215,15 @@ const MatchProvider = (props) => {
                 case 6:
                     await handleNewAchievement('victoria_herrero')
                     break;
+                case 7:
+                    await handleNewAchievement('victoria_cazarrecompensas')
+                    break;
+                case 8:
+                    await handleNewAchievement('victoria_vampiro')
+                    break;
+                case 9:
+                    await handleNewAchievement('victoria_domador')
+                    break;
             }
         } else {
             // Logro derrota
