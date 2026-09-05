@@ -94,6 +94,15 @@ class Habilidades extends Seeder
                 'coste_oro' => null,
                 'usos_por_ronda' => null,
             ],
+            [
+                'nombre' => 'Domesticación',
+                'descripcion' => 'El siguiente enemigo al que derrotes, se volverá tu arma. Cuando tengas un enemigo como arma, harás 1 más de daño y los efectos que este tenga se activarán cada vez que ataques.',
+                'icono' => '/storage/habilidades/Domesticacion.webp',
+                'codigo' => 'domador',
+                'efectos' => ['name' => 'tamer_dmg', 'value' => 1],
+                'coste_oro' => null,
+                'usos_por_ronda' => 1,
+            ],
         ];
 
         foreach ($habilidadesData as $data) {

@@ -215,6 +215,15 @@ const MatchProvider = (props) => {
                 case 6:
                     await handleNewAchievement('victoria_herrero')
                     break;
+                case 7:
+                    await handleNewAchievement('victoria_cazarrecompensas')
+                    break;
+                case 8:
+                    await handleNewAchievement('victoria_vampiro')
+                    break;
+                case 9:
+                    await handleNewAchievement('victoria_domador')
+                    break;
             }
         } else {
             // Logro derrota
@@ -245,6 +254,9 @@ const MatchProvider = (props) => {
         if (character && activeModifiers.length > 0) {
             await loadAchievements(victoria, rondas);
             const gameModifiers = activeModifiers.map((modifier) => modifier.id);
+            if(victoria && gameModifiers.length === 0){
+                handleNewAchievement('cesped');
+            }
             const payload = {
                 usuario_id: user_id,
                 personaje_id: character.id,

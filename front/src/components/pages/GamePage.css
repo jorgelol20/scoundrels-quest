@@ -112,6 +112,13 @@
     justify-content: start;
     align-items: start;
     flex-wrap: wrap;
+    h1{
+        text-align: center;
+        align-self: center;
+        justify-self: center;
+        margin-left: 15%;
+        font-size: 1em;
+    }
 }
 
 .game-buttons {

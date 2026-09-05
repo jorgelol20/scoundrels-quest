@@ -244,8 +244,7 @@ const ProfilePage = () => {
                         <div className='achievements'>
                             <h1>Logros</h1>
                             <div className='user-achievements'>
-                                {console.log(userAchievements)}
-                                {userAchievements.sort((a, b) => a.codigo.localeCompare(b.codigo)).map(achievement => <Achievement key={achievement.nombre} achievementInfo={achievement} />)}
+                                {userAchievements.length > 0 && userAchievements.sort((a, b) => a.codigo.localeCompare(b.codigo)).map(achievement => <Achievement key={achievement.nombre} achievementInfo={achievement} />)}
                             </div>
                         </div>
                     </div>

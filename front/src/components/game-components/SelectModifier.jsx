@@ -4,7 +4,7 @@ import { matchContext } from "../../context/MatchProvider.jsx";
 import Modifier from "../Modifier.jsx";
 import ShopMan from '/images/ShopMan.webp'
 
-const SelectModifier = ({ setSelectModifier, rounds }) => {
+const SelectModifier = ({ setSelectModifier, rounds, setModifiersLoading }) => {
     const { getRandomsModifier } = useContext(matchContext)
     const [modifiersList, setModifiersList] = useState([])
     useEffect(() => {
@@ -31,12 +31,18 @@ const SelectModifier = ({ setSelectModifier, rounds }) => {
                                 </div>
                                 <div style={{display:'flex'}}>
                                     <img src={ShopMan} alt="ShopMan" />
-                                    <button onClick={()=>{setSelectModifier(false)}}>Pues vale...</button>
+                                    <button onClick={()=>setSelectModifier(false)}>Pues vale...</button>
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
+                <button 
+                className="skip-modifiers"
+                onClick={() => {setSelectModifier(false);setModifiersLoading(false)}}
+                >
+                    Saltar
+                </button>
             </div>
         </Fragment>
     )

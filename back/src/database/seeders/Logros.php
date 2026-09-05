@@ -85,6 +85,13 @@ class Logros extends Seeder
                 'codigo' => 'victoria_vampiro'
             ],
             [
+                'nombre' => 'Como entrenar a tu monstruo',
+                'descripcion' => 'Gana tu primera partida con `El Domador`.',
+                'icono' => '/storage/logros/',
+                'meta' => null,
+                'codigo' => 'victoria_domador'
+            ],
+            [
                 'nombre' => 'Ludópata',
                 'descripcion' => 'Usa la habilidad de `El Apostador` 100 veces.',
                 'icono' => '/storage/logros/',
@@ -132,6 +139,13 @@ class Logros extends Seeder
                 'icono' => '/storage/logros/',
                 'meta' => 100,
                 'codigo' => 'habilidad_vampiro'
+            ],
+            [
+                'nombre' => 'Susurrador de bestias',
+                'descripcion' => 'Usa la habilidad de `El Domador` 100 veces.',
+                'icono' => '/storage/logros/',
+                'meta' => 100,
+                'codigo' => 'habilidad_domador'
             ],
             [
                 'nombre' => 'Textura gelatinosa',
@@ -183,11 +197,18 @@ class Logros extends Seeder
                 'codigo' => 'al_limite'
             ],
             [
-                'nombre' => 'let_it_ride',
+                'nombre' => 'Let it Ride',
                 'descripcion' => 'Consigue el `jackpot` usando la habilidad de `El Apostador`.',
                 'icono' => '/storage/logros/',
                 'meta' => null,
                 'codigo' => 'let_it_ride'
+            ],
+            [
+                'nombre' => '¿Césped?',
+                'descripcion' => 'Gana una partida sin obtener ningún modificador.',
+                'icono' => '/storage/logros/',
+                'meta' => null,
+                'codigo' => 'cesped'
             ],
         ];
 
