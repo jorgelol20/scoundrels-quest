@@ -690,9 +690,9 @@ const GamePage = () => {
             } else if (char?.habilidad_personaje?.codigo === 'vampiro') {
                 setIsVampire(true);
                 setMaxHealthSteal(10);
-            } else if(char?.habilidad_personaje?.codigo === 'domador'){
+            } else if (char?.habilidad_personaje?.codigo === 'domador') {
                 setTameDamage(1);
-            }   
+            }
         }, []);
 
         const restartFunction = (resetCharacter = false) => {
@@ -771,7 +771,7 @@ const GamePage = () => {
                         setGold(prev => prev + Math.floor((prev / interest)));
                     }
                     newEnemys = await addEnemys()
-                    if(health <= (maxHealth / 4)){
+                    if (health <= (maxHealth / 4)) {
                         handleNewAchievement('al_limite')
                     }
                     setShopAvailable(true)
@@ -790,7 +790,7 @@ const GamePage = () => {
 
                 shuffleDeck([...newEnemys, ...matchDeck]);
                 setDiscardPile([]);
-                if (!isGambler) {
+                if (!isGambler && !isVampire) {
                     setAvailableAbility(true)
                 }
             }
@@ -888,7 +888,7 @@ const GamePage = () => {
         const applyCardEffect = (effect, cardValue) => {
             switch (effect?.name) {
                 case 'restore_ability':
-                    if (!isGambler) {
+                    if (!isGambler && !isVampire) {
                         sealTurns.current = 0
                         setAvailableAbility(true);
                     }
@@ -1063,10 +1063,10 @@ const GamePage = () => {
             if (card?.especial) {
                 handleCardEffect(card);
             }
-            if(isTaming){
+            if (isTaming) {
                 setIsTaming(false);
                 handleWeapon(card);
-                return false;
+                return true;
             }
 
             // Cálculos base de combate y modificadores
@@ -1156,7 +1156,7 @@ const GamePage = () => {
                 const finalUserDmg = Math.floor(((pentakill + extraSuitDmg + userExtraDmg.current + mma.current) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
                 finalDmg = Math.max(0, enemyBaseDmg - finalUserDmg);
                 isSlain = false;
-                
+
                 moveCardToDiscard([card]);
                 damageAnimation(finalDmg, true);
                 processDamageAndRevive(finalDmg);
@@ -1251,7 +1251,7 @@ const GamePage = () => {
 
             if (validMove) {
                 startPlayCardSound();
-                if (character?.habilidad_personaje?.id === 1) {
+                if (character?.habilidad_personaje?.codigo === 'guerrero') {
                     setAvailableAbility(false);
                 }
                 canScape.current = false;
@@ -1469,7 +1469,7 @@ const GamePage = () => {
         useEffect(() => {
             if (maxHealth >= 60 && character?.habilidad_personaje?.codigo === 'paladin') {
                 handleNewAchievement('muro_impenetrable');
-            } 
+            }
         }, [maxHealth, character]);
 
         // Manejo disponibilidad pasiva Guerrero
@@ -1483,25 +1483,33 @@ const GamePage = () => {
 
         // Manejo disponibilidad habilidad Gambler
         useEffect(() => {
+            if (!isGambler) return;
+
             if (sealTurns.current === 0) {
-                if (isGambler && gold >= 25) {
+                // Solo actualiza si tiene suficiente oro
+                if (gold >= 25) {
                     setAvailableAbility(true);
-                } else if (isGambler && gold < 25) {
+                } else if (gold < 25 && availableAbility) {
+                    // Solo desactiva si ACTUALMENTE está activa
+                    // Esto evita sobrescribir cuando fue usada hace poco
                     setAvailableAbility(false);
                 }
             }
-        }, [gold, isGambler]);
+            // NO desactives si está sellada (sealTurns > 0) - el otro useEffect lo maneja
+        }, [gold, isGambler, sealTurns.current]);
 
         // Manejo disponibilidad habilidad Vampiro
         useEffect(() => {
+            if (!isVampire) return;
+
             if (sealTurns.current === 0) {
-                if (isVampire && health > 5) {
+                if (health > 5) {
                     setAvailableAbility(true);
-                } else {
+                } else if (health <= 5 && availableAbility) {
                     setAvailableAbility(false);
                 }
             }
-        }, [health, isVampire]);
+        }, [health, isVampire, sealTurns.current]);
 
         useEffect(() => {
             if (expert.current && extraHealthExpert.current < 10) {
@@ -1713,7 +1721,7 @@ const GamePage = () => {
             return (
                 <Fragment>
                     <div>
-                        <SelectModifier rounds={rounds} setSelectModifier={setSelectModifier} setModifiersLoading={setModifiersLoading}/>
+                        <SelectModifier rounds={rounds} setSelectModifier={setSelectModifier} setModifiersLoading={setModifiersLoading} />
                     </div>
                 </Fragment>
             )
@@ -1840,12 +1848,12 @@ const GamePage = () => {
                             </div>
                             <div className="extra">
                                 <div className="game-modifiers">
-                                    {   
+                                    {
                                         modifiers.length > 0 ?
-                                        modifiers.map((modifierInfo) => (
-                                            <Modifier key={crypto.randomUUID()} modifierInfo={modifierInfo} />
-                                        ))
-                                        : <h1>Sin modificadores</h1>
+                                            modifiers.map((modifierInfo) => (
+                                                <Modifier key={crypto.randomUUID()} modifierInfo={modifierInfo} />
+                                            ))
+                                            : <h1>Sin modificadores</h1>
                                     }
                                 </div>
                                 <div className="game-buttons">
