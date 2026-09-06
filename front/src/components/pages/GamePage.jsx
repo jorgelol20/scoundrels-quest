@@ -412,8 +412,8 @@ const GamePage = () => {
             const newEnemy = await addEnemysToMatchDeck(1, rounds);
             return newEnemy[0];
         }
-        const addEnemys = async (anti_exec) => {
-            const quantity = 5 + Math.floor((rounds - 1) * 2);
+        const addEnemys = async (anti_exec) => { 
+            const quantity = 5 + Math.floor((Math.floor((rounds - 1) % 2.5)) * 2);
             const newEnemys = await addEnemysToMatchDeck(quantity, rounds);
             return newEnemys;
         };

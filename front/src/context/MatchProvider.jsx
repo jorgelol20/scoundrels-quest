@@ -376,7 +376,7 @@ const MatchProvider = (props) => {
      * @returns 
      */
     const addRandomEnemysToMatchDeck = (quantity, round = 1) => {
-        const minPower = Math.min(9, Math.max(2, round));
+        const minPower = Math.min(10, Math.max(2, round));
         const maxPower = Math.min(round + 5, 14);
 
         const candidates = cards.filter(({ palo, valor }) =>
