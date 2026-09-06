@@ -9,7 +9,7 @@ const SelectModifier = ({ setSelectModifier, rounds, setModifiersLoading }) => {
     const [modifiersList, setModifiersList] = useState([])
     useEffect(() => {
         setModifiersList(getRandomsModifier(3, rounds))
-    }, [getRandomsModifier])
+    }, [getRandomsModifier, rounds])
     if (undefined in modifiersList) {
         return (<></>)
     }

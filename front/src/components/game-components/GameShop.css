@@ -22,11 +22,12 @@
     .dialog {
         overflow: visible;
         position: absolute;
-        top: 15%;
+        bottom: 65%;
         right: 5%;
         background-color: var(--main-white);
-        width: 10%;
-        height: 15%;
+        width: fit-content;
+        max-width: 15%;
+        height: fit-content;
         border: 5px solid var(--main-black);
         text-align: center;
         display: flex;
