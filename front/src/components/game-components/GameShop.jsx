@@ -30,6 +30,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
 
     const calculateWeaponPrice = (valor, multiplicador, id) => {
         const timesBought = boughtCards.get(id) ?? 0; // 0 = nunca comprada
+        console.log( timesBought)
         const base = valor <= 10
             ? valor * 5
             : ((valor - 4) * 5) + ((valor >= 14 ? 15 : 10) * (valor - 8));
@@ -37,7 +38,7 @@ const GameShop = ({ gold, setGold, setShopAvailable, health, maxHealth, formated
         const price = Math.max(10, base) * multiplicador;
 
         // Interés compuesto: cada compra multiplica el precio anterior por 1.25
-        const finalPrice = price * Math.pow(1.5, timesBought);
+        const finalPrice = price * Math.pow(1.25, timesBought);
 
         return Math.floor(finalPrice);
     };
@@ -73,7 +74,7 @@ useEffect(() => {
                 id: `mod-${index}`,
                 type: 'modifier',
                 data: mod,
-                price: 100 * (mod.nivel || 1) * multiplicador,
+                price: 75 * (mod.nivel || 1) * multiplicador,
                 isBought: false
             });
         }
@@ -86,7 +87,7 @@ useEffect(() => {
                 id: `wep-${valor}`,
                 type: 'card',
                 data: wep,
-                price: calculateWeaponPrice(wep?.valor, multiplicador),
+                price: calculateWeaponPrice(wep?.valor, multiplicador, wep?.id),
                 isBought: false
             });
         }
@@ -97,7 +98,7 @@ useEffect(() => {
                 id: `heal-${valor}`,
                 type: 'card',
                 data: heal,
-                price: calculateHealPrice(heal?.valor, multiplicador),
+                price: calculateHealPrice(heal?.valor, multiplicador, wep?.id),
                 isBought: false
             });
         }
