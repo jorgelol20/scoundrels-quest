@@ -1,4 +1,4 @@
-import { createContext, Fragment, useState, useEffect } from "react";
+import { createContext, Fragment, useState, useEffect, useCallback } from "react";
 import lodash from 'lodash';
 
 import { useCard } from "../hooks/useCard.js";
@@ -196,11 +196,11 @@ const MatchProvider = (props) => {
             await handleNewAchievement('victoria')
             switch (character.id) {
                 case 1:
-                    
+
                     await handleNewAchievement('victoria_guerrero')
                     break;
                 case 2:
-                    
+
                     await handleNewAchievement('victoria_paladin')
                     break;
                 case 3:
@@ -254,7 +254,7 @@ const MatchProvider = (props) => {
         if (character && activeModifiers.length > 0) {
             await loadAchievements(victoria, rondas);
             const gameModifiers = activeModifiers.map((modifier) => modifier.id);
-            if(victoria && gameModifiers.length === 0){
+            if (victoria && gameModifiers.length === 0) {
                 handleNewAchievement('cesped');
             }
             const payload = {
@@ -387,7 +387,7 @@ const MatchProvider = (props) => {
 
         const shuffled = lodash.shuffle(candidates);
         const selectedEnemys = shuffled.slice(0, quantity);
-        const effectProbability = Math.min(5 + (round - 1) * 5, 60);
+        const effectProbability = Math.min(5 + (round - 1) * 5, 100);
 
         const newEnemys = selectedEnemys.map((card) => {
             const roll = Math.random() * 100;
@@ -396,8 +396,10 @@ const MatchProvider = (props) => {
                 const randomEffectIndex = Math.floor(Math.random() * enemyCardEffectList.length);
                 appliedEffect = { ...enemyCardEffectList[randomEffectIndex] };
             }
+            const enemyDmg = round > 5 ? Math.floor(card.valor + (round / 5)) : card.valor;
             return {
                 ...card,
+                valor: enemyDmg,
                 x: 200,
                 y: 0,
                 key: generateCardKey(),
@@ -540,7 +542,7 @@ const MatchProvider = (props) => {
      * @param {int} round Ronda actual (Por defecto 1)
      * @returns 
      */
-    const getRandomsModifier = (quantity = 3, round = 1) => {
+    const getRandomsModifier = useCallback((quantity = 3, round = 1) => {
         const activeIds = new Set(activeModifiers.map(mod => mod.id));
         let pool = availableModifiers.filter(mod => !activeIds.has(mod.id) && mod.nivel > 0);
 
@@ -551,10 +553,10 @@ const MatchProvider = (props) => {
 
             // CÁLCULO DE PROBABILIDADES
             // Nivel 3: Empieza en 5% y sube 2.5% por ronda (Cap en 25%)
-            const probLvl3 = Math.min(5 + (round - 1) * 2.5, 25);
+            const probLvl3 = Math.min(0 + (round - 1) * 2.5, 25);
 
             // Nivel 2: Empieza en 10% y sube 5% por ronda (Cap en 40%)
-            const probLvl2 = Math.min(10 + (round - 1) * 5, 40);
+            const probLvl2 = Math.min(5 + (round - 1) * 5, 40);
 
             if (roll < probLvl3) return 3;
             if (roll < probLvl3 + probLvl2) return 2;
@@ -584,7 +586,7 @@ const MatchProvider = (props) => {
         }
 
         return selectedModifiers;
-    };
+    }, [activeModifiers, availableModifiers])
 
     const exports = {
         gameLoading,

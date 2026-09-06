@@ -170,7 +170,7 @@ class Modificadores extends Seeder
             ],
             [
                 'nombre' => 'Cambio táctico I',
-                'descripcion' => 'Cada vez que cambias de arma, te curas 1 de vida.',
+                'descripcion' => 'Cada vez que cambias de arma, te curas 1 de vida. Únicamente se aplica una vez por mano.',
                 'imagen' => "/storage/modificadores/CambioTactico1.webp",
                 'nivel' => 1,
                 'efectos' => json_encode([
@@ -179,7 +179,7 @@ class Modificadores extends Seeder
             ],
             [
                 'nombre' => 'Cambio táctico II',
-                'descripcion' => 'Cada vez que cambias de arma, te curas 2 de vida.',
+                'descripcion' => 'Cada vez que cambias de arma, te curas 2 de vida. Únicamente se aplica una vez por mano.',
                 'imagen' => "/storage/modificadores/CambioTactico2.webp",
                 'nivel' => 2,
                 'efectos' => json_encode([
@@ -188,7 +188,7 @@ class Modificadores extends Seeder
             ],
             [
                 'nombre' => 'Cambio táctico III',
-                'descripcion' => 'Cada vez que cambias de arma, te curas 3 de vida.',
+                'descripcion' => 'Cada vez que cambias de arma, te curas 3 de vida. Únicamente se aplica una vez por mano.',
                 'imagen' => "/storage/modificadores/CambioTactico3.webp",
                 'nivel' => 3,
                 'efectos' => json_encode([

@@ -95,6 +95,7 @@ const GamePage = () => {
     const [enemysDefeated, setEnemysDefeated] = useState(0);
     const totalCardsUsed = useRef(0);
     const logsRef = useRef([]);
+    const [isRestarting, setIsRestarting] = useState(false);
 
     // Timer
     const formatedTimeRef = useRef(null);
@@ -188,6 +189,7 @@ const GamePage = () => {
     const criticalPercentage = useRef(0);
     const [grandma, setGrandma] = useState(false);
     const tacticalChange = useRef(0);
+    const tacticalChangeUsed = useRef(false);
     const expert = useRef(false);
     const extraHealthExpert = useRef(0);
     const [scavenger, setScavenger] = useState(false);
@@ -536,6 +538,9 @@ const GamePage = () => {
             setThanatophobia(false)
             setThanatophobiaActivated(false);
             setInterest(0);
+            vitamineValue.current = 0;
+            refund.current = false;
+            setLifeward(false);
 
         }
         // =====================================================
@@ -706,6 +711,8 @@ const GamePage = () => {
         }, []);
 
         const restartFunction = (resetCharacter = false) => {
+            setBoughtCards(new Map());
+            setIsRestarting(true);
             setRounds(0);
             setGold(0);
             setHealth(20);
@@ -726,6 +733,14 @@ const GamePage = () => {
             setLastGamblerEffect(null);
             setContinuedGame(false);
             gameSavedRef.current = false;
+
+            // Reiniciar modificadores
+            cleanModifiers()
+
+            // Reiniciar efectos cartas
+            cleanHealEffects()
+            cleanWeaponEffects()
+            cleanEnemyEffects()
 
             // Limpieza de cartas y mazo
             setDungeon([]);
@@ -755,14 +770,7 @@ const GamePage = () => {
             if (formatedTimeRef.current) {
                 formatedTimeRef.current.textContent = `Tiempo: 00:00`;
             }
-            // Reiniciar modificadores
-            cleanModifiers()
-
-            // Reiniciar efectos cartas
-            cleanHealEffects()
-            cleanWeaponEffects()
-            cleanEnemyEffects()
-
+            setIsRestarting(false);
         }
 
         const startNewRound = async (continueMatch = false) => {
@@ -783,7 +791,7 @@ const GamePage = () => {
                     }
                     setShopAvailable(true)
                 } else {
-                    setShopAvailable(false)
+                    setShopAvailable(true)
                 }
                 if (continueMatch || gameOn || rounds == 0) {
                     setRounds(rounds + 1)
@@ -797,7 +805,9 @@ const GamePage = () => {
 
                 shuffleDeck([...newEnemys, ...matchDeck]);
                 setDiscardPile([]);
-                if (!isGambler && !isVampire) {
+                if (!isGambler) {
+                    setAvailableAbility(true)
+                } else if (isVampire && health > 5) {
                     setAvailableAbility(true)
                 }
             }
@@ -896,9 +906,10 @@ const GamePage = () => {
             switch (effect?.name) {
                 case 'restore_ability':
                     if (!isGambler && !isVampire) {
-                        sealTurns.current = 0
+
                         setAvailableAbility(true);
                     }
+                    sealTurns.current = 0
                     currentHeal.current = 0;
                     break
                 case 'heal':
@@ -1033,10 +1044,11 @@ const GamePage = () => {
 
             // 2. Curación por cambio táctico (evitamos operaciones si es 0)
             const healAmount = tacticalChange.current;
-            if (healAmount !== 0) {
+            if (healAmount !== 0 && !tacticalChangeUsed.current) {
                 healAnimation(healAmount);
                 healedLife.current += healAmount;
                 setHealth(prev => Math.min(maxHealth, prev + healAmount));
+                tacticalChangeUsed.current = true;
             }
 
             // 3. Gestión del arma y Logs
@@ -1094,7 +1106,6 @@ const GamePage = () => {
 
             // Helpers locales para evitar duplicar lógica recurrente
             const grantGoldReward = () => {
-                console.log(isGambler)
                 const baseGold = isGambler ? 10 : 5;
                 const earnedGold = Math.floor(baseGold * goldMultiplier.current);
                 setGold(prev => prev + earnedGold);
@@ -1514,15 +1525,16 @@ const GamePage = () => {
         // Manejo disponibilidad habilidad Vampiro
         useEffect(() => {
             if (!isVampire) return;
-
             if (sealTurns.current === 0) {
                 if (health > 5) {
                     setAvailableAbility(true);
-                } else if (health <= 5 && availableAbility) {
+                } else {
                     setAvailableAbility(false);
                 }
+            } else {
+                setAvailableAbility(false);
             }
-        }, [health, isVampire, sealTurns.current]);
+        }, [health, isVampire, sealTurns.current, rounds]);  // ← Añadir rounds aquí
 
         useEffect(() => {
             if (expert.current && extraHealthExpert.current < 10) {
@@ -1580,6 +1592,7 @@ const GamePage = () => {
                     if (isWarrior && sealTurns.current === 0) {
                         setAvailableAbility(true);
                     }
+                    tacticalChangeUsed.current = false;
                     healedRef.current = false;
                     actualScapes.current = maxScapes;
                     canScape.current = true;
@@ -1719,6 +1732,13 @@ const GamePage = () => {
         // CAPA 12 — RENDER
         // =====================================================
 
+        if (isRestarting && !gameOver) {
+            return (
+                <Fragment>
+                    <Loading />
+                </Fragment>
+            )
+        }
 
         if (!character && !gameOver) {
             return (
