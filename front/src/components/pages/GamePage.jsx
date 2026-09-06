@@ -707,7 +707,7 @@ const GamePage = () => {
 
         const restartFunction = (resetCharacter = false) => {
             setRounds(0);
-            setGold(1000);
+            setGold(0);
             setHealth(20);
             setMaxHealth(20)
             setAvailableAbility(true);
@@ -783,7 +783,7 @@ const GamePage = () => {
                     }
                     setShopAvailable(true)
                 } else {
-                    setShopAvailable(true)
+                    setShopAvailable(false)
                 }
                 if (continueMatch || gameOn || rounds == 0) {
                     setRounds(rounds + 1)
@@ -997,21 +997,26 @@ const GamePage = () => {
             if (card?.especial) {
                 handleCardEffect(card)
             }
-            if (!healedRef.current && !antiheal.current && !isVampire) {
-                if (gluttony) {
-                    currentHeal.current += 1;
-                }
-                if (currentHeal.current + health > maxHealth) {
-                    vitamineValue.current = Math.min(2, (currentHeal.current + health - maxHealth));
-                }
-                setHealth(prev => Math.max(0, Math.min(maxHealth, prev + currentHeal.current)));
-                healAnimation(currentHeal.current)
-                healedLife.current += currentHeal.current;
-                healedRef.current = true
-                logsRef.current.push((logsRef.current.length + 1) + " - " + card?.valor + " de " + card?.palo + " te ha curado " + currentHeal.current + " de daño.")
-            } else {
+            if (isVampire || healedRef.current || antiheal.current) {
                 logsRef.current.push((logsRef.current.length + 1) + " - " + card?.valor + " de " + card?.palo + " te no te ha curado nada.")
+                moveCardToDiscard([card])
+                setActualStreak(0);
+                return true;
             }
+
+            if (gluttony) {
+                currentHeal.current += 1;
+            }
+            if (currentHeal.current + health > maxHealth) {
+                vitamineValue.current = Math.min(2, (currentHeal.current + health - maxHealth));
+            }
+            setHealth(prev => Math.max(0, Math.min(maxHealth, prev + currentHeal.current)));
+            healAnimation(currentHeal.current)
+            healedLife.current += currentHeal.current;
+            healedRef.current = true
+            logsRef.current.push((logsRef.current.length + 1) + " - " + card?.valor + " de " + card?.palo + " te ha curado " + currentHeal.current + " de daño.")
+
+
             moveCardToDiscard([card])
             setActualStreak(0);
             return true;
@@ -1242,7 +1247,7 @@ const GamePage = () => {
                     userExtraDmg.current = 0;
                     dmgReduction.current = 0;
                 }
-                if (scavenger) {
+                if (scavenger && validMove) {
                     if (Math.floor(Math.random() * 100) <= 10) {
                         if (Math.floor(Math.random() * 100) > 50) {
                             userExtraDmg.current += 1;
