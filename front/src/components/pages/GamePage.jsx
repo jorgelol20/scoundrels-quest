@@ -113,6 +113,16 @@ const GamePage = () => {
     // Oro
     const [gold, setGold] = useState(0);
     const [shopAvailable, setShopAvailable] = useState(false);
+    const [boughtCards, setBoughtCards] = useState(new Map());
+
+    const setNewBought = (newBoughtCard) => {
+        if (boughtCards.has(newBoughtCard.id)) {
+            const currentTimes = boughtCards.get(newBoughtCard.id);
+            boughtCards.set(newBoughtCard.id, currentTimes + 1);
+        } else {
+            boughtCards.set(newBoughtCard.id, 1);
+        }
+    }
 
     // Cartas y zonas Konva
     const layerRef = useRef(null);
@@ -681,7 +691,7 @@ const GamePage = () => {
                 actualScapes.current = 2;
             } else if (char?.habilidad_personaje?.codigo === 'mago') {
                 setIsWizard(true);
-            } else if (char?.habilidad_personaje?.codigo === 'gambler') {
+            } else if (char?.habilidad_personaje?.codigo === 'apostador') {
                 setIsGambler(true);
                 coinAnimation(50);
                 setGold(prev => 50);
@@ -697,14 +707,11 @@ const GamePage = () => {
 
         const restartFunction = (resetCharacter = false) => {
             setRounds(0);
-            setGold(0);
+            setGold(1000);
             setHealth(20);
             setMaxHealth(20)
             setAvailableAbility(true);
             setShopAvailable(false)
-            setActualStreak(0);
-            setPentakillDmg(0)
-            setPentakillTargetNumber(0)
             canScape.current = true;
             healedLife.current = 0;
             totalEarnedGold.current = 0;
@@ -776,7 +783,7 @@ const GamePage = () => {
                     }
                     setShopAvailable(true)
                 } else {
-                    setShopAvailable(false)
+                    setShopAvailable(true)
                 }
                 if (continueMatch || gameOn || rounds == 0) {
                     setRounds(rounds + 1)
@@ -1082,6 +1089,7 @@ const GamePage = () => {
 
             // Helpers locales para evitar duplicar lógica recurrente
             const grantGoldReward = () => {
+                console.log(isGambler)
                 const baseGold = isGambler ? 10 : 5;
                 const earnedGold = Math.floor(baseGold * goldMultiplier.current);
                 setGold(prev => prev + earnedGold);
@@ -1747,6 +1755,8 @@ const GamePage = () => {
                         character={character}
                         round={rounds}
                         refund={refund.current}
+                        boughtCards={boughtCards}
+                        setNewBought={setNewBought}
                     />
                 </Fragment>
             )
