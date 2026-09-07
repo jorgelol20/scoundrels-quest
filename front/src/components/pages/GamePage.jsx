@@ -83,6 +83,7 @@ const GamePage = () => {
     const [gameWin, setGameWin] = useState(false);
     const [continuedGame, setContinuedGame] = useState(false);
     const [restart, setRestart] = useState(false);
+    const isMountedRef = useRef(true);
     // Nuevo: indica si el próximo reinicio debe forzar también la
     // reselección de personaje (lo activa el botón "CAMBIAR PERSONAJE").
     const [changeCharacter, setChangeCharacter] = useState(false);
@@ -160,6 +161,7 @@ const GamePage = () => {
     const isScapingRef = useRef(false);
     const canScape = useRef(true);
     const [isVampire, setIsVampire] = useState(false)
+    const vampireAbilityUsed = useRef(false);
     const [maxHealthSteal, setMaxHealthSteal] = useState(3);
     const [isTaming, setIsTaming] = useState(false);
     const [tameDamage, setTameDamage] = useState(0);
@@ -412,7 +414,7 @@ const GamePage = () => {
             const newEnemy = await addEnemysToMatchDeck(1, rounds);
             return newEnemy[0];
         }
-        const addEnemys = async (anti_exec) => { 
+        const addEnemys = async (anti_exec) => {
             const quantity = 5 + Math.floor(((rounds - 1) % 2.5) * 2);
             const newEnemys = await addEnemysToMatchDeck(quantity, rounds);
             return newEnemys;
@@ -541,6 +543,12 @@ const GamePage = () => {
             vitamineValue.current = 0;
             refund.current = false;
             setLifeward(false);
+            sealTurns.current = 0;
+            totalCardsUsed.current = 0;
+            healedLife.current = 0;
+            totalEarnedGold.current = 0;
+            antiheal.current = false;
+            goldMultiplier.current = 1;;
 
         }
         // =====================================================
@@ -728,6 +736,7 @@ const GamePage = () => {
             setIsGambler(false);
             setIsWarrior(false);
             setIsVampire(false);
+            vampireAbilityUsed.current = false;
             setBlacksmishDmg(0)
             setMaxScapes(1);
             setLastGamblerEffect(null);
@@ -1235,6 +1244,7 @@ const GamePage = () => {
                 validMove = handleHeal(card);
                 if (validMove) {
                     userExtraDmg.current = 0;
+                    vampireAbilityUsed.current = false;
                     userExtraDmg.current += vitamineValue.current;
                     vitamineValue.current = 0;
                     if (grandma) {
@@ -1247,6 +1257,7 @@ const GamePage = () => {
                 validMove = handleWeapon(card);
                 if (validMove) {
                     userExtraDmg.current = 0;
+                    vampireAbilityUsed.current = false;
                     dmgReduction.current = 0;
                 }
             }
@@ -1256,6 +1267,7 @@ const GamePage = () => {
                 if (validMove) {
                     setEnemysDefeated(prev => prev + 1);
                     userExtraDmg.current = 0;
+                    vampireAbilityUsed.current = false;
                     dmgReduction.current = 0;
                 }
                 if (scavenger && validMove) {
@@ -1308,7 +1320,7 @@ const GamePage = () => {
                 handleNewAchievement('habilidad_apostador')
             },
             herrero: () => { blacksmith(); setAvailableAbility(false); handleNewAchievement('habilidad_herrero') },
-            vampiro: () => { setHealth(prev => prev - Math.floor(prev / 4)); userExtraDmg.current += 5; handleNewAchievement('habilidad_vampiro') },
+            vampiro: () => { setHealth(prev => prev - Math.floor(prev / 4)); userExtraDmg.current += 5; handleNewAchievement('habilidad_vampiro'); vampireAbilityUsed.current = true; },
             domador: () => { setIsTaming(true); setAvailableAbility(false); handleNewAchievement('habilidad_domador') },
         };
 
@@ -1599,7 +1611,9 @@ const GamePage = () => {
                     setThanatophobiaActivated(false);
                 }
 
-                isScapingRef.current = false;
+                setTimeout(() => {
+                    isScapingRef.current = false;
+                }, 50);
             }
         }, [room.length, dungeon.length]);
 
@@ -1616,7 +1630,14 @@ const GamePage = () => {
 
         // Reinicio solicitado
         useEffect(() => {
-            if (restart) {
+            if (restart && isMountedRef.current) {
+                // Limpieza ANTES de reiniciar
+                cleanModifiers();
+                cleanHealEffects();
+                cleanWeaponEffects();
+                cleanEnemyEffects();
+
+                // DESPUÉS reiniciar
                 restartFunction(changeCharacter);
                 setChangeCharacter(false);
             }
@@ -1632,6 +1653,7 @@ const GamePage = () => {
             };
             window.addEventListener('resize', handleResize);
             return () => {
+                isMountedRef.current = false;
                 window.removeEventListener('resize', handleResize);
                 if (!gameSavedRef.current && userRef.current && characterRef.current && modifiersRef.current.length > 0) {
                     gameSavedRef.current = true;
@@ -1672,7 +1694,9 @@ const GamePage = () => {
 
         // Cuando el mazo base de la partida esté listo, se carga en el mazo de juego.
         useEffect(() => {
-            if (matchDeck && matchDeck.length > 0 && dungeon.length == 0 && room.length == 0 && !isScapingRef.current) {
+            const totalCardsAvailable = (dungeon?.length || 0) + (room?.length || 0);
+
+            if (matchDeck && matchDeck.length > 0 && totalCardsAvailable === 0 && !isScapingRef.current) {
                 startNewRound();
             }
         }, [matchDeck, dungeon, room]);
@@ -1727,6 +1751,25 @@ const GamePage = () => {
                 window.removeEventListener('popstate', handlePopState);
             };
         }, [navigate, user, gameWin, rounds, endGame]);
+
+        useEffect(() => {
+            return () => {
+                // Asegurar que TODO se limpia al salir
+                isMountedRef.current = false;
+                setGameOver(true);
+                setGameOn(false);
+                setRounds(0);
+                setHealth(0);
+                setMaxHealth(20);
+                setActiveModifiers([]);
+                setNewCharacter(null);
+                setNewDeck();
+                cleanModifiers();
+                cleanHealEffects();
+                cleanWeaponEffects();
+                cleanEnemyEffects();
+            };
+        }, []);
 
         // =====================================================
         // CAPA 12 — RENDER
@@ -1878,7 +1921,7 @@ const GamePage = () => {
                                 {isGambler ? lastGamblerEffect !== null ? <p className="gambler-text">Última apuesta: <br /> <span>{lastGamblerEffect}</span></p> : <p>Aún no has apostado.</p> : <></>}
                             </div>
                             <div className="game-character">
-                                <img className={`character-avatar ${isWarrior && health <= maxHealth / 2 ? 'passiveActive' : ''}`} style={{ borderColor: user.color }} src={character?.imagen} alt={character?.nombre} title={character?.nombre} />
+                                <img className={`character-avatar ${isWarrior && health <= maxHealth / 2 ? 'warrior' : ''} ${isTaming ? 'tamer' : ''} ${vampireAbilityUsed.current ? 'vampire' : ''}`} style={{ borderColor: user.color }} src={character?.imagen} alt={character?.nombre} title={character?.nombre} />
                                 <img className={availableAbility ? "character-ability available" : "character-ability"} src={character?.habilidad_personaje?.icono} style={null} />
                             </div>
                             <div className="extra">
