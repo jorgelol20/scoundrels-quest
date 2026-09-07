@@ -15,7 +15,7 @@ class Usuarios extends Authenticatable
 
     public $timestamps = true;
     protected $table = 'usuarios';
-    protected $fillable = ['nick', 'es_admin', 'is_tester', 'password', 'email', 'avatar','banner', 'color', 'ultima_vez_visto'];
+    protected $fillable = ['nick', 'es_admin', 'is_tester', 'password', 'email', 'avatar', 'banner', 'color', 'ultima_vez_visto'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -78,5 +78,17 @@ class Usuarios extends Authenticatable
     public function reportesBug()
     {
         return $this->hasMany(ReporteBug::class, 'usuario_id');
+    }
+
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificacion::class, 'usuario_id');
+    }
+
+    // Probablemente, innecesaria xD
+    public function notificacionesPendientes()
+    {
+        return $this->hasMany(Notificacion::class, 'usuario_id')
+            ->where('vista', false);
     }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartaController;
 use App\Http\Controllers\Api\ComentarioReporteBugController as ComentarioReporteBugApiController;
+use App\Http\Controllers\Api\NotificacionController as NotificacionApiController;
 use App\Http\Controllers\Api\ReporteBugController as ReporteBugApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Rutas logros
     Route::post('/nuevo-logro', [UsuarioApiController::class, 'registrarLogro'])->name('api.usuarios.logro');
+
+    Route::get('/notificaciones', [NotificacionApiController::class, 'index'])->name('api.notificaciones');
+    // Marcar vista una notificacion
+    Route::patch('/notificacion/{id}/vista', [NotificacionApiController::class, 'marcarVista'])
+        ->name('api.notificaciones.vista');
+
+    Route::patch('/notificaciones/vista', [NotificacionApiController::class, 'marcarTodasVistas'])
+        ->name('api.notificaciones.todas.vista');
+
 });
 
 // Rutas de creación con limitante de 5 peticiones por minuto y autenticación por Sanctum
@@ -64,13 +74,6 @@ Route::middleware(['auth:sanctum', 'throttle:5,1'])->group(function () {
     // Rutas de comentarios
     Route::post('/usuarios/comentario/', [UsuarioApiController::class, 'storeComentario'])->name('api.usuarios.comentario');
 });
-
-
-
-
-
-
-
 
 // Rankings
 Route::get('/ranking-victorias', [UsuarioApiController::class, 'ranking_victorias'])->name('api.usuarios.ranking-victorias');

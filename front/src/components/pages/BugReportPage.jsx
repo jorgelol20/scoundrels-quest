@@ -184,8 +184,7 @@ const BugReportPage = () => {
                                             </div>
                                         </div>
                                     )}
-                                    {console.log(logsData)}
-                                    {logsData[0].nick && (
+                                    {logsData[0] && (
                                         <div className="bug-report-tecnico-item full">
                                             <span className="label">Información del usuario</span>
                                             <div className="user-info">

@@ -74,6 +74,17 @@ export const useUser = () => {
         setActivePlayers(response.data.active_users || 0);
     };
 
+    const [notifications, setNotifications] = useState([]);
+
+    const getNotifications = async () => {
+        try {
+            const response = await api.get('/notificaciones');
+            setNotifications(response.data || []);
+        } catch (error) {
+            console.error("Error al obtener las notificaciones:", error.response?.data?.message);
+        }
+    };
+
 
     // Intervalo para obtener los jugadores activos
     useEffect(() => {
@@ -83,12 +94,15 @@ export const useUser = () => {
         }
         sendPing();
         getActivePlayers();
+        getNotifications();
         const pingInterval = setInterval(sendPing, 15000); // 30s
         const countInterval = setInterval(getActivePlayers, 30000); //45s
+        const notifInterval = setInterval(getNotifications, 5000) //15s
 
         return () => {
             clearInterval(pingInterval);
             clearInterval(countInterval);
+            clearInterval(notifInterval)
         };
     }, [user, isLoading, error]);
 
@@ -127,6 +141,8 @@ export const useUser = () => {
             throw error;
         }
     }
+
+
 
     /**
      * Manda una solicitud de registro.
@@ -253,6 +269,24 @@ export const useUser = () => {
         }
     }
 
+    const markAsSeen = async (id) => {
+        try {
+            await api.patch(`/notificacion/${id}/vista`);
+            await getNotificaciones();
+        } catch (error) {
+            console.error("Error al marcar como vista:", error.response?.data?.message);
+        }
+    };
+
+    const markAllAsSeen = async () => {
+        try {
+            await api.patch(`/notificaciones/vista`);
+            await getNotificaciones();
+        } catch (error) {
+            console.error("Error al marcar como vistas:", error.response?.data?.message);
+        }
+    };
+
 
 
     return {
@@ -283,6 +317,9 @@ export const useUser = () => {
         deleteProfilePhoto: deleteProfilePhoto.mutate,
         deleteProfilePhotoError: deleteProfilePhoto.error,
         isDeletingProfilePhoto: deleteProfilePhoto.isPending,
-        getUsers
+        getUsers,
+        notifications,
+        markAsSeen,
+        markAllAsSeen,
     };
 };

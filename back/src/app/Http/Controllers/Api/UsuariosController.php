@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notificacion;
 use App\Models\Partidas;
 use App\Models\Usuarios;
 use App\Http\Requests\Usuarios\StoreUsuarioRequest;
@@ -182,6 +183,13 @@ class UsuariosController extends Controller
             'updated_at' => now()
         ]);
 
+        (new NotificacionController())->store(
+            usuario_id: $partida->usuario_id,
+            tipo: 'comentario',
+            descripcion:"Tu partida (ID: $partida->id) ha recibido un nuevo comentario.",
+            partida_id: $partida->id,
+        );
+
         return response()->json(['message' => 'Comentario añadido con éxito']);
     }
 
@@ -219,6 +227,13 @@ class UsuariosController extends Controller
             return response()->json(['message' => 'El comentario no existe'], 404);
         }
         DB::table('comentarios_usuario_partida')->where('id', $id)->delete();
+        Notificacion::create([
+            'usuario_id'  => $existe->usuario_id,
+            'tipo'        => 'comentario',
+            'descripcion' => 'Se ha eliminado uno de tus comentarios.',
+            'reporte_id'  => null,
+            'partida_id'  => $existe->partida_id,
+        ]);
         return response()->json([
             'status' => 'success',
             'message' => 'Comentario eliminado correctamente'
