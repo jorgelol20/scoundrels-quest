@@ -4,6 +4,7 @@ import './BugForm.css';
 
 import Folder from '/images/folder.svg'
 import { useLocation } from 'react-router-dom';
+import ConfirmationModal from './ConfirmationModal.jsx';
 
 const TIPOS = [
     { value: 'visual', label: 'Visual' },
@@ -139,8 +140,15 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
 
         return (
             <Fragment>
-
                 <form className="bug-form" onSubmit={handleSubmit}>
+                    <div className='window-bar'>
+                        <button
+                            className='close-button'
+                            onClick={onClose}
+                        >
+                            X
+                        </button>
+                    </div>
                     <h2>Reportar a {reportedUserInfo.nick}</h2>
                     <div className="bug-form-field">
                         <label htmlFor="descripcion">Motivo</label>
@@ -218,80 +226,90 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
     }
     return (
         <Fragment>
-            <form className="bug-form" onSubmit={handleSubmit}>
-                <h2>Reportar</h2>
-
-                {parsedBugInfo?.personaje && (
-                    <p className="bug-form-context">
-                        Detectado durante la partida con <strong>{parsedBugInfo.personaje}</strong>
-                    </p>
-                )}
-
-                <div className="bug-form-field">
-                    <label htmlFor="tipo">Tipo<span>*</span></label>
-                    <select
-                        id="tipo"
-                        name="tipo"
-                        value={formData.tipo}
-                        onChange={handleChange}
-                    >
-                        {TIPOS.map((t) => (
-                            <option key={t.label} value={t.value}>{t.label}</option>
-                        ))}
-                    </select>
-                    {errors.tipo && <span className="bug-form-error">{errors.tipo[0]}</span>}
-                </div>
-
-                <div className="bug-form-field">
-                    <label htmlFor="descripcion">Descripción<span>* ({formData.descripcion.length}/2000)</span></label>
-                    <textarea
-                        id="descripcion"
-                        name="descripcion"
-                        value={formData.descripcion}
-                        onChange={handleChange}
-                        maxLength={2000}
-                        rows={5}
-                        placeholder="Describe qué ha pasado, qué esperabas que pasara y cómo reproducirlo"
-                        required
-
-                    />
-                    {errors.descripcion && <span className="bug-form-error">{errors.descripcion[0]}</span>}
-                </div>
-
-                <div className="bug-form-field">
-                    <label htmlFor="screenshot">Captura de pantalla</label>
-                    <div className="custom-file-container">
-                        <label htmlFor="file-upload" className="file-button">
-                            <span className="icon"><img src={Folder} /></span>
-                            <span className="text">Seleccionar Archivo</span>
-                        </label>
-                        <input type="file" id="file-upload" onChange={handleFileChange} />
-                        <span id="file-name" className="file-status">{screenshot?.name}</span>
+            <div className='bug-form-container'>
+                <div className='bug-form-window'>
+                    <div className='window-bar'>
+                        <button
+                            className='close-button'
+                            onClick={onClose}
+                        >
+                            X
+                        </button>
                     </div>
+                    <form className="bug-form" onSubmit={handleSubmit}>
+
+                        <h2>Reportar</h2>
+
+                        {parsedBugInfo?.personaje && (
+                            <p className="bug-form-context">
+                                Detectado durante la partida con <strong>{parsedBugInfo.personaje}</strong>
+                            </p>
+                        )}
+
+                        <div className="bug-form-field">
+                            <label htmlFor="tipo">Tipo<span>*</span></label>
+                            <select
+                                id="tipo"
+                                name="tipo"
+                                value={formData.tipo}
+                                onChange={handleChange}
+                            >
+                                {TIPOS.map((t) => (
+                                    <option key={t.label} value={t.value}>{t.label}</option>
+                                ))}
+                            </select>
+                            {errors.tipo && <span className="bug-form-error">{errors.tipo[0]}</span>}
+                        </div>
+
+                        <div className="bug-form-field">
+                            <label htmlFor="descripcion">Descripción<span>* ({formData.descripcion.length}/2000)</span></label>
+                            <textarea
+                                id="descripcion"
+                                name="descripcion"
+                                value={formData.descripcion}
+                                onChange={handleChange}
+                                maxLength={2000}
+                                rows={5}
+                                placeholder="Describe qué ha pasado, qué esperabas que pasara y cómo reproducirlo"
+                                required
+
+                            />
+                            {errors.descripcion && <span className="bug-form-error">{errors.descripcion[0]}</span>}
+                        </div>
+
+                        <div className="bug-form-field">
+                            <label htmlFor="screenshot">Captura de pantalla</label>
+                            <div className="custom-file-container">
+                                <label htmlFor="file-upload" className="file-button">
+                                    <span className="icon"><img src={Folder} /></span>
+                                    <span className="text">Seleccionar Archivo</span>
+                                </label>
+                                <input type="file" id="file-upload" onChange={handleFileChange} />
+                                <span id="file-name" className="file-status">{screenshot?.name}</span>
+                            </div>
+                        </div>
+
+
+                        {parsedBugInfo?.logs && (
+                            <div className="bug-form-field">
+                                <label htmlFor="logs_preview">Logs de la partida (adjuntos automáticamente)</label>
+                                <textarea
+                                    id="logs_preview"
+                                    value={parsedBugInfo.logs}
+                                    rows={4}
+                                    readOnly
+                                />
+                            </div>
+                        )}
+
+                        <div className="bug-form-actions">
+                            <button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? 'Enviando...' : 'Enviar reporte'}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-
-                {parsedBugInfo?.logs && (
-                    <div className="bug-form-field">
-                        <label htmlFor="logs_preview">Logs de la partida (adjuntos automáticamente)</label>
-                        <textarea
-                            id="logs_preview"
-                            value={parsedBugInfo.logs}
-                            rows={4}
-                            readOnly
-                        />
-                    </div>
-                )}
-
-                <div className="bug-form-actions">
-                    <button type="button" onClick={onClose} disabled={isSubmitting}>
-                        Cancelar
-                    </button>
-                    <button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Enviando...' : 'Enviar reporte'}
-                    </button>
-                </div>
-            </form>
+            </div>
         </Fragment>
     );
 };

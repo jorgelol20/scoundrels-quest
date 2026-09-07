@@ -216,3 +216,18 @@ option:active{
     color: var(--main-purple) !important;
     text-shadow: 0px 0px 0px white;
 }
+.window-bar{
+    border-bottom: 5px groove var(--main-color);
+    display: flex;
+    justify-content: end;
+    button{
+        border-radius: 0;
+        width: fit-content;
+        padding-left: 15px;
+        padding-right: 15px;
+        margin: 0;
+    }
+    .close-button:hover{
+        background-color: var(--main-red);
+    }
+}

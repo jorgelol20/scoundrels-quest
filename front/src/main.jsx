@@ -8,6 +8,7 @@ import App from './App.jsx'
 import MatchProvider from './context/MatchProvider.jsx'
 import BugReportProvider from './context/BugReportProvider.jsx'
 import { BrowserRouter } from 'react-router-dom'
+import NotificationProvider from './context/NotificationsProdiver.jsx'
 
 const queryClient = new QueryClient();
 
@@ -16,11 +17,13 @@ createRoot(document.getElementById('root')).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <SoundProvider>
-          <MatchProvider>
-            <BugReportProvider>
-              <App />
-            </BugReportProvider>
-          </MatchProvider>
+          <NotificationProvider>
+            <MatchProvider>
+              <BugReportProvider>
+                <App />
+              </BugReportProvider>
+            </MatchProvider>
+          </NotificationProvider>
         </SoundProvider>
       </BrowserRouter>
     </QueryClientProvider>

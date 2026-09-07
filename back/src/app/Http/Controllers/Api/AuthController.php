@@ -57,7 +57,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $usuario = $request->user();
-        $usuario = $usuario->load(['comentarios', 'tiene_jugadas', 'logros']);
+        $usuario = $usuario->load(['comentarios', 'tiene_jugadas', 'logros', 'notificaciones']);
         return response()->json($usuario);
     }
 

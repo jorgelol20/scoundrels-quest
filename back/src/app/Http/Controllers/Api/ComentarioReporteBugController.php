@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ReportesBugs\StoreComentarioReporteBugRequest;
 use App\Http\Requests\ReportesBugs\UpdateComentarioReporteBugRequest;
 use App\Models\ComentarioReporteBug;
+use App\Models\Notificacion;
 use App\Models\ReporteBug;
 use App\Notifications\ComentarioReporteBugNotificacionUsuario;
 use Illuminate\Http\Request;
@@ -36,6 +37,13 @@ class ComentarioReporteBugController extends Controller
                 ->notify(
                     new ComentarioReporteBugNotificacionUsuario($comentario)
                 );
+            Notificacion::create([
+                'usuario_id' => $usuarioReporte?->id,
+                'tipo' => 'reporte',
+                'descripcion' => 'Han puesto un comentario a tu reporte.',
+                'reporte_id' => $reporte_bug->id,
+                'partida_id' => null,
+            ]);
         }
 
         return response()->json($comentario->load('usuario'), 201);
