@@ -791,7 +791,7 @@ const GamePage = () => {
                     }
                     setShopAvailable(true)
                 } else {
-                    setShopAvailable(true)
+                    setShopAvailable(false)
                 }
                 if (continueMatch || gameOn || rounds == 0) {
                     setRounds(rounds + 1)

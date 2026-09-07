@@ -5,24 +5,29 @@ import Placeholder from './../../../public//images/placeholder.webp'
 import { NavLink, useLocation } from "react-router-dom";
 
 import { settingsContext } from "../../context/SettingsProvider.jsx";
+import { notificationContext } from "../../context/NotificationsProdiver.jsx";
 
 import FPSCounter from "./FPSCounter.jsx";
 import UserShow from "../UserShow.jsx";
 import ConfirmationModal from "./../modals/ConfirmationModal.jsx";
 import GameIcon from '/images/banner_menu.webp';
+import NotificationIcon from '/images/notification_icon.svg';
+
 
 const Navbar = () => {
     const { user, searchUsuario, isLoading, activePlayers } = useUser();
     const { showFPS } = useContext(settingsContext);
+    const { userNotifications, openNotificationModal } = useContext(notificationContext);
     const [userAvatar, setUserAvatar] = useState('');
     const [userColor, setUserColor] = useState('');
+    const [unseenNotifications, setUnseenNotifications] = useState(0);
 
     const [userList, setUserList] = useState([]);
     const [isActiveSearch, setIsActiveSearch] = useState(false);
 
     const [toPage, setToPage] = useState(null)
     const searchRef = useRef(null);
-    
+
     const location = useLocation()
 
 
@@ -71,6 +76,12 @@ const Navbar = () => {
         }
     };
 
+    useEffect(() => {
+        if (userNotifications != null) {
+            const newNotifications = userNotifications.filter((notification) => !notification.vista)
+            setUnseenNotifications(newNotifications.length)
+        }
+    }, [userNotifications])
     return (
         <Fragment>
             <nav>
@@ -127,6 +138,23 @@ const Navbar = () => {
                             Panel Admin
                         </NavLink>
                         : <></>}
+
+                    {
+                        user ?
+                            <button
+                                className="notification-icon"
+                                onClick={openNotificationModal}
+                            >
+                                {unseenNotifications > 0 ?
+                                    <div className="notification-quantity">
+                                        {unseenNotifications}
+                                    </div>
+                                    : <></>
+                                }
+                                <img src={NotificationIcon} alt="Notification Icon" title={`Tienes ${unseenNotifications} notificaciones pendientes.`} />
+                            </button>
+                            : <></>
+                    }
 
                     <NavLink
                         to="/"

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ReportesBugs\StoreReporteBugRequest;
 use App\Http\Requests\ReportesBugs\UpdateReporteBugRequest;
 use App\Http\Requests\ReportesBugs\UpdateEstadoReporteBugRequest;
+use App\Models\Notificacion;
 use App\Models\ReporteBug;
 use App\Notifications\CambioEstadoReporteBugNotificacionUsuario;
 use App\Notifications\NuevoReporteBugNotificacion;
@@ -54,7 +55,7 @@ class ReporteBugController extends Controller
     public function store(StoreReporteBugRequest $request)
     {
         $data = $request->validated();
-        $usuario= $request->user();
+        $usuario = $request->user();
 
         $data['usuario_id'] = $usuario->id;
 
@@ -70,6 +71,12 @@ class ReporteBugController extends Controller
         $reporte = ReporteBug::create($data);
         Notification::route('mail', 'soporte@scoundrels-quest.com')->notify(new NuevoReporteBugNotificacion($reporte));
         Notification::route('mail', $usuario->email)->notify(new NuevoReporteBugNotificacionUsuario($reporte));
+        (new NotificacionController)->store(
+            usuario_id: $usuario->id,
+            tipo: 'reporte',
+            descripcion: 'Se ha creado tu reporte correctamente.',
+            reporte_id: $reporte->id,
+        );
 
         $discordService = new DiscordReporteBugService($reporte);
         $discordService->send();
@@ -83,19 +90,31 @@ class ReporteBugController extends Controller
 
         $reporte_bug->update($data);
 
-        $usuario= $reporte_bug->usuario;
+        $usuario = $reporte_bug->usuario;
 
         Notification::route('mail', $usuario->email)->notify(new CambioEstadoReporteBugNotificacionUsuario($reporte_bug));
-
+        (new NotificacionController())->store(
+            usuario_id: $usuario->id,
+            tipo: 'reporte',
+            descripcion: 'Tu reporte ha sido modificado.',
+            reporte_id: $reporte_bug->id,
+        );
         return response()->json($reporte_bug->fresh());
     }
 
     public function updateEstado(UpdateEstadoReporteBugRequest $request, ReporteBug $reporte_bug)
     {
         $reporte_bug->update($request->validated());
-        
-        $usuario= $reporte_bug->usuario;
+
+        $usuario = $reporte_bug->usuario;
         Notification::route('mail', $usuario->email)->notify(new CambioEstadoReporteBugNotificacionUsuario($reporte_bug));
+
+        (new NotificacionController)->store(
+            usuario_id: $usuario->id,
+            tipo: 'reporte',
+            descripcion: 'El estado de tu reporte ha cambiado.',
+            reporte_id: $reporte_bug->id,
+        );
 
         return response()->json($reporte_bug->fresh());
     }
