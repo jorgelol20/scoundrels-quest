@@ -112,7 +112,8 @@
     justify-content: start;
     align-items: start;
     flex-wrap: wrap;
-    h1{
+
+    h1 {
         text-align: center;
         align-self: center;
         justify-self: center;
@@ -206,7 +207,7 @@
     z-index: 100;
     top: 10%;
     left: 30%;
-    
+
 
     button {
         margin-bottom: 1cqh;
@@ -453,8 +454,16 @@ span {
     }
 }
 
-.passiveActive {
+.warrior {
     animation: heartbeat 1s ease-in-out infinite;
+}
+
+.vampire {
+    animation: vampire 1s ease-in-out infinite;
+}
+
+.tamer {
+    animation: taming 1s ease-in-out infinite;
 }
 
 @keyframes heartbeat {
@@ -475,5 +484,30 @@ span {
 
     42% {
         box-shadow: 0 0 12px 6px var(--main-red), inset 0 0 8px 3px rgba(239, 68, 68, 0.25);
+    }
+}
+
+@keyframes taming {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px 5px var(--main-orange), inset 0 0 0 0 var(--main-orange);
+    }
+
+    50% {
+        box-shadow: 0 0 12px 6px var(--main-orange), inset 0 0 8px 3px var(--main-orange);
+    }
+}
+
+@keyframes vampire {
+
+    0%,100% {
+        /* Sombra roja inicial */
+        box-shadow: 0 0 15px 5px rgba(180, 0, 0, 0.7);
+    }
+
+    50% {
+        /* Sombra más intensa y expandida */
+        box-shadow: 0 0 35px 12px rgba(255, 0, 0, 0.9);
     }
 }
