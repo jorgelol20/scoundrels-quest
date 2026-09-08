@@ -140,87 +140,99 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
 
         return (
             <Fragment>
-                <form className="bug-form" onSubmit={handleSubmit}>
-                    <div className='window-bar'>
-                        <button
-                            className='close-button'
-                            onClick={onClose}
-                        >
-                            X
-                        </button>
-                    </div>
-                    <h2>Reportar a {reportedUserInfo.nick}</h2>
-                    <div className="bug-form-field">
-                        <label htmlFor="descripcion">Motivo</label>
-                        <select
-                            id="descripcion"
-                            name="descripcion"
-                            value={formData.descripcion}
-                            onChange={handleChange}
-                        >
-                            <option value="">Selecciona una razón...</option>
-                            <option value="El jugador tiene un banner inapropiado">
-                                El jugador tiene un banner inapropiado
-                            </option>
-                            <option value="El jugador tiene un avatar inapropiado">
-                                El jugador tiene un avatar inapropiado
-                            </option>
-                            <option value="Tanto el avatar como el banner son inapropiados">
-                                Tanto el avatar como el banner son inapropiados
-                            </option>
-                            <option value="El jugador ha hecho trampas">
-                                El jugador ha hecho trampas
-                            </option>
-                            <option value="Otro">
-                                Otro
-                            </option>
-                        </select>
-
-                        {(formData.descripcion.startsWith('El jugador ha hecho trampas') || formData.descripcion.startsWith('Otro')) && (
-                            <textarea
-                                value={detallesTrampas}
-                                onChange={handleTrampasChange}
-                                placeholder="Indique las trampas"
-                                rows="4"
-                                style={{ marginTop: '10px', width: '100%' }}
-                            />
-                        )}
-                    </div>
-
-                    <div className="bug-form-field">
-                        <label htmlFor="screenshot">Captura de pantalla</label>
-                        <div className="custom-file-container">
-                            <label htmlFor="file-upload" className="file-button">
-                                <span className="icon"><img src={Folder} /></span>
-                                <span className="text">Seleccionar Archivo</span>
-                            </label>
-                            <input type="file" id="file-upload" onChange={handleFileChange} />
-                            <span id="file-name" className="file-status">{screenshot?.name}</span>
+                <div className='bug-form-container'>
+                    <div className='bug-form-window'>
+                        <div className='window-bar'>
+                            <button
+                                className='close-button'
+                                onClick={onClose}
+                            >
+                                X
+                            </button>
                         </div>
+                        <form className="bug-form" onSubmit={handleSubmit}>
+                            <div className='window-bar'>
+                                <button
+                                    className='close-button'
+                                    onClick={onClose}
+                                >
+                                    X
+                                </button>
+                            </div>
+                            <h2>Reportar a {reportedUserInfo.nick}</h2>
+                            <div className="bug-form-field">
+                                <label htmlFor="descripcion">Motivo</label>
+                                <select
+                                    id="descripcion"
+                                    name="descripcion"
+                                    value={formData.descripcion}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">Selecciona una razón...</option>
+                                    <option value="El jugador tiene un banner inapropiado">
+                                        El jugador tiene un banner inapropiado
+                                    </option>
+                                    <option value="El jugador tiene un avatar inapropiado">
+                                        El jugador tiene un avatar inapropiado
+                                    </option>
+                                    <option value="Tanto el avatar como el banner son inapropiados">
+                                        Tanto el avatar como el banner son inapropiados
+                                    </option>
+                                    <option value="El jugador ha hecho trampas">
+                                        El jugador ha hecho trampas
+                                    </option>
+                                    <option value="Otro">
+                                        Otro
+                                    </option>
+                                </select>
+
+                                {(formData.descripcion.startsWith('El jugador ha hecho trampas') || formData.descripcion.startsWith('Otro')) && (
+                                    <textarea
+                                        value={detallesTrampas}
+                                        onChange={handleTrampasChange}
+                                        placeholder="Indique las trampas"
+                                        rows="4"
+                                        style={{ marginTop: '10px', width: '100%' }}
+                                    />
+                                )}
+                            </div>
+
+                            <div className="bug-form-field">
+                                <label htmlFor="screenshot">Captura de pantalla</label>
+                                <div className="custom-file-container">
+                                    <label htmlFor="file-upload" className="file-button">
+                                        <span className="icon"><img src={Folder} /></span>
+                                        <span className="text">Seleccionar Archivo</span>
+                                    </label>
+                                    <input type="file" id="file-upload" onChange={handleFileChange} />
+                                    <span id="file-name" className="file-status">{screenshot?.name}</span>
+                                </div>
+                            </div>
+
+
+                            {parsedBugInfo?.logs && (
+                                <div className="bug-form-field">
+                                    <label htmlFor="logs_preview">Logs de la partida (adjuntos automáticamente)</label>
+                                    <textarea
+                                        id="logs_preview"
+                                        value={parsedBugInfo.logs}
+                                        rows={4}
+                                        readOnly
+                                    />
+                                </div>
+                            )}
+
+                            <div className="bug-form-actions">
+                                <button type="button" onClick={onClose} disabled={isSubmitting}>
+                                    Cancelar
+                                </button>
+                                <button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Enviando...' : 'Enviar reporte'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-
-
-                    {parsedBugInfo?.logs && (
-                        <div className="bug-form-field">
-                            <label htmlFor="logs_preview">Logs de la partida (adjuntos automáticamente)</label>
-                            <textarea
-                                id="logs_preview"
-                                value={parsedBugInfo.logs}
-                                rows={4}
-                                readOnly
-                            />
-                        </div>
-                    )}
-
-                    <div className="bug-form-actions">
-                        <button type="button" onClick={onClose} disabled={isSubmitting}>
-                            Cancelar
-                        </button>
-                        <button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? 'Enviando...' : 'Enviar reporte'}
-                        </button>
-                    </div>
-                </form>
+                </div>
             </Fragment>
         )
     }
