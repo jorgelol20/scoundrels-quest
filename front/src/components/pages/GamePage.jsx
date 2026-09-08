@@ -795,7 +795,7 @@ const GamePage = () => {
                         setGold(prev => prev + Math.floor((prev / interest)));
                     }
                     newEnemys = await addEnemys()
-                    if (health <= (maxHealth / 4)) {
+                    if (health <= (maxHealth / 4) && health > 0) {
                         handleNewAchievement('al_limite')
                     }
                     setShopAvailable(true)
