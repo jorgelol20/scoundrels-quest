@@ -1630,7 +1630,10 @@ const GamePage = () => {
 
         // Reinicio solicitado
         useEffect(() => {
+            console.log("Voy a limpiar guarro")
+            console.log(isMountedRef.current)
             if (restart && isMountedRef.current) {
+                console.log("Limpiando puto guarro")
                 // Limpieza ANTES de reiniciar
                 cleanModifiers();
                 cleanHealEffects();
@@ -1640,6 +1643,7 @@ const GamePage = () => {
                 // DESPUÉS reiniciar
                 restartFunction(changeCharacter);
                 setChangeCharacter(false);
+                setRestart(false); // ✅ RESETEA EL ESTADO PARA PERMITIR REINICIO FUTURO
             }
         }, [restart]);
 
@@ -1882,7 +1886,10 @@ const GamePage = () => {
                                 }
 
                                 <button onClick={(event) => {
+                                    console.log("SI")
                                     setRestart(true)
+                                    console.log(restart)
+                                    console.log(isMountedRef.current)
                                 }}>
                                     {gameWin ? 'JUGAR OTRA' : 'REINTENTAR'}
                                 </button>
@@ -2102,12 +2109,27 @@ const GamePage = () => {
                                     <Rect width={DUNGEON_ZONE.width} height={DUNGEON_ZONE.height} fill="#0000006c" stroke="white" strokeWidth={2} cornerRadius={8} onMouseEnter={(e) => { setOverDungeonZone(true) }} onMouseLeave={(e) => { setOverDungeonZone(false) }} />
                                     <Text text="DUNGEON" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={20} x={35} />
 
-                                    {dungeon.toReversed().slice(0, 4).toReversed().map((card, i) => (
-                                        <Card
+                                    {dungeon.toReversed().slice(0, isWizard ? 8 : 4).toReversed().map((card, i) => {
+                                        let x, y;
+
+                                        if (isWizard) {
+                                            if (i < 4) {
+                                                x = 5;
+                                                y = 5 + (overDungeonZone ? i * 100 : 0);
+                                            } else {
+                                                const rowIndex = i - 4; // 0, 1, 2, 3
+                                                x = overDungeonZone ? 50 : 5; // izquierda
+                                                y = 5 + (overDungeonZone ? rowIndex * 100 : 0);
+                                            }
+                                        } else {
+                                            x = 7;
+                                            y = 5;
+                                        }
+                                        return <Card
                                             key={card?.key}
                                             cardInfo={card}
-                                            x={7}
-                                            y={isWizard ? 5 + (i * (overDungeonZone ? 100 : 0)) : 5}
+                                            x={x}
+                                            y={y}
                                             onDragEnd={() => { }}
                                             onClick={setOverDungeonZone}
                                             canBeClicked={canBeClicked}
@@ -2118,7 +2140,7 @@ const GamePage = () => {
                                             cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : SpadeIcon}
                                             defaultImage={defaultImage}
                                         />
-                                    ))}
+                                    })}
                                 </Group>
 
                                 {/* PILA DE DESCARTES */}

@@ -2,7 +2,6 @@
 
 namespace Illuminate\Database\Query;
 
-use BackedEnum;
 use Closure;
 use DatePeriod;
 use DateTimeInterface;
@@ -16,7 +15,6 @@ use Illuminate\Database\Concerns\ExplainsQueries;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\Query\Grammars\Grammar;
 use Illuminate\Database\Query\Processors\Processor;
 use Illuminate\Pagination\Paginator;
@@ -24,6 +22,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
+use Illuminate\Support\Stringable;
 use Illuminate\Support\Traits\ForwardsCalls;
 use Illuminate\Support\Traits\Macroable;
 use InvalidArgumentException;
@@ -495,13 +494,15 @@ class Builder implements BuilderContract
      * @param  \Illuminate\Support\Collection<int, float>|\Illuminate\Contracts\Support\Arrayable|array<int, float>|string  $vector
      * @param  string|null  $as
      * @return $this
+     *
+     * @throws \JsonException
      */
     public function selectVectorDistance($column, $vector, $as = null)
     {
         $this->ensureConnectionSupportsVectors();
 
         if (is_string($vector)) {
-            $vector = Str::of($vector)->toEmbeddings(cache: true);
+            $vector = (new Stringable($vector))->toEmbeddings(cache: true);
         }
 
         $this->addBinding(
@@ -517,7 +518,7 @@ class Builder implements BuilderContract
         $as = $this->getGrammar()->wrap($as ?? $column.'_distance');
 
         return $this->addSelect(
-            new Expression("({$this->getGrammar()->wrap($column)} <=> ?) as {$as}")
+            new Expression("{$this->getGrammar()->compileVectorDistanceExpression($column)} as {$as}")
         );
     }
 
@@ -1220,7 +1221,7 @@ class Builder implements BuilderContract
     public function whereVectorSimilarTo($column, $vector, $minSimilarity = 0.6, $order = true)
     {
         if (is_string($vector)) {
-            $vector = Str::of($vector)->toEmbeddings(cache: true);
+            $vector = (new Stringable($vector))->toEmbeddings(cache: true);
         }
 
         $this->whereVectorDistanceLessThan($column, $vector, 1 - $minSimilarity);
@@ -1240,17 +1241,19 @@ class Builder implements BuilderContract
      * @param  float  $maxDistance
      * @param  string  $boolean
      * @return $this
+     *
+     * @throws \JsonException
      */
     public function whereVectorDistanceLessThan($column, $vector, $maxDistance, $boolean = 'and')
     {
         $this->ensureConnectionSupportsVectors();
 
         if (is_string($vector)) {
-            $vector = Str::of($vector)->toEmbeddings(cache: true);
+            $vector = (new Stringable($vector))->toEmbeddings(cache: true);
         }
 
         return $this->whereRaw(
-            "({$this->getGrammar()->wrap($column)} <=> ?) <= ?",
+            "{$this->getGrammar()->compileVectorDistanceExpression($column)} <= ?",
             [
                 json_encode(
                     $vector instanceof Arrayable
@@ -1304,6 +1307,63 @@ class Builder implements BuilderContract
     public function orWhereRaw($sql, $bindings = [])
     {
         return $this->whereRaw($sql, $bindings, 'or');
+    }
+
+    /**
+     * Add a "where binary" clause to the query.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
+     * @param  string  $value
+     * @param  string  $boolean
+     * @param  bool  $not
+     * @return $this
+     */
+    public function whereBinary($column, $value, $boolean = 'and', $not = false)
+    {
+        $type = 'Binary';
+
+        $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+
+        $this->addBinding($value);
+
+        return $this;
+    }
+
+    /**
+     * Add an "or where binary" clause to the query.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
+     * @param  string  $value
+     * @return $this
+     */
+    public function orWhereBinary($column, $value)
+    {
+        return $this->whereBinary($column, $value, 'or');
+    }
+
+    /**
+     * Add a "where not binary" clause to the query.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
+     * @param  string  $value
+     * @param  string  $boolean
+     * @return $this
+     */
+    public function whereNotBinary($column, $value, $boolean = 'and')
+    {
+        return $this->whereBinary($column, $value, $boolean, true);
+    }
+
+    /**
+     * Add an "or where not binary" clause to the query.
+     *
+     * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
+     * @param  string  $value
+     * @return $this
+     */
+    public function orWhereNotBinary($column, $value)
+    {
+        return $this->whereNotBinary($column, $value, 'or');
     }
 
     /**
@@ -1508,7 +1568,7 @@ class Builder implements BuilderContract
         $values = Arr::flatten($values);
 
         foreach ($values as &$value) {
-            $value = (int) ($value instanceof BackedEnum ? $value->value : $value);
+            $value = (int) enum_value($value);
         }
 
         $this->wheres[] = ['type' => $type, 'column' => $column, 'values' => $values, 'boolean' => $boolean];
@@ -3035,13 +3095,15 @@ class Builder implements BuilderContract
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
      * @param  \Illuminate\Support\Collection<int, float>|\Illuminate\Contracts\Support\Arrayable|array<int, float>  $vector
      * @return $this
+     *
+     * @throws \JsonException
      */
     public function orderByVectorDistance($column, $vector)
     {
         $this->ensureConnectionSupportsVectors();
 
         if (is_string($vector)) {
-            $vector = Str::of($vector)->toEmbeddings(cache: true);
+            $vector = (new Stringable($vector))->toEmbeddings(cache: true);
         }
 
         $this->addBinding(
@@ -3055,7 +3117,7 @@ class Builder implements BuilderContract
         );
 
         $this->{$this->unions ? 'unionOrders' : 'orders'}[] = [
-            'column' => new Expression("({$this->getGrammar()->wrap($column)} <=> ?)"),
+            'column' => new Expression($this->getGrammar()->compileVectorDistanceExpression($column)),
             'direction' => 'asc',
         ];
 
@@ -3077,7 +3139,7 @@ class Builder implements BuilderContract
      * Add an "order by" clause to order results by a given sequence of values.
      *
      * @param  \Illuminate\Contracts\Database\Query\Expression|string  $column
-     * @param  \Illuminate\Contracts\Support\Arrayable|array  $values
+     * @param  \Illuminate\Contracts\Support\Arrayable|array<\UnitEnum|string|int|float|bool>  $values
      * @return $this
      */
     public function inOrderOf($column, $values)
@@ -3086,7 +3148,7 @@ class Builder implements BuilderContract
             $values = $values->toArray();
         }
 
-        $values = array_values($values);
+        $values = array_map(enum_value(...), array_values($values));
 
         if (empty($values)) {
             return $this;
@@ -4769,8 +4831,8 @@ class Builder implements BuilderContract
      */
     protected function ensureConnectionSupportsVectors()
     {
-        if (! $this->connection instanceof PostgresConnection) {
-            throw new RuntimeException('Vector distance queries are only supported by Postgres.');
+        if (! $this->getGrammar()->supportsVectorDistance()) {
+            throw new RuntimeException('Vector distance queries are only supported by Postgres and MariaDB.');
         }
     }
 
