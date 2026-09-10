@@ -1123,18 +1123,16 @@ const GamePage = () => {
             };
 
             const processDamageAndRevive = (dmg) => {
-                if (health - dmg <= 0 && revive.current || lifeward) {
+                if (health - dmg <= 0 && revive.current) {
                     if (reviveHealth?.current !== 0) {
                         setHealth(reviveHealth?.current);
-                    } else {
-                        setHealth(1);
-                    }
-                    if (lifeward) {
-                        setLifeward(false)
-                    } else {
                         revive.current = false;
-                        reviveHealth.current = 0;
+                        reviveHealth.current = 0
                     }
+                    logsRef.current.push(`${logsRef.current.length + 1} - Tu ángel guardián te ha salvado la vida.`);
+                } else if (lifeward && health - dmg <= 0) {
+                    setLifeward(false)
+                    setHealth(1);
                     logsRef.current.push(`${logsRef.current.length + 1} - Tu ángel guardián te ha salvado la vida.`);
                 } else {
                     setHealth(prev => Math.max(0, prev - dmg));
@@ -1630,10 +1628,7 @@ const GamePage = () => {
 
         // Reinicio solicitado
         useEffect(() => {
-            console.log("Voy a limpiar guarro")
-            console.log(isMountedRef.current)
-            if (restart && isMountedRef.current) {
-                console.log("Limpiando puto guarro")
+            if (restart) {
                 // Limpieza ANTES de reiniciar
                 cleanModifiers();
                 cleanHealEffects();
@@ -1646,6 +1641,12 @@ const GamePage = () => {
                 setRestart(false); // ✅ RESETEA EL ESTADO PARA PERMITIR REINICIO FUTURO
             }
         }, [restart]);
+
+        useEffect(() => {
+            if (!isMountedRef.current) {
+                setRestart(true);
+            }
+        }, [isMountedRef])
 
         // Layout / resize
         useEffect(() => {
@@ -1888,8 +1889,6 @@ const GamePage = () => {
                                 <button onClick={(event) => {
                                     console.log("SI")
                                     setRestart(true)
-                                    console.log(restart)
-                                    console.log(isMountedRef.current)
                                 }}>
                                     {gameWin ? 'JUGAR OTRA' : 'REINTENTAR'}
                                 </button>

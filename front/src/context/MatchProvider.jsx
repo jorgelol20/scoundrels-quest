@@ -251,7 +251,7 @@ const MatchProvider = (props) => {
      * @returns 
      */
     const endGame = async (user_id, tiempo, victoria, rondas, earnedGold, healedLife, enemysDefeated) => {
-        if (character && activeModifiers.length > 0) {
+        if (character) {
             await loadAchievements(victoria, rondas);
             const gameModifiers = activeModifiers.map((modifier) => modifier.id);
             if (victoria && gameModifiers.length === 0) {
