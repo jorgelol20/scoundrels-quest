@@ -29,6 +29,10 @@ class Cartas extends Seeder
             '13' => 'Rey',
             '14' => 'As'
         ];
+        
+        $fecha = (int) date('n');
+        $evento = $fecha === 10 ? 'halloween/':'';
+        $evento = $fecha === 12 ? 'navidad/':$evento;
 
         foreach ($palos as $palo) {
             foreach ($valores as $num => $nombre) {
@@ -55,13 +59,15 @@ class Cartas extends Seeder
                     $efectos = json_encode($arrayEfectos);
                 }
 
+                $eventoCarta = $palo === 'Trebol' || $palo === 'Pica' ? $evento : '';
+
                 ModelCarta::updateOrCreate(
                     [
                         'palo' => $palo,
                         'valor' => $num,
                     ],
                     [
-                        'imagen' => config('app.backend_url') . "/storage/cartas/{$nombre}{$palo}.webp",
+                        'imagen' => config('app.backend_url') . "/storage/cartas/{$eventoCarta}{$nombre}{$palo}.webp",
                         'activa' => true,
                         'especial' => $esEspecial,
                         'efectos' => $efectos,

@@ -1128,7 +1128,10 @@ const GamePage = () => {
             if (isTaming) {
                 setIsTaming(false);
                 handleWeapon(card);
+                setTameDamage(1);
                 return true;
+            }else{
+                setTameDamage(0);
             }
 
             // Cálculos base de combate y modificadores
@@ -1187,7 +1190,7 @@ const GamePage = () => {
             } else if (canUseWeapon) {
 
                 // --- ATAQUE CON ARMA ---
-                const finalUserDmg = Math.floor(((weaponDmg.current + extraSuitDmg + userExtraDmg.current + userPermanentExtraDmg.current + blacksmithDmg) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
+                const finalUserDmg = Math.floor(((weaponDmg.current + extraSuitDmg + tameDamage + userExtraDmg.current + userPermanentExtraDmg.current + blacksmithDmg) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
                 finalDmg = Math.max(0, (enemyBaseDmg - pentakill) - finalUserDmg);
                 isSlain = true;
                 damageAnimation(finalDmg);
@@ -1974,9 +1977,9 @@ const GamePage = () => {
 
         const extraDmgEffects = () => {
             if (userDmgMultiplier.current !== 1) {
-                return `${userExtraDmg.current + (weapon ? blacksmithDmg : 0) + userPermanentExtraDmg.current + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0)} y un mult de ${userDmgMultiplier.current}.`
+                return `${userExtraDmg.current + (weapon ? blacksmithDmg : 0) + tameDamage + userPermanentExtraDmg.current + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0)} y un mult de ${userDmgMultiplier.current}.`
             } else {
-                return userExtraDmg.current + (weapon ? blacksmithDmg : 0) + userPermanentExtraDmg.current + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0);
+                return userExtraDmg.current + (weapon ? blacksmithDmg : 0) + tameDamage + userPermanentExtraDmg.current + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0);
             }
         }
 
