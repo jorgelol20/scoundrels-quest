@@ -251,7 +251,7 @@ const MatchProvider = (props) => {
      * @returns 
      */
     const endGame = async (user_id, tiempo, victoria, rondas, earnedGold, healedLife, enemysDefeated) => {
-        if (character && activeModifiers.length > 0) {
+        if (character) {
             await loadAchievements(victoria, rondas);
             const gameModifiers = activeModifiers.map((modifier) => modifier.id);
             if (victoria && gameModifiers.length === 0) {
@@ -330,6 +330,14 @@ const MatchProvider = (props) => {
     const setNewDeck = () => {
         setMatchDeck(baseDeck);
     };
+
+    /**
+     * 
+     * @returns 
+     */
+    const setNewMatchDeck = (newMatchDeck) => {
+        setMatchDeck(newMatchDeck);
+    }
 
     const checkWeapons = () => {
         const especialCardsIds = [36, 37, 38, 39];
@@ -597,6 +605,7 @@ const MatchProvider = (props) => {
         isLoadingCharacter,
         newAchievements,
         setNewDeck,
+        setNewMatchDeck,
         addCardToMatchDeck,
         startNewGame,
         setNewCharacter,

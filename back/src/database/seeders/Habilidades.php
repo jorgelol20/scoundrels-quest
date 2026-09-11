@@ -47,7 +47,7 @@ class Habilidades extends Seeder
             ],
             [
                 'nombre' => 'Visión arcana',
-                'descripcion' => 'Permite ver el palo de las 4 siguientes cartas siempre que quieras y barajar el mazo 1 vez por ronda.',
+                'descripcion' => 'Permite ver las dos siguientes manos siempre que quieras y barajar el mazo 1 vez por ronda.',
                 'icono' => '/storage/habilidades/VisionArcana.webp',
                 'codigo' => 'mago',
                 'efectos' => null,

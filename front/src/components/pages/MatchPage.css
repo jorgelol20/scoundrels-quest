@@ -120,6 +120,7 @@
         border: 5px groove var(--second-color-dark);
         border-top: 0;
         overflow-y: scroll;
+        max-width: 30em;
         .comments { 
             width: 100%;
         }
@@ -262,6 +263,7 @@
             height: 20em;
             max-height: 20em;
             width: 90%;
+            
             margin-left: 0.5%;
             border: 5px groove var(--second-color-dark);
             overflow-y: scroll;
