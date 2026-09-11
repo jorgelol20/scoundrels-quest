@@ -751,7 +751,7 @@ const GamePage = () => {
             setBoughtCards(new Map());
             setIsRestarting(true);
             setRounds(0);
-            setGold(40);
+            setGold(0);
             setHealth(20);
             setMaxHealth(20)
             setAvailableAbility(true);
@@ -829,7 +829,7 @@ const GamePage = () => {
                     }
                     setShopAvailable(true)
                 } else {
-                    setShopAvailable(true)
+                    setShopAvailable(false)
                 }
                 if (continueMatch || gameOn || rounds == 0) {
                     setRounds(rounds + 1)
