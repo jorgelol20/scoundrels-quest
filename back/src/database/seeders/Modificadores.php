@@ -294,6 +294,96 @@ class Modificadores extends Seeder
                     ['name' => 'refund', 'value' => true],
                 ])
             ],
+            [
+                'nombre' => 'Sacrificio de Acero',
+                'descripcion' => 'Elimina todas las cartas de arma (Diamantes) con valor 5 o menor para otorgarte daño permanente. (Cada 4 cartas eliminadas 1 de daño).',
+                'imagen' => "/storage/modificadores/ALasArmas.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'delete', 'value' => 'Diamante'],
+                ])
+            ],
+            [
+                'nombre' => 'Ayuno Premeditado',
+                'descripcion' => 'Elimina todas las cartas de curación (Corazones) con valor 5 o menor para otorgarte vida máxima permanente. (Cada 4 cartas eliminadas 1 de vida máxima).',
+                'imagen' => "/storage/modificadores/AyunoPremeditado.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'delete', 'value' => 'Corazon'],
+                ])
+            ],
+            [
+                'nombre' => 'Carnet de Socio',
+                'descripcion' => 'Al final de cada ronda, puedes comprar gratis una carta de valor 2.',
+                'imagen' => "/storage/modificadores/CarnetDeSocio.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'membership', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Limpieza General de Mazmorra',
+                'descripcion' => 'Elimina la mitad de la baraja (No distingue de curaciones, armas ni enemigos).',
+                'imagen' => "/storage/modificadores/LimpiezaGeneralDeMazmorra.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'clean', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Mano de Midas',
+                'descripcion' => 'Obtienes oro de los enemigos cuando atacas sin armas.',
+                'imagen' => "/storage/modificadores/ManoDeMidas.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'midas', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Ojos de Gato',
+                'descripcion' => 'Puedes ver la primera carta de la siguiente mano.',
+                'imagen' => "/storage/modificadores/OjosDeGato.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'cat_eye', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Pacto Malevolente',
+                'descripcion' => 'Sacrifica 5 de vida máxima por 2 de daño permanente.',
+                'imagen' => "/storage/modificadores/PactoMalevolente.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'covenant', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Precio Amigo',
+                'descripcion' => 'Cada tienda tendrá un objeto aleatorio rebajado a la mitad.',
+                'imagen' => "/storage/modificadores/PrecioAmigo.webp",
+                'nivel' => 2,
+                'efectos' => json_encode([
+                    ['name' => 'amego', 'value' => true],
+                ])
+            ],
+            [
+                'nombre' => 'Regeneración Pasiva I',
+                'descripcion' => 'Cada 5 manos recuperas 1 de vida.',
+                'imagen' => "/storage/modificadores/RegeneracionPasiva1.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'regenerator', 'value' => 1],
+                ])
+            ],
+            [
+                'nombre' => 'Subidón de Adrenalina',
+                'descripcion' => 'Si en tu mano hay 4 enemigos y tu habilidad ya ha sido usada, puedes volver a utilizarla. (1 vez por ronda)',
+                'imagen' => "/storage/modificadores/SubidonDeAdrenalina.webp",
+                'nivel' => 1,
+                'efectos' => json_encode([
+                    ['name' => 'adrenalin', 'value' => true],
+                ])
+            ],
         ];
         foreach ($modificadores as $data) {
             ModelModificadores::updateOrCreate(

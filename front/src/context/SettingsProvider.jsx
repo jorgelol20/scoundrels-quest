@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useRef } from "react";
-import MainMusic from '/sounds/main-music.mp3';
+import MainMusic from '/sounds/main-music.wav';
 import ButtonSound from '/sounds/button-sound.mp3';
 import AchievementSound from '/sounds/achievement-sound.aac';
 import PlayCardSound from '/sounds/play-card-sound.aac'

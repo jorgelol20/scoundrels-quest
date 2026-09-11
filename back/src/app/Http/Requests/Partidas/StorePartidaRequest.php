@@ -19,7 +19,7 @@ class StorePartidaRequest extends FormRequest
             'tiempo' => 'required|integer',
             'victoria' => 'required|boolean',
             'rondas' => 'required|integer',
-            'modificadores' => 'required|array',
+            'modificadores' => 'nullable|array',
             'oro_obtenido' => 'required|integer',
             'vida_curada' => 'required|integer',
             'enemigos_enfrentados' => 'required|integer',

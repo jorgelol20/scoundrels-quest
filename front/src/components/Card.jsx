@@ -21,7 +21,7 @@ import SouleaterIcon from '/images/cardEffects/Souleater.webp';
 import SealIcon from '/images/cardEffects/Seal.webp';
 import BlockedIcon from '/images/cardEffects/Blocked.webp';
 
-const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = true, onDeck = false, isWizard = false, setOverDungeonZone, canBeClicked, cardSuit, defaultImage, scale = 1 }, ref) => {
+const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = true, onDeck = false, isWizard = false, haveCatEye = false, setOverDungeonZone, canBeClicked, cardSuit, defaultImage, scale = 1 }, ref) => {
 
     const groupRef = useRef(null);
     const [strokeWidth, setStrokeWidth] = useState(2);
@@ -166,7 +166,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
             <Rect
                 width={120}
                 height={150}
-                fill={onDeck ? (!isWizard ? "#000000" : "#ffffffe5") : "white"}
+                fill={onDeck ? ((!isWizard && !haveCatEye) ? "#000000" : "#ffffffe5") : "white"}
                 cornerRadius={8}
                 stroke={!onDeck ? colorRef.current : '#0C0C0C'}
                 strokeWidth={!onDeck ? strokeWidth : 0}
@@ -237,7 +237,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
             )}
 
             {onDeck && (
-                !isWizard ? (
+                !isWizard && !haveCatEye ? (
                     <Image
                         image={defaultImage}
                         width={120}
