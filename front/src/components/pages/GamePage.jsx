@@ -70,7 +70,7 @@ const GamePage = () => {
 
     const navigate = useNavigate();
     const { startButtonSound, startPlayCardSound, startPlaceCardSound, showLogs } = useContext(settingsContext)
-    const { matchDeck, character, activeModifiers: modifiers, setNewDeck, setNewCharacter, startNewGame, addCardToMatchDeck, gameLoading, availableCharacters, getWeapon, getHealItem, endGame, updateActualGame, setCharacter, setActiveModifiers, setGameLoading, addEnemysToMatchDeck, addEnemyToMatchDeck, handleNewAchievement } = useContext(matchContext);
+    const { matchDeck, character, activeModifiers: modifiers, setNewDeck, setNewMatchDeck, setNewCharacter, startNewGame, addCardToMatchDeck, gameLoading, availableCharacters, getWeapon, getHealItem, endGame, updateActualGame, setCharacter, setActiveModifiers, setGameLoading, addEnemysToMatchDeck, addEnemyToMatchDeck, handleNewAchievement } = useContext(matchContext);
     const { user } = useUser();
     const { openBugReport } = useContext(bugReportContext);
 
@@ -174,6 +174,7 @@ const GamePage = () => {
     const [selectModifier, setSelectModifier] = useState(false);
     const [modifiersLoading, setModifiersLoading] = useState(true);
     const userExtraDmg = useRef(0);
+    const userPermanentExtraDmg = useRef(0);
     const userDmgMultiplier = useRef(1);
     const mma = useRef(0);
     const enemyDmgMultiplier = useRef(1);
@@ -203,6 +204,15 @@ const GamePage = () => {
     const [thanatophobiaActivated, setThanatophobiaActivated] = useState(false);
     const [lifeward, setLifeward] = useState(false)
     const refund = useRef(false);
+    const membership = useRef(false);
+    const catEye = useRef(false);
+    const amego = useRef(false);
+    const regeneratorTurns = useRef(0);
+    const regeneratorHealth = useRef(0);
+    const regeneratorGoalTurns = useRef(0);
+    const adrenalin = useRef(false);
+    const adrenalinActivated = useRef(false)
+    const midas = useRef(false);
 
     // Efectos de cartas
     const currentHeal = useRef(0);
@@ -527,6 +537,7 @@ const GamePage = () => {
             goldMultiplier.current = (1)
             setMaxScapes(1)
             userExtraDmg.current = (0)
+            userPermanentExtraDmg.current = (0)
             userDmgMultiplier.current = (1);
             criticalPercentage.current = (0);
             mma.current = (0);
@@ -542,6 +553,15 @@ const GamePage = () => {
             setInterest(0);
             vitamineValue.current = 0;
             refund.current = false;
+            membership.current = false;
+            catEye.current = false;
+            amego.current = false;
+            regeneratorGoalTurns.current = 0;
+            regeneratorHealth.current = 0;
+            regeneratorTurns.current = 0;
+            adrenalin.current = false;
+            adrenalinActivated.current = false;
+            midas.current = false;
             setLifeward(false);
             sealTurns.current = 0;
             totalCardsUsed.current = 0;
@@ -671,6 +691,15 @@ const GamePage = () => {
                 logsRef.current.push((logsRef.current.length + 1) + " - " + `Te has curado ${progresiveHealTurns.current}.`)
                 progresiveHealTurns.current -= 1;
             }
+            if (regeneratorGoalTurns.current > 0) {
+                regeneratorTurns.current += 1;
+                if(regeneratorTurns.current === regeneratorGoalTurns.current){   
+                    regeneratorTurns.current = 0;
+                    healAnimation(regeneratorHealth.current);
+                    setHealth(prev => Math.min(maxHealth, prev + regeneratorHealth.current));
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Te has curado ${regeneratorHealth.current} de tu curación pasiva.`)
+                }
+            }
             if (souleaterTurns.current > 0) {
                 if (souleaterTurns.current === 1) {
                     if (health === maxHealth) {
@@ -722,7 +751,7 @@ const GamePage = () => {
             setBoughtCards(new Map());
             setIsRestarting(true);
             setRounds(0);
-            setGold(0);
+            setGold(40);
             setHealth(20);
             setMaxHealth(20)
             setAvailableAbility(true);
@@ -800,7 +829,7 @@ const GamePage = () => {
                     }
                     setShopAvailable(true)
                 } else {
-                    setShopAvailable(false)
+                    setShopAvailable(true)
                 }
                 if (continueMatch || gameOn || rounds == 0) {
                     setRounds(rounds + 1)
@@ -1158,7 +1187,7 @@ const GamePage = () => {
             } else if (canUseWeapon) {
 
                 // --- ATAQUE CON ARMA ---
-                const finalUserDmg = Math.floor(((weaponDmg.current + extraSuitDmg + userExtraDmg.current + blacksmithDmg) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
+                const finalUserDmg = Math.floor(((weaponDmg.current + extraSuitDmg + userExtraDmg.current + userPermanentExtraDmg.current + blacksmithDmg) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
                 finalDmg = Math.max(0, (enemyBaseDmg - pentakill) - finalUserDmg);
                 isSlain = true;
                 damageAnimation(finalDmg);
@@ -1184,13 +1213,16 @@ const GamePage = () => {
             } else {
 
                 // --- ATAQUE SIN ARMA ---
-                const finalUserDmg = Math.floor(((pentakill + extraSuitDmg + userExtraDmg.current + mma.current) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
+                const finalUserDmg = Math.floor(((pentakill + extraSuitDmg + userExtraDmg.current + userPermanentExtraDmg.current + mma.current) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
                 finalDmg = Math.max(0, enemyBaseDmg - finalUserDmg);
                 isSlain = false;
 
                 moveCardToDiscard([card]);
                 damageAnimation(finalDmg, true);
                 processDamageAndRevive(finalDmg);
+                if(midas.current){
+                    grantGoldReward();
+                }
 
                 if (!antiheal.current && isVampire && card?.valor < finalUserDmg) {
                     let heal = Math.min(maxHealthSteal, (finalUserDmg) - card?.valor);
@@ -1350,6 +1382,40 @@ const GamePage = () => {
         // CAPA 9 — APLICACIÓN DE MODIFICADORES
         // =====================================================
 
+
+        const handleDeleteSuit = (suit) => {
+            const newDeck = matchDeck.filter((card) => !(card.valor <= 5 && card.palo === suit));
+            let originalCardNumber = matchDeck.length - newDeck.length;
+            setNewMatchDeck(newDeck);
+            shuffleDeck(newDeck);
+            setRoom([]);
+            const aument = Math.floor(originalCardNumber / 4);
+            if (suit === "Corazon") {
+                setMaxHealth(prev => prev + aument);
+                setHealth(prev => prev + aument);
+            } else {
+                userPermanentExtraDmg.current += aument;
+            }
+        }
+
+        const handleDeleteHalf = async () => {
+            const half = Math.floor(matchDeck.length / 2);
+            const shuffledDeck = lodash.shuffle(matchDeck);
+            const newDeck = shuffledDeck.slice(0, half);
+            shuffleDeck()
+            setNewMatchDeck(newDeck);
+            setDungeon(newDeck);
+            setRoom([]);
+        }
+
+        const handleCovenant = async () => {
+            setMaxHealth(prev => prev - 5);
+            if (health >= maxHealth) {
+                setHealth(prev => prev - 5)
+            }
+            userPermanentExtraDmg.current += 2;
+        }
+
         const applyEffect = (effect) => {
             switch (effect?.name) {
                 case "chest_rewards":
@@ -1444,6 +1510,43 @@ const GamePage = () => {
                     break;
                 case 'refund':
                     refund.current = true;
+                    break;
+                case 'delete':
+                    handleDeleteSuit(effect.value);
+                    break;
+                case 'membership':
+                    membership.current = true;
+                    break;
+                case 'clean':
+                    handleDeleteHalf();
+                    break;
+                case 'cat_eye':
+                    catEye.current = true;
+                    break;
+                case 'covenant':
+                    handleCovenant();
+                    break;
+                case 'amego':
+                    amego.current = true;
+                    break;
+                case 'regenerator':
+                    if (effect.value === 1 && regeneratorHealth.current == 0) {
+                        regeneratorGoalTurns.current = 5;
+                    } else if (effect.value === 2 && regeneratorGoalTurns.current > 3) {
+                        regeneratorGoalTurns.current = 3;
+                    } else if (effect.value === 3) {
+                        regeneratorGoalTurns.current = 1;
+                    }
+                    regeneratorHealth.current = 1;
+                    regeneratorTurns.current = 0;
+                    break;
+                case 'adrenalin':
+                    adrenalin.current = true;
+                    adrenalinActivated.current = false;
+                    break;
+                case 'midas':
+                    midas.current = true;
+                    break;
                 default:
                     return false;
             }
@@ -1638,7 +1741,7 @@ const GamePage = () => {
                 // DESPUÉS reiniciar
                 restartFunction(changeCharacter);
                 setChangeCharacter(false);
-                setRestart(false); // ✅ RESETEA EL ESTADO PARA PERMITIR REINICIO FUTURO
+                setRestart(false); // 
             }
         }, [restart]);
 
@@ -1687,6 +1790,20 @@ const GamePage = () => {
                 }
             }
         }, [room, thanatophobia])
+
+        useEffect(() => {
+            if (adrenalin.current && room.length === 4) {
+                const allEnemys = room.reduce(
+                    (areEnemys, currentValue) => areEnemys = ((currentValue.palo === 'Trebol' || currentValue.palo === 'Pica') && areEnemys),
+                    true,);
+                if (allEnemys && !adrenalinActivated.current) {
+                    if (!isGambler && !isVampire) {
+                        setAvailableAbility(true);
+                    }
+                    adrenalinActivated.current = true;
+                }
+            }
+        }, [room, adrenalin])
 
         const handleEffectHover = (effect) => {
             const stage = stageRef.current;
@@ -1830,6 +1947,11 @@ const GamePage = () => {
                         refund={refund.current}
                         boughtCards={boughtCards}
                         setNewBought={setNewBought}
+                        membership={membership.current}
+                        coinAnimation={coinAnimation}
+                        goldAnimation={goldAnimation}
+                        goldAnimationValue={goldAnimationValue}
+                        amego={amego.current}
                     />
                 </Fragment>
             )
@@ -1852,9 +1974,9 @@ const GamePage = () => {
 
         const extraDmgEffects = () => {
             if (userDmgMultiplier.current !== 1) {
-                return `${userExtraDmg.current + (weapon ? blacksmithDmg : 0) + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0)} y un mult de ${userDmgMultiplier.current}.`
+                return `${userExtraDmg.current + (weapon ? blacksmithDmg : 0) + userPermanentExtraDmg.current + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0)} y un mult de ${userDmgMultiplier.current}.`
             } else {
-                return userExtraDmg.current + (weapon ? blacksmithDmg : 0) + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0);
+                return userExtraDmg.current + (weapon ? blacksmithDmg : 0) + userPermanentExtraDmg.current + (actualStreak >= pentakillTargetNumber ? pentakillDmg : 0);
             }
         }
 
@@ -1887,7 +2009,6 @@ const GamePage = () => {
                                 }
 
                                 <button onClick={(event) => {
-                                    console.log("SI")
                                     setRestart(true)
                                 }}>
                                     {gameWin ? 'JUGAR OTRA' : 'REINTENTAR'}
@@ -2108,7 +2229,7 @@ const GamePage = () => {
                                     <Rect width={DUNGEON_ZONE.width} height={DUNGEON_ZONE.height} fill="#0000006c" stroke="white" strokeWidth={2} cornerRadius={8} onMouseEnter={(e) => { setOverDungeonZone(true) }} onMouseLeave={(e) => { setOverDungeonZone(false) }} />
                                     <Text text="DUNGEON" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={20} x={35} />
 
-                                    {dungeon.toReversed().slice(0, isWizard ? 8 : 4).toReversed().map((card, i) => {
+                                    {dungeon.toReversed().slice(0, isWizard ? 8 : 1).toReversed().map((card, i) => {
                                         let x, y;
 
                                         if (isWizard) {
@@ -2116,9 +2237,9 @@ const GamePage = () => {
                                                 x = 5;
                                                 y = 5 + (overDungeonZone ? i * 100 : 0);
                                             } else {
-                                                const rowIndex = i - 4; // 0, 1, 2, 3
-                                                x = overDungeonZone ? 50 : 5; // izquierda
-                                                y = 5 + (overDungeonZone ? rowIndex * 100 : 0);
+                                                const rowIndex = i - 4;
+                                                x = overDungeonZone ? 50 : 5;
+                                                y = (overDungeonZone ? 10 : 5) + (overDungeonZone ? rowIndex * 100 : 0);
                                             }
                                         } else {
                                             x = 7;
@@ -2134,6 +2255,7 @@ const GamePage = () => {
                                             canBeClicked={canBeClicked}
                                             isDraggable={false}
                                             isWizard={isWizard}
+                                            haveCatEye={catEye.current}
                                             onDeck={true}
                                             setOverDungeonZone={setOverDungeonZone}
                                             cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : SpadeIcon}

@@ -331,6 +331,14 @@ const MatchProvider = (props) => {
         setMatchDeck(baseDeck);
     };
 
+    /**
+     * 
+     * @returns 
+     */
+    const setNewMatchDeck = (newMatchDeck) => {
+        setMatchDeck(newMatchDeck);
+    }
+
     const checkWeapons = () => {
         const especialCardsIds = [36, 37, 38, 39];
         const idsEnArray = new Set(matchDeck.map(obj => obj.id));
@@ -597,6 +605,7 @@ const MatchProvider = (props) => {
         isLoadingCharacter,
         newAchievements,
         setNewDeck,
+        setNewMatchDeck,
         addCardToMatchDeck,
         startNewGame,
         setNewCharacter,
