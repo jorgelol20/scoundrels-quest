@@ -235,6 +235,9 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
+    p{
+        position: relative;
+    }
 }
 
 .item-purchase-controls p {
@@ -359,4 +362,12 @@
         }
     }
 
+}
+
+.discount{
+    color: var(--main-red);
+    text-decoration: line-through;
+    position: absolute;
+    top: -20px;
+    right:-25px;
 }
