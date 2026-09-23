@@ -29,3 +29,7 @@ api.scoundrels-quest.com, http://api.localhost {
   php_fastcgi php:9000
   file_server
 }
+
+portfolio.scoundrels-quest.com {
+	reverse_proxy node:5000
+}
