@@ -31,7 +31,7 @@ const SelectModifier = ({ setSelectModifier, rounds, setModifiersLoading }) => {
                                 </div>
                                 <div style={{display:'flex'}}>
                                     <img src={ShopMan} alt="ShopMan" />
-                                    <button onClick={()=>setSelectModifier(false)}>Pues vale...</button>
+                                    <button onClick={()=>{ setModifiersLoading(false); setSelectModifier(false); }}>Pues vale...</button>
                                 </div>
                             </div>
                         </div>

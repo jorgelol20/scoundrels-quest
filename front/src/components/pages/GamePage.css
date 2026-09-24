@@ -11,6 +11,7 @@
     display: flex;
     justify-content: center;
     text-shadow: 1px 1px 2px black;
+    
 }
 
 .game-container {
@@ -19,6 +20,15 @@
     margin-top: -5em;
     padding: 1em;
     background-color: var(--second-color);
+    
+}
+
+/* Icono de miniboss activo en el HUD (junto a "cartas restantes") */
+.game-hud p img.minibossIcon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    vertical-align: middle;
 }
 
 .game-hud {
@@ -46,6 +56,18 @@
     h2 {
         font-size: 1cqw;
         margin-bottom: 1cqh;
+    }
+
+    p {
+        display: flex;
+        align-items: center;
+        
+        img{
+            background:none;
+            width: 25px;
+            margin-left: 1em;
+            
+        }
     }
 
     .player-health {
@@ -383,6 +405,7 @@ span {
     .game-hud-text {
         width: 30%;
         margin-right: 1cqw;
+
     }
 
     .gambler-text {
@@ -501,7 +524,8 @@ span {
 
 @keyframes vampire {
 
-    0%,100% {
+    0%,
+    100% {
         /* Sombra roja inicial */
         box-shadow: 0 0 15px 5px rgba(180, 0, 0, 0.7);
     }

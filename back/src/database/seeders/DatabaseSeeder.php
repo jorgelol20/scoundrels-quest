@@ -12,6 +12,7 @@ use Database\Seeders\Modificadores;
 use Database\Seeders\Usuarios;
 use Database\Seeders\Partidas;
 use Database\Seeders\Logros;
+use Database\Seeders\Minibosses;
 
 class DatabaseSeeder extends Seeder
 {
@@ -33,6 +34,7 @@ class DatabaseSeeder extends Seeder
         $this->call(Modificadores::class);
         $this->call(Partidas::class);
         $this->call(Logros::class);
+        $this->call(Minibosses::class);
        
     }
 }

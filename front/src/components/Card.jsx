@@ -1,8 +1,7 @@
-import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect } from "react";
+import { useRef, useImperativeHandle, forwardRef, useState, useEffect } from "react";
 import { Group, Rect, Text, Image } from 'react-konva';
 import Konva from 'konva';
 import useImage from 'use-image';
-import Default from '/images/default_card.webp'
 import PoisonIcon from '/images/cardEffects/Poison.webp';
 import AntihealIcon from '/images/cardEffects/Antiheal.webp';
 import WeaponBreakerIcon from '/images/cardEffects/WeaponBreaker.webp';
@@ -20,6 +19,8 @@ import MitosisIcon from '/images/cardEffects/Mitosis.webp';
 import SouleaterIcon from '/images/cardEffects/Souleater.webp';
 import SealIcon from '/images/cardEffects/Seal.webp';
 import BlockedIcon from '/images/cardEffects/Blocked.webp';
+import SpiderWebIcon from '/images/cardEffects/SpiderWeb.webp';
+import SuppliesIcon from '/images/cardEffects/Supplies.webp';
 
 const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = true, onDeck = false, isWizard = false, haveCatEye = false, setOverDungeonZone, canBeClicked, cardSuit, defaultImage, scale = 1 }, ref) => {
 
@@ -41,9 +42,27 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
         }
     }));
 
+    // --- Mímico (efecto "mimicry") ---
+    // Mientras `disfrazado` sea true, la carta se dibuja con el aspecto de la
+    // carta de curación que suplanta (imagen, valor y palo superior). El valor
+    // interno `cardInfo.valor` NO se toca: sigue siendo el verdadero (16) y es
+    // el que usa el combate.
+    // PISTA SUTIL del camuflaje: la esquina INFERIOR derecha (palo rotado 180°)
+    // sigue enseñando el palo de Miniboss ("si tienes buen ojo, lo verás").
+    const isDisguised = !!(cardInfo?.disfrazado && cardInfo?.disfraz?.imagen);
+    const rawValor = isDisguised ? cardInfo?.disfraz?.valor : cardInfo?.valor;
+    // Clamp cosmético: Diamante/Corazón con valor 11-13 se muestran como 10
+    // (el 14 se muestra tal cual). El juego sigue usando `cardInfo.valor` real.
+    const needsValorClamp = !isDisguised
+        && rawValor > 10 && rawValor !== 14
+        && (cardInfo?.palo === 'Diamante' || cardInfo?.palo === 'Corazon');
+    const displayValor = needsValorClamp ? 10 : rawValor;
+
     // Carga de imágenes
-    const [image] = useImage(cardInfo?.imagen);
+    const [image] = useImage(isDisguised ? cardInfo?.disfraz?.imagen : cardInfo?.imagen);
     const [suit] = useImage(cardSuit);
+    const [topSuit] = useImage(isDisguised ? (cardInfo?.disfraz?.suit ?? cardSuit) : cardSuit);
+    const topSuitImage = isDisguised ? topSuit : suit;
 
     const selectEffectImage = () => {
         if (cardInfo?.efectos) {
@@ -66,6 +85,8 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
                 case 'souleater': return SouleaterIcon;
                 case 'seal': return SealIcon;
                 case 'blocked': return BlockedIcon; 
+                case 'supplies': return SuppliesIcon;
+                case 'spider_web': return SpiderWebIcon;
                 default: return null;
             }
         }
@@ -125,15 +146,13 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
     };
 
     useEffect(() => {
-        const palos = ['Diamante', 'Corazon'];
-        if (cardInfo?.valor > 10 && palos.indexOf(cardInfo?.palo) !== -1) {
-            if (cardInfo?.valor !== 14) {
-                cardInfo.valor = 10;
-            }
-        }
+        // NOTA: ya NO se muta `cardInfo.valor` (rompía la identidad de la carta
+        // y hacía que el juego usara el valor recortado). El clamp es SOLO
+        // cosmético y se aplica en `displayValor` al inicio del componente.
         setHasEffect(!!cardInfo?.efectos);
-        colorRef.current = cardInfo?.especial ? '#D4AF37' : cardInfo?.palo === 'Corazon' ? '#1E5128' : cardInfo?.palo === 'Diamante' ? '#F77F00' : '#0C0C0C';
-    }, [cardInfo]);
+        // El Mímico camuflado adopta el verde de una carta de curación (Corazon)
+        colorRef.current = isDisguised ? '#1E5128' : cardInfo?.especial ? '#D4AF37' : cardInfo?.palo === 'Corazon' ? '#1E5128' : cardInfo?.palo === 'Diamante' ? '#F77F00' : '#0C0C0C';
+    }, [cardInfo, isDisguised]);
 
     return (
         <Group
@@ -176,7 +195,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
             {!onDeck && (
                 <>
                     <Text
-                        text={`${cardInfo?.valor}`}
+                        text={`${displayValor}`}
                         fill={colorRef.current}
                         fontSize={34}
                         fontFamily="Alagard"
@@ -185,7 +204,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
                         listening={false}
                     />
                     <Image
-                        image={suit}
+                        image={topSuitImage}
                         width={25}
                         height={25}
                         x={75}
@@ -214,7 +233,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
                         />
                     )}
                     <Image
-                        image={suit}
+                        image={topSuitImage}
                         width={25}
                         height={25}
                         x={40}
@@ -224,7 +243,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
                         listening={false}
                     />
                     <Text
-                        text={`${cardInfo?.valor}`}
+                        text={`${displayValor}`}
                         fill={colorRef.current}
                         fontSize={34}
                         fontFamily="Alagard"
@@ -260,7 +279,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
                             listening={false}
                         />
                         <Text
-                            text={`${cardInfo?.valor}`}
+                            text={`${displayValor}`}
                             fill={colorRef.current}
                             fontSize={34}
                             fontFamily="Alagard"
@@ -269,7 +288,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
                             listening={false}
                         />
                         <Image
-                            image={suit}
+                            image={topSuitImage}
                             width={25}
                             height={25}
                             x={75}
@@ -297,7 +316,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
                             listening={false}
                         />
                         <Text
-                            text={`${cardInfo?.valor}`}
+                            text={`${displayValor}`}
                             fill={colorRef.current}
                             fontSize={34}
                             fontFamily="Alagard"

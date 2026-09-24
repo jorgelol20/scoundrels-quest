@@ -82,14 +82,12 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
             amegoItem = Math.floor(Math.random() * (30));
         }
 
-        console.log(amegoItem);
         let itemIndex = 0;
 
         // Agregar modificadores si existen
         mods.forEach((mod, index) => {
             if (mod) {
                 itemIndex++;
-                console.log(amegoItem === itemIndex)
                 items.push({
                     id: `mod-${index}`,
                     type: 'modifier',
@@ -105,7 +103,6 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
             const wep = getWeapon(valor);
             if (wep) {
                 itemIndex++;
-                console.log(amegoItem === itemIndex)
                 items.push({
                     id: `wep-${valor}`,
                     type: 'card',
@@ -118,7 +115,6 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
 
             const heal = getHealItem(valor);
             if (heal) {
-                console.log(amegoItem === itemIndex)
                 itemIndex++;
                 items.push({
                     id: `heal-${valor}`,
@@ -211,21 +207,21 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
             <div className="game-shop">
                 <div className="game-hud">
                     <div className="game-hud-text">
-                        <h1 className="player-health"><img src={healthIcon} />{health}/{maxHealth}</h1>
-                        <h1 className="player-gold"><img src={GoldIcon} />{gold}{goldAnimation !== null ? <div className="animation-container"><strong className="animation" disabled={goldAnimation}>{goldAnimationValue}</strong><img className="animation" disabled={goldAnimation} src={goldAnimation} /></div> : <></>}</h1>
+                        <h1 className="player-health"><img src={healthIcon} alt="" />{health}/{maxHealth}</h1>
+                        <h1 className="player-gold"><img src={GoldIcon} alt="" />{gold}{goldAnimation !== null ? <div className="animation-container"><strong className="animation">{goldAnimationValue}</strong><img className="animation" alt="" src={goldAnimation} /></div> : <></>}</h1>
                         {refund ? <h1 className="player-gold">Reembolso: {Math.floor(usedGold.current / 10)}</h1> : <></>}
                         <h1>RONDA {round}</h1>
                         <h2 ref={formatedTimeRef}>Tiempo: 00:00</h2>
                     </div>
                     <div className="game-character">
-                        <img className="character-avatar" style={{ borderColor: user.color }} src={character?.imagen} alt={character?.nombre} />
-                        <img className="character-ability available" src={character?.habilidad_personaje?.icono} style={null} />
+                        <img className="character-avatar" style={{ borderColor: user?.color }} src={character?.imagen} alt={character?.nombre} />
+                        <img className="character-ability available" src={character?.habilidad_personaje?.icono} style={null} alt="Habilidad" />
                     </div>
                     <div className="extra">
                         <div className="game-modifiers">
                             {
-                                modifiers.map((modifierInfo) => (
-                                    <Modifier key={crypto.randomUUID()} modifierInfo={modifierInfo} />
+                                modifiers.map((modifierInfo, modifierIndex) => (
+                                    <Modifier key={`${modifierInfo.id}-${modifierIndex}`} modifierInfo={modifierInfo} />
                                 ))
                             }
                         </div>

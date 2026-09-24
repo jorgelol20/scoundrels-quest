@@ -63,7 +63,7 @@
     }
 
     .ranking-container {
-        overflow-y: auto;
+        overflow-y: scroll;
         height: 75%;
         margin: 5px solid var(--main-color);
         overflow: auto;
@@ -119,7 +119,7 @@
         }
 
         .ranking-container {
-            height: 90%;
+            height: 70%;
         }
 
         .user-ranking {
