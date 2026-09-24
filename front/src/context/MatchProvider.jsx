@@ -313,6 +313,7 @@ const MatchProvider = (props) => {
      * @returns 
      */
     const updateActualGame = async (user_id, tiempo, victoria, rondas, earnedGold, healedLife, enemysDefeated) => {
+        loadAchievements(victoria, rondas)
         if (actualMatchId == null) {
             return false;
         }
