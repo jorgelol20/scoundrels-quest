@@ -5,6 +5,7 @@
     gap: 2cqw;
     padding: 2%;
     position: relative;
+    margin-bottom: 1em;
 
     .shop-man {
         width: 15%;
@@ -17,6 +18,7 @@
             z-index: 100;
             margin-top: 10cqw;
         }
+
     }
 
     .dialog {
@@ -35,6 +37,7 @@
         justify-content: center;
         font-size: 1cqw;
     }
+
 }
 
 .game-hud {
@@ -51,6 +54,7 @@
         inset 4px 4px 4px var(--second-color-dark);
     width: 10cqw;
     height: 25cqw;
+    margin-bottom: 1em;
 
     h1,
     h2 {
@@ -173,7 +177,7 @@
     box-shadow:
         inset 4px 4px 0px var(--second-color-light),
         inset -4px -4px 0px var(--main-black);
-
+    margin-bottom: 1em;
 }
 
 .shop-items {
@@ -235,7 +239,8 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    p{
+
+    p {
         position: relative;
     }
 }
@@ -321,7 +326,7 @@
                     font-size: 1em;
                 }
             }
-
+            
         }
 
         .game-hud {
@@ -364,10 +369,10 @@
 
 }
 
-.discount{
+.discount {
     color: var(--main-red);
     text-decoration: line-through;
     position: absolute;
     top: -20px;
-    right:-25px;
+    right: -25px;
 }

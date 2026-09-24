@@ -210,6 +210,62 @@ class Logros extends Seeder
                 'meta' => null,
                 'codigo' => 'cesped'
             ],
+            [
+                'nombre' => 'Derrocamiento Viscoso',
+                'descripcion' => 'Derrota al miniboss `Reina Slime`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'miniboss_slime'
+            ],
+            [
+                'nombre' => 'Caida de la Red',
+                'descripcion' => 'Derrota al miniboss `La Araña`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'miniboss_arana'
+            ],
+            [
+                'nombre' => 'Exorcismo express',
+                'descripcion' => 'Derrota al miniboss `Chamán Demoniaco`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'miniboss_chaman'
+            ],
+            [
+                'nombre' => 'El último asalto',
+                'descripcion' => 'Derrota al miniboss `Reina de los ladrones`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'miniboss_ladrona'
+            ],
+            [
+                'nombre' => 'Fin del reino feérico',
+                'descripcion' => 'Derrota al miniboss `Rey Hada`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'miniboss_hada'
+            ],
+            [
+                'nombre' => 'Precios rabiosos',
+                'descripcion' => 'Derrota al miniboss `Guantes, la mascota del mercader`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'miniboss_guantes'
+            ],
+            [
+                'nombre' => 'Que asco',
+                'descripcion' => 'Derrota por primera vez una `bola de pelo de guantes`.',
+                'icono' => '/storage/logros/Bronce.webp',
+                'meta' => null,
+                'codigo' => 'miniboss_bola'
+            ],
+            [
+                'nombre' => 'Indigestión',
+                'descripcion' => 'Derrota al miniboss `Mímico`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'miniboss_mimico'
+            ],
         ];
 
         foreach ($logrosData as $data) {

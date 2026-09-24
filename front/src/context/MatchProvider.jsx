@@ -40,6 +40,30 @@ const generateCardKey = (id) => {
     return `${id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 };
 
+/**
+ * @typedef {Object} Card
+ * @property {boolean} activa - Indica si la carta está activa en el tablero.
+ * @property {Array|null} efectos - Efectos aplicados a la carta.
+ * @property {boolean} especial - Define si la carta tiene propiedades especiales.
+ * @property {number} id - Identificador numérico único de la carta.
+ * @property {string} imagen - URL de la imagen de la carta.
+ * @property {string} key - UUID único para la instancia de la carta.
+ * @property {string} palo - Palo de la baraja (ej. "Diamante", "Trebol").
+ * @property {number} valor - Valor numérico de la carta.
+ * @property {number} x - Posición en el eje X.
+ * @property {number} y - Posición en el eje Y.
+ */
+/**
+ * @typedef {Object} Modifier
+ * @property {number} id - Identificador único del modificador.
+ * @property {string} nombre - Nombre del modificador.
+ * @property {string} descripcion - Descripción de sus efectos.
+ * @property {string} imagen - URL de la imagen del modificador.
+ * @property {number} nivel - Nivel de rareza/potencia (1, 2 o 3).
+ * @property {boolean} activo - Estado de activación.
+ * @property {Object|string} efectos - Configuración o datos de los efectos aplicados.
+ */
+
 const MatchProvider = (props) => {
     // Hooks de datos externos
     const {
@@ -106,7 +130,8 @@ const MatchProvider = (props) => {
                 const palo = normalize(card?.palo);
                 const isForbiddenDiamond = palo === 'diamante' && card?.valor > 10;
                 const isForbiddenHeart = palo === 'corazon' && card?.valor > 10;
-                return !isForbiddenDiamond && !isForbiddenHeart;
+                const isBosscard = palo === 'miniboss';
+                return !isForbiddenDiamond && !isForbiddenHeart && !isBosscard;
             })
             .map((card) => ({
                 ...card,
@@ -288,6 +313,7 @@ const MatchProvider = (props) => {
      * @returns 
      */
     const updateActualGame = async (user_id, tiempo, victoria, rondas, earnedGold, healedLife, enemysDefeated) => {
+        loadAchievements(victoria, rondas)
         if (actualMatchId == null) {
             return false;
         }
@@ -347,17 +373,7 @@ const MatchProvider = (props) => {
 
     /**
      * 
-     * @param {Object} card 
-     * 
-        class Card {
-            id,
-            palo,
-            valor,
-            imagen,
-            activa,
-            especial,
-            efectos
-        }
+     * @param {Card} card 
      */
     const addCardToMatchDeck = (card) => {
         if (card) {
@@ -366,7 +382,7 @@ const MatchProvider = (props) => {
                 efectos: typeof card?.efectos === 'string' ? JSON.parse(card.efectos) : card?.efectos,
                 x: 200,
                 y: 0,
-                key: generateCardKey()
+                key: card?.key ?? generateCardKey()
             };
             setMatchDeck(prevDeck => [...prevDeck, newCard]);
             if (checkWeapons()) {
@@ -377,11 +393,11 @@ const MatchProvider = (props) => {
 
 
     /**
-     * Añadir X cantidad de enemigos aleatorios al mazo
+     * Devuelve X cantidad de enemigos aleatorios 
      * 
      * @param {int} quantity Cantidad de cartas
      * @param {int} round Ronda (de esto dependerá el `nivel` de la carta)
-     * @returns 
+     * @returns {Card|undefined}
      */
     const addRandomEnemysToMatchDeck = (quantity, round = 1) => {
         const minPower = Math.min(10, Math.max(2, round));
@@ -422,11 +438,11 @@ const MatchProvider = (props) => {
 
 
     /**
-     * Añadir cun enemigo de valor X al mazo.
+     * Devuelve un enemigo de valor X 
      * 
      * @param {int} power Valor de la carta
      * @param {int} round Ronda (de esto dependerá el `nivel` de la carta)
-     * @returns 
+     * @returns {Card|undefined}
      */
     const addEnemyToMatchDeck = (power, round = 1) => {
         const candidates = cards.filter(({ palo, valor }) =>
@@ -449,7 +465,7 @@ const MatchProvider = (props) => {
             ...targetCard,
             x: 200,
             y: 0,
-            key: Date.now() * targetCard.id,
+            key: generateCardKey(),
             especial: appliedEffect !== null,
             efectos: appliedEffect
         };
@@ -460,32 +476,58 @@ const MatchProvider = (props) => {
 
 
     /**
-     * Añadir un arma con valor X al mazo
+     * Devuelve un arma con valor X 
      * 
      * @param {int} power Valor de la carta
-     * @returns 
+     * @returns {Card|null} 
      */
     const getWeapon = (power) => {
-        const card = cards.find((c) => c?.palo === "Diamante" && c?.valor === power);
-        if (card) {
-            return {
-                ...card,
-                x: 200,
-                y: 0,
-                efectos: typeof card?.efectos === 'string' ? JSON.parse(card.efectos) : card?.efectos,
-                key: generateCardKey()
-            };
+        if (cards) {
+            const card = cards.find((c) => c?.palo === "Diamante" && c?.valor === power);
+            if (card) {
+                return {
+                    ...card,
+                    x: 200,
+                    y: 0,
+                    efectos: typeof card?.efectos === 'string' ? JSON.parse(card.efectos) : card?.efectos,
+                    key: generateCardKey()
+                };
+            }
         }
+        return null;
     };
 
     /**
-     * Añadir una curación con valor X al mazo
-     * 
-     * @param {int} power Valor de la carta
-     * @returns 
-     */
+ * Devuelve una curación con valor X.
+ * 
+ * @param {number} power - Valor de la carta.
+ * @returns {Card|null}
+ */
     const getHealItem = (power) => {
-        const card = cards.find((c) => c?.palo === "Corazon" && c?.valor === power);
+        if (cards) {
+            const card = cards.find((c) => c?.palo === "Corazon" && c?.valor === power);
+            if (card) {
+                return {
+                    ...card,
+                    x: 200,
+                    y: 0,
+                    efectos: typeof card?.efectos === 'string' ? JSON.parse(card.efectos) : card?.efectos,
+                    key: generateCardKey()
+                };
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Devuelve un miniboss random
+     * 
+     * @returns {Card|null}
+     */
+    const getRandomMiniboss = () => {
+        const tempPower = Math.floor(Math.random() * (9 - 1) + 1);
+        const power = tempPower === 7 ? 6 : tempPower;
+        const card = cards.find((c) => c?.palo === "Miniboss" && c?.valor === power);
         if (card) {
             return {
                 ...card,
@@ -495,7 +537,51 @@ const MatchProvider = (props) => {
                 key: generateCardKey()
             };
         }
-    };
+        return null;
+    }
+
+    const getHairball = () => {
+        const power = 7;
+        const card = cards.find((c) => c?.palo === "Miniboss" && c?.valor === power);
+        if (card) {
+            // Spec de Guantes: cada bola de pelo lleva un Efecto de carta ALEATORIO,
+            // tomado de la misma pool que los enemigos normales. El `codigo` conserva
+            // la identidad 'hairball' para que su derrota lance el logro 'miniboss_bola'.
+            const randomEffectIndex = Math.floor(Math.random() * enemyCardEffectList.length);
+            return {
+                ...card,
+                valor: 0,
+                x: 200,
+                y: 0,
+                codigo: 'hairball',
+                efectos: [{ ...enemyCardEffectList[randomEffectIndex] }],
+                key: generateCardKey()
+            };
+        }
+        return null;
+    }
+
+    const getCustomSlime = (power) => {
+        const card = cards.find((c) => c?.palo === "Trebol" && c?.valor === 2);
+        if (card) {
+            return {
+                ...card,
+                valor: power,
+                x: 200,
+                y: 0,
+                palo: 'Miniboss',
+                efectos: typeof card?.efectos === 'string' ? JSON.parse(card.efectos) : card?.efectos,
+                key: generateCardKey()
+            };
+        }
+        return null;
+    }
+
+    const deleteCardFromMatchDeck = (cardKey) => {
+        const filteredDeck = matchDeck.filter((card) => (card.key !== cardKey));
+        setMatchDeck(filteredDeck);
+    }
+
 
     /**
      * Obtener las cartas de X tutorial
@@ -507,7 +593,14 @@ const MatchProvider = (props) => {
         const tempDeck = [...baseDeck];
         switch (tutorialNumber) {
             case 1:
-                const cardstutorialOne = [tempDeck[0], tempDeck[14], tempDeck[28], tempDeck[42]];
+                // No depender del orden de la API: el tutorial necesita una
+                // muestra de cada palo aunque el backend cambie la respuesta.
+                const cardstutorialOne = [
+                    tempDeck.find(card => card?.palo === "Pica"),
+                    tempDeck.find(card => card?.palo === "Corazon"),
+                    tempDeck.find(card => card?.palo === "Diamante"),
+                    tempDeck.find(card => card?.palo === "Trebol"),
+                ].filter(Boolean);
                 return cardstutorialOne;
             case 7:
                 const cardstutorialSeven = [tempDeck[5], tempDeck[26], tempDeck[28], tempDeck[41]];
@@ -619,11 +712,15 @@ const MatchProvider = (props) => {
         addEnemysToMatchDeck: addRandomEnemysToMatchDeck,
         addEnemyToMatchDeck,
         getHealItem,
+        getRandomMiniboss,
+        getHairball,
+        getCustomSlime,
         updateActualGame,
         getTutorialCards,
         setNewAchievements,
         handleNewAchievement,
         deleteNewAchievement,
+        deleteCardFromMatchDeck,
     };
 
     return (
