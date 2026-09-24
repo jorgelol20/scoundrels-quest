@@ -647,7 +647,7 @@ const GamePageInner = () => {
             actualScapes.current = (1);
             healthSteal.current = (false);
             setRicochet(false)
-            enemyDmgMultiplier.current = (0);
+            enemyDmgMultiplier.current = (1);
             enemyExtraDmg.current = (0)
             spadesExtraTakedDmg.current = (0);
             clubsExtraTakedDmg.current = (0);
@@ -1267,13 +1267,12 @@ const GamePageInner = () => {
                 // Agrupamos la lógica por flujo: Primera ronda vs Rondas siguientes
                 let pendingMiniboss = null;
                 if (rounds === 0) {
-                    setShopAvailable(true);
+                    setShopAvailable(false);
                     applyCharacterPassive(character);
                     setGameOn(true);
                     // Nueva partida activa: se vuelve a permitir el guardado
                     gameSavedRef.current = false;
                     setRounds(startedRound);
-                    pendingMiniboss = getRandomMiniboss();
                 }
                 else if (isActiveMatch) { // Ya sabemos implícitamente que rounds >= 1
                     setShopAvailable(true);
