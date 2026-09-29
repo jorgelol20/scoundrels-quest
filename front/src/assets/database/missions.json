@@ -1,0 +1,92 @@
+[
+  {
+    "id": "primera-sangre",
+    "meta": {
+      "tipo": "kills",
+      "objetivo": 5
+    },
+    "recompensa_oro": 20,
+    "dificultad": 1,
+    "enemigos_extra": 0
+  },
+  {
+    "id": "racha-prometedora",
+    "meta": {
+      "tipo": "streak",
+      "objetivo": 3
+    },
+    "recompensa_oro": 30,
+    "dificultad": 1,
+    "enemigos_extra": 0
+  },
+  {
+    "id": "manos-de-oro",
+    "meta": {
+      "tipo": "gold",
+      "objetivo": 60
+    },
+    "recompensa_oro": 35,
+    "dificultad": 1,
+    "enemigos_extra": 0
+  },
+  {
+    "id": "superviviente",
+    "meta": {
+      "tipo": "rounds",
+      "objetivo": 4
+    },
+    "recompensa_oro": 50,
+    "dificultad": 2,
+    "enemigos_extra": 0
+  },
+  {
+    "id": "cazador",
+    "meta": {
+      "tipo": "kills",
+      "objetivo": 15
+    },
+    "recompensa_oro": 70,
+    "dificultad": 2,
+    "enemigos_extra": 2
+  },
+  {
+    "id": "imparable",
+    "meta": {
+      "tipo": "streak",
+      "objetivo": 5
+    },
+    "recompensa_oro": 90,
+    "dificultad": 2,
+    "enemigos_extra": 2
+  },
+  {
+    "id": "mata-monstruos",
+    "meta": {
+      "tipo": "miniboss",
+      "objetivo": 1
+    },
+    "recompensa_oro": 110,
+    "dificultad": 3,
+    "enemigos_extra": 0
+  },
+  {
+    "id": "exterminador",
+    "meta": {
+      "tipo": "kills",
+      "objetivo": 30
+    },
+    "recompensa_oro": 140,
+    "dificultad": 3,
+    "enemigos_extra": 3
+  },
+  {
+    "id": "leyenda",
+    "meta": {
+      "tipo": "rounds",
+      "objetivo": 8
+    },
+    "recompensa_oro": 200,
+    "dificultad": 3,
+    "enemigos_extra": 4
+  }
+]

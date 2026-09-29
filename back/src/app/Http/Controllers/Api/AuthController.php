@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Usuarios;
 use App\Notifications\RegistroNotificacionUsuario;
-use Auth;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 use Notification;
-use Str;
+
 class AuthController extends Controller
 {
     /**
@@ -28,8 +28,10 @@ class AuthController extends Controller
         $usuario = Usuarios::where('email', $request->email)->first();
 
         if (!$usuario || !Hash::check($request->password, $usuario->password)) {
+            // Mismo mensaje y coste aproximado tanto si el email existe como
+            // si no, para no filtrar qué correos están registrados.
             throw ValidationException::withMessages([
-                'email' => ['Las credenciales no son correctas.'],
+                'email' => [__('api.invalid_credentials')],
             ]);
         }
 
@@ -47,10 +49,10 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()?->delete();
 
         return response()->json([
-            'message' => 'Sesión cerrada correctamente'
+            'message' => __('api.logout_ok')
         ]);
     }
 
@@ -64,27 +66,42 @@ class AuthController extends Controller
     //Inicio de sesión con Google
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        // Con estado (no stateless): Socialite valida el parámetro `state`
+        // contra la sesión, lo que bloquea el login CSRF.
+        return Socialite::driver('google')->scopes(['openid', 'email', 'profile'])->redirect();
     }
 
     public function handleGoogleCallback()
     {
-        $usuario_google = Socialite::driver('google')->stateless()->user();
-        $user = Usuarios::firstOrCreate(
-            ['email' => $usuario_google->getEmail()],
-            [
-                'nick' => $usuario_google->getNickname() ?? explode('@', $usuario_google->getEmail())[0],
+        $usuario_google = Socialite::driver('google')->user();
+
+        // Sin email verificado no se crea ni se vincula ninguna cuenta: de lo
+        // contrario el proveedor podría vincularse a una cuenta ajena.
+        $email = $usuario_google->getEmail();
+        $verificado = (bool) ($usuario_google->user['email_verified'] ?? false);
+
+        if (empty($email) || ! $verificado) {
+            return redirect(config('app.frontend_url') . '/auth/error?reason=email_not_verified');
+        }
+
+        $user = Usuarios::where('email', $email)->first();
+
+        if (!$user) {
+            $user = Usuarios::create([
+                'nick' => $this->generarNickUnico($usuario_google->getNickname() ?? explode('@', $email)[0]),
+                'email' => $email,
                 'password' => Hash::make(Str::random(64)),
                 'avatar' => $usuario_google->getAvatar(),
-            ]
-        );
+            ]);
+        }
 
         if ($user->wasRecentlyCreated) {
-            Notification::route('mail', $user->email)->notify(new RegistroNotificacionUsuario($user));
+            $this->enviarMailRegistro($user);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
-        return redirect(config('app.frontend_url') . "/auth/callback?token={$token}");
+
+        return $this->redirigirConToken($token);
     }
 
     // Inicio de sesión con Twitter (X)
@@ -95,23 +112,81 @@ class AuthController extends Controller
 
     public function handleXCallback()
     {
-        $xUser = Socialite::driver('twitter-oauth-2')->stateless()->user();
+        $xUser = Socialite::driver('twitter-oauth-2')->user();
 
-        $user = Usuarios::firstOrCreate(
-            ['email' => $xUser->getEmail() ?? $xUser->getId() . '@twitter.com'],
-            [
-                'nick' => $xUser->getNickname(),
+        $email = $xUser->getEmail();
+
+        // X no siempre devuelve el email (depende de los scopes concedidos).
+        // Antes se fabricaba uno sintético "{id}@twitter.com", lo que creaba
+        // identidades falsas y podía vincular la cuenta equivocada.
+        if (empty($email)) {
+            return redirect(config('app.frontend_url') . '/auth/error?reason=email_required');
+        }
+
+        $user = Usuarios::where('email', $email)->first();
+
+        if (!$user) {
+            $user = Usuarios::create([
+                'nick' => $this->generarNickUnico($xUser->getNickname() ?? explode('@', $email)[0]),
+                'email' => $email,
                 'password' => Hash::make(Str::random(64)),
                 'avatar' => $xUser->getAvatar(),
-            ]
-        );
+            ]);
+        }
 
         if ($user->wasRecentlyCreated) {
-            Notification::route('mail', $user->email)->notify(new RegistroNotificacionUsuario($user));
+            $this->enviarMailRegistro($user);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return redirect(config('app.frontend_url') . "/auth/callback?token={$token}");
+        return $this->redirigirConToken($token);
+    }
+
+    /**
+     * Devuelve el token en el FRAGMENTO de la URL (#token=...) en lugar del
+     * query string. El fragmento no viaja en la petición HTTP: no aparece en
+     * logs del servidor, cabeceras Referer ni cabeceras History del navegador.
+     */
+    private function redirigirConToken(string $token)
+    {
+        return redirect(config('app.frontend_url') . '/auth/callback#token=' . urlencode($token));
+    }
+
+    /**
+     * Garantiza que el nick del proveedor no colisiona con uno existente.
+     */
+    private function generarNickUnico(string $base): string
+    {
+        $base = Str::limit(preg_replace('/[^\pL\pN._-]/u', '', $base) ?: 'jugador', 24, '');
+
+        if ($base === '') {
+            $base = 'jugador';
+        }
+
+        $nick = $base;
+        $i = 1;
+
+        while (Usuarios::where('nick', $nick)->exists()) {
+            $i++;
+            $nick = Str::limit($base, 24, '') . $i;
+        }
+
+        return $nick;
+    }
+
+    /**
+     * El mail nunca debe tumbar el registro/login (p. ej. SMTP 550).
+     */
+    private function enviarMailRegistro(Usuarios $usuario): void
+    {
+        try {
+            Notification::route('mail', $usuario->email)->notify(new RegistroNotificacionUsuario($usuario));
+        } catch (Exception $mailError) {
+            \Log::warning('No se pudo enviar el mail de registro', [
+                'email' => $usuario->email,
+                'error' => $mailError->getMessage(),
+            ]);
+        }
     }
 }

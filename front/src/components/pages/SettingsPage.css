@@ -137,3 +137,6 @@ input[type="range"]:hover::-webkit-slider-thumb {
     }
 }
 }
+p{
+    color: var(--main-white);
+}

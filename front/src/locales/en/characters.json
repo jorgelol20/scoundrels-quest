@@ -1,0 +1,48 @@
+{
+  "kicker": "Choose your playstyle",
+  "title": "Characters",
+  "subtitle": "Every character changes the way you clear the dungeon. Review their ability and strategy before starting your run.",
+  "count_one": "{{count}} character available",
+  "count_other": "{{count}} characters available",
+  "loading": "Loading characters…",
+  "loadError": "The characters could not be loaded.",
+  "empty": "There are no characters available yet.",
+  "position": "Character {{index}} of {{total}}",
+  "noDescription": "No description available.",
+  "ability": "Ability",
+  "abilityFallback": "This character doesn't have a visible ability yet.",
+  "specialAbility": "Special ability",
+  "strategyTitle": "Ideal strategy",
+  "strategyFallback": "No fixed strategy.",
+  "styles": {
+    "fallback": "Hybrid",
+    "guerrero": "Offensive",
+    "paladin": "Defensive",
+    "elfo": "Control",
+    "mago": "Information",
+    "apostador": "Risk",
+    "herrero": "Offensive",
+    "cazador": "Economy",
+    "vampiro": "Drain",
+    "domador": "Control"
+  },
+  "strategies": {
+    "guerrero": "The ideal play is to stay around 50% health and try to grab the extra health modifiers so that 50% is actually higher, instead of always risking death from a bad decision.",
+    "paladin": "The most balanced character, since it fits any playstyle.",
+    "elfo": "With the chance to flee up to 2 times per hand, you can think things through better when you push your luck or use your ability.",
+    "mago": "The ideal character if you enjoy a slower, calmer pace, since it lets you plan several turns ahead.",
+    "apostador": "The most viable option is: not using its ability."
+  },
+  "select": "Select",
+  "aria": {
+    "list": "Scrollable character list"
+  },
+  "alt": {
+    "portrait": "Portrait of {{nombre}}",
+    "ability": "Ability icon for {{nombre}}",
+    "abilityIcon": "Ability of {{nombre}}"
+  },
+  "achievements": {
+    "iconAlt": "Achievement icon {{nombre}}"
+  }
+}

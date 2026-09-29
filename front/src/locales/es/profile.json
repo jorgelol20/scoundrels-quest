@@ -1,0 +1,76 @@
+{
+  "avatarOf": "Avatar de {{nick}}",
+  "confirmDeleteTitle": "Confirmar Eliminación",
+  "confirmDeleteMessage": "¿Estás seguro de que deseas eliminar la foto de perfil? Esta acción es irreversible.",
+  "changeAdminTitle": "Cambiar Rol de Administrador",
+  "revokeAdmin": "El usuario dejará de ser administrador. ¿Estás seguro?",
+  "grantAdmin": "El usuario pasará a ser administrador. ¿Estás seguro?",
+  "revokeTester": "El usuario dejará de ser tester. ¿Estás seguro?",
+  "grantTester": "El usuario pasará a ser tester. ¿Estás seguro?",
+  "admin": "Admin:",
+  "tester": "Tester:",
+  "yes": "Si",
+  "no": "No",
+  "played": "Jugadas:",
+  "deletePhoto": "Eliminar foto",
+  "changeAdminState": "Cambiar estado admin",
+  "changeTesterState": "Cambiar estado tester",
+  "viewProfile": "Ver perfil",
+  "serverError": "Error al conectar con el servidor",
+  "deletePhotoConfirm": "Se eliminará la foto de perfil",
+  "report": {
+    "buttonTitle": "Reportar a {{nick}}",
+    "buttonAlt": "Reportar usuario"
+  },
+  "roles": {
+    "adminTitle": "Título por ser admin",
+    "admin": "Administrador",
+    "testerTitle": "Título por ser tester",
+    "tester": "Tester",
+    "beater": "Beater"
+  },
+  "meta": {
+    "since": "Desde: {{date}}",
+    "lastSeen": "Última vez visto: {{status}}",
+    "playedCount": "Partidas jugadas: {{count}}"
+  },
+  "lastSeen": {
+    "offline": "Desconectado",
+    "online": "En línea"
+  },
+  "actions": {
+    "editProfile": "Editar perfil",
+    "logout": "Cerrar sesión"
+  },
+  "history": {
+    "title": "Historial de partidas",
+    "empty": "Sin partidas jugadas"
+  },
+  "filters": {
+    "all": "Todas",
+    "victories": "Victorias",
+    "defeats": "Derrotas",
+    "newestFirst": "Más reciente a más antigua",
+    "oldestFirst": "Más antigua a más reciente"
+  },
+  "achievements": {
+    "title": "Logros"
+  },
+  "reports": {
+    "title": "Reportes de usuario"
+  },
+  "match": {
+    "idLabel": "ID de la partida: {{id}}",
+    "time": "Tiempo: {{time}}",
+    "rounds": "Rondas superadas: {{count}}",
+    "totalGold": "Oro total obtenido:",
+    "totalHealed": "Vida total curada:",
+    "enemiesFaced": "Enemigos enfrentados:",
+    "commentPlaceholder": "Escribe tu comentario...",
+    "commentSubmit": "Comentar"
+  },
+  "comments": {
+    "deleteTitle": "Eliminar comentario",
+    "deleteMessage": "¿Seguro que quieres eliminar el comentario?"
+  }
+}

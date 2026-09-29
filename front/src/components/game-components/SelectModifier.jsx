@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import './SelectModifier.css'
 import { matchContext } from "../../context/MatchProvider.jsx";
 import Modifier from "../Modifier.jsx";
@@ -6,6 +7,7 @@ import ShopMan from '/images/ShopMan.webp'
 
 const SelectModifier = ({ setSelectModifier, rounds, setModifiersLoading }) => {
     const { getRandomsModifier } = useContext(matchContext)
+    const { t } = useTranslation('game');
     const [modifiersList, setModifiersList] = useState([])
     useEffect(() => {
         setModifiersList(getRandomsModifier(3, rounds))
@@ -26,12 +28,12 @@ const SelectModifier = ({ setSelectModifier, rounds, setModifiersLoading }) => {
                             <div className="shop-man">
                                 <div className="dialog">
                                     <div>
-                                        <p>Pues no quedan modificadores máquina.</p>
+                                        <p>{t('select.noModifiersLeft')}</p>
                                     </div>
                                 </div>
                                 <div style={{display:'flex'}}>
-                                    <img src={ShopMan} alt="ShopMan" />
-                                    <button onClick={()=>{ setModifiersLoading(false); setSelectModifier(false); }}>Pues vale...</button>
+                                    <img src={ShopMan} alt={t('select.shopManAlt')} />
+                                    <button onClick={()=>{ setModifiersLoading(false); setSelectModifier(false); }}>{t('select.close')}</button>
                                 </div>
                             </div>
                         </div>
@@ -41,7 +43,7 @@ const SelectModifier = ({ setSelectModifier, rounds, setModifiersLoading }) => {
                 className="skip-modifiers"
                 onClick={() => {setSelectModifier(false);setModifiersLoading(false)}}
                 >
-                    Saltar
+                    {t('select.skip')}
                 </button>
             </div>
         </Fragment>

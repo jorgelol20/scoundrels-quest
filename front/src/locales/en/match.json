@@ -1,0 +1,8 @@
+{
+  "win": "Victory",
+  "loss": "Defeat",
+  "playedOn": "Played on {{date}}",
+  "commentsCount": "Comment count",
+  "noModifiers": "No modifiers",
+  "avatarOf": "Avatar of {{nick}}"
+}

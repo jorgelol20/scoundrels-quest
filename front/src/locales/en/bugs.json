@@ -1,0 +1,58 @@
+{
+  "status": {
+    "abierto": "Open",
+    "en_revision": "In review",
+    "solucionado": "Resolved",
+    "descartado": "Dismissed",
+    "duplicado": "Duplicate"
+  },
+  "severity": {
+    "baja": "Low",
+    "media": "Medium",
+    "alta": "High",
+    "critica": "Critical"
+  },
+  "filters": {
+    "allStates": "All statuses"
+  },
+  "detail": {
+    "loadError": "Could not load the report.",
+    "back": "Back",
+    "reportedBy": "Reported by: {{nick}}",
+    "techInfo": "Technical information",
+    "character": "Character:",
+    "error": "Error:",
+    "activeModifiers": "Active modifiers:",
+    "handCards": "Hand cards: ({{count}})",
+    "deckCards": "Deck cards: ({{count}})",
+    "userInfo": "User information",
+    "nickLabel": "Nick:",
+    "idLabel": "Id:",
+    "isAdmin": "Is admin:",
+    "isTester": "Is tester:",
+    "yes": "Yes",
+    "no": "No",
+    "consoleLogs": "Console logs",
+    "screenshot": "Screenshot",
+    "screenshotAlt": "Bug screenshot",
+    "stateLabel": "Status",
+    "severityLabel": "Severity",
+    "save": "Save changes",
+    "saving": "Saving..."
+  },
+  "comments": {
+    "title": "Comments",
+    "empty": "No comments yet.",
+    "delete": "Delete",
+    "placeholder": "Write a comment...",
+    "submit": "Comment",
+    "sending": "Sending..."
+  },
+  "admin": {
+    "searchUsers": "Search user",
+    "title": "Bug reports ({{count}})",
+    "loadError": "Error loading reports.",
+    "noReports": "No reports{{suffix}}.",
+    "noReportsState": " with status \"{{estado}}\""
+  }
+}

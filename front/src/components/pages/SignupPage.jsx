@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useUser } from '../../hooks/useUser.js';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -17,6 +18,7 @@ import XLogo from '/images/x-icon.svg'
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const SignupPage = () => {
+    const { t } = useTranslation('auth');
     const navigate = useNavigate();
     const { user, isLoading, signup, signupError, isSingingup } = useUser();
     const [isGettingUser, setIsGettingUser] = useState(true);
@@ -93,8 +95,8 @@ const SignupPage = () => {
                             type="text"
                             ref={nickRef}
                             onChange={(e) => { nickRef.current = e.target.value }}
-                            placeholder="Nick"
-                            onInvalid={(e) => e.target.setCustomValidity("Este campo es obligatorio")}
+                            placeholder={t('signupNickPlaceholder')}
+                            onInvalid={(e) => e.target.setCustomValidity(t('signupRequiredField'))}
                             onInput={(e) => e.target.setCustomValidity("")}
                             required
                         />
@@ -104,22 +106,22 @@ const SignupPage = () => {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
-                            onInvalid={(e) => e.target.setCustomValidity("Este campo es obligatorio")}
+                            placeholder={t('signupEmailPlaceholder')}
+                            onInvalid={(e) => e.target.setCustomValidity(t('signupRequiredField'))}
                             onInput={(e) => e.target.setCustomValidity("")}
                             required
                         />
 
                         {formErrors?.password ? <><br /><label className='form-error' htmlFor="newPassword"> {formErrors.password[0]} </label><br /></> : <></>}
-                        {passwordsAreSame ? <></> : <><br /><label className='form-error'>Las contraseñas no coinciden</label><br /></>}
+                        {passwordsAreSame ? <></> : <><br /><label className='form-error'>{t('signupPasswordsMismatch')}</label><br /></>}
                         <div className='password-field'>
                             <input
                                 type={viewPassword ? 'text' : 'password'}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="newPassword"
-                                placeholder="Contraseña"
-                                onInvalid={(e) => e.target.setCustomValidity("Este campo es obligatorio")}
+                                placeholder={t('signupPasswordPlaceholder')}
+                                onInvalid={(e) => e.target.setCustomValidity(t('signupRequiredField'))}
                                 onInput={(e) => e.target.setCustomValidity("")}
                             /><button type="button" className='seePassword' onClick={() => { setViewPassword(!viewPassword) }}><img src={viewPassword ? VisibilityOn : VisibilityOff} /></button>
                         </div>
@@ -128,8 +130,8 @@ const SignupPage = () => {
                                 type={viewConfirmPassword ? 'text' : 'password'}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="Confirmar contraseña"
-                                onInvalid={(e) => e.target.setCustomValidity("Este campo es obligatorio")}
+                                placeholder={t('signupConfirmPasswordPlaceholder')}
+                                onInvalid={(e) => e.target.setCustomValidity(t('signupRequiredField'))}
                                 onInput={(e) => e.target.setCustomValidity("")}
                             /><button type="button" className='seePassword' onClick={() => { setViewConfirmPassword(!viewConfirmPassword) }}><img src={viewConfirmPassword ? VisibilityOn : VisibilityOff} /></button>
                         </div>
@@ -138,7 +140,7 @@ const SignupPage = () => {
                         <div className="custom-file-container">
                             <label htmlFor="file-upload" className="file-button">
                                 <span className="icon"><img src={Folder} /></span>
-                                <span className="text">Seleccionar Archivo</span>
+                                <span className="text">{t('signupSelectFile')}</span>
                             </label>
                             <input type="file" id="file-upload" onChange={handleFileChange} />
                             <span id="file-name" className="file-status">{avatar?.name}</span>
@@ -149,12 +151,12 @@ const SignupPage = () => {
 
                         <div className="loginButton">
                             <button type="submit" disabled={isSingingup} onClick={(event) => { startButtonSound(true) }}>
-                                {isSingingup ? 'Procesando...' : 'Registrarse'}
+                                {isSingingup ? t('signupSubmitting') : t('signupSubmit')}
                             </button>
-                            <p>¿Ya tienes cuenta? <a onClick={() => { navigate('/login') }}>¡Inicia sesión!</a></p>
+                            <p>{t('signupAlreadyAccount')} <a onClick={() => { navigate('/login') }}>{t('signupLoginLink')}</a></p>
                             <div className='social-login'>
-                                <button type='button' className='google-login' onClick={loginWithGoogle}>Google <img className='google-icon' src={GoogleLogo} /></button>
-                                <button type='button' className='google-login' onClick={loginWithX}>X <img className='google-icon' src={XLogo} /></button>
+                                <button type='button' className='google-login' onClick={loginWithGoogle}><img className='google-icon' src={GoogleLogo} /></button>
+                                <button type='button' className='google-login' onClick={loginWithX}><img className='google-icon' src={XLogo} /></button>
                             </div>
                         </div>
                     </div>
@@ -162,7 +164,7 @@ const SignupPage = () => {
                     <div className="avatar-preview-container">
                         <img
                             src={preview}
-                            alt="Avatar"
+                            alt={t('signupAvatarAlt')}
                             style={{ borderColor: color }}
                             onError={(e) => { e.target.src = Placeholder; }}
                             className="avatar-preview"

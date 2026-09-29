@@ -15,9 +15,11 @@ class UpdatePersonajeRequest extends FormRequest
     {
         return [
             'nombre' => 'sometimes|string|max:30',
-            'descripcion' => 'sometimes|string|max:300',
+            'descripcion' => 'sometimes|nullable|string|max:300',
             'imagen' => 'nullable|image|max:2048',
-            'habilidad_id' => 'sometimes|exists:habilidades,id'
+            'habilidad_id' => 'sometimes|exists:habilidades,id',
+            'activo' => 'sometimes|boolean',
+            'translations' => 'sometimes|nullable|array',
         ];
     }
 }

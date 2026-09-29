@@ -30,9 +30,9 @@ class UpdateEstadoReporteBugRequest extends FormRequest
     public function messages()
     {
         return [
-            'estado.required' => 'El estado es obligatorio.',
-            'estado.in' => 'El estado debe ser: abierto, en revisión, solucionado, descartado o duplicado.',
-            'severidad.in' => 'La severidad debe ser: baja, media, alta o crítica.',
+            'estado.required' => __('api.reporte_estado_required'),
+            'estado.in' => __('api.reporte_estado_in'),
+            'severidad.in' => __('api.reporte_severidad_in'),
         ];
     }
 }

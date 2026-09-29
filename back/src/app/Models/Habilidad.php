@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Concerns\HasTranslations;
 
 /**
  * Summary of Habilidad
  */
 class Habilidad extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     public $timestamps = false;
 
@@ -23,11 +24,13 @@ class Habilidad extends Model
         'codigo',
         'efectos',
         'coste_oro',
-        'usos_por_ronda'
+        'usos_por_ronda',
+        'translations',
     ];
 
     protected $casts = [
        'efectos' => 'array',
+       'translations' => 'array',
     ];
 
     // Relación: una habilidad tiene muchos personajes

@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useUser } from '../../hooks/useUser.js';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -14,6 +15,7 @@ import Loading from "../Loading.jsx";
 import Banner from "../structure/Banner.jsx";
 
 const ProfileEdit = () => {
+    const { t } = useTranslation('auth');
     const navigate = useNavigate();
     const {
         user,
@@ -139,7 +141,7 @@ const ProfileEdit = () => {
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 className="newPassword"
-                                placeholder="Nueva contraseña"
+                                placeholder={t('editNewPasswordPlaceholder')}
                             />
 
                             <button
@@ -151,7 +153,7 @@ const ProfileEdit = () => {
                             >
                                 <img
                                     src={viewPassword ? VisibilityOn : VisibilityOff}
-                                    alt="Mostrar contraseña"
+                                    alt={t('editShowPasswordAlt')}
                                 />
                             </button>
                         </div>
@@ -174,7 +176,7 @@ const ProfileEdit = () => {
                                 type={viewConfirmPassword ? 'text' : 'password'}
                                 value={newConfirmPassword}
                                 onChange={(e) => setNewConfirmPassword(e.target.value)}
-                                placeholder="Confirmar nueva contraseña"
+                                placeholder={t('editConfirmPasswordPlaceholder')}
                             />
 
                             <button
@@ -186,7 +188,7 @@ const ProfileEdit = () => {
                             >
                                 <img
                                     src={viewConfirmPassword ? VisibilityOn : VisibilityOff}
-                                    alt="Mostrar contraseña"
+                                    alt={t('editShowPasswordAlt')}
                                 />
                             </button>
                         </div>
@@ -203,7 +205,7 @@ const ProfileEdit = () => {
 
                         {!passwordsAreSame && (
                             <label className="form-error">
-                                Las contraseñas no coinciden
+                                {t('editPasswordsMismatch')}
                             </label>
                         )}
 
@@ -211,7 +213,7 @@ const ProfileEdit = () => {
 
                         {/* AVATAR */}
                         <label htmlFor="file-upload-avatar">
-                            Avatar
+                            {t('editAvatarLabel')}
                         </label>
 
                         <div className="custom-file-container">
@@ -221,11 +223,11 @@ const ProfileEdit = () => {
                                 className="file-button"
                             >
                                 <span className="icon">
-                                    <img src={Folder} alt="Carpeta" />
+                                    <img src={Folder} alt={t('editFolderAlt')} />
                                 </span>
 
                                 <span className="text">
-                                    Seleccionar Archivo
+                                    {t('editSelectFile')}
                                 </span>
                             </label>
 
@@ -256,7 +258,7 @@ const ProfileEdit = () => {
 
                         {/* BANNER */}
                         <label htmlFor="file-upload-banner">
-                            Banner Fondo
+                            {t('editBannerLabel')}
                         </label>
 
                         <div className="custom-file-container">
@@ -266,11 +268,11 @@ const ProfileEdit = () => {
                                 className="file-button"
                             >
                                 <span className="icon">
-                                    <img src={Folder} alt="Carpeta" />
+                                    <img src={Folder} alt={t('editFolderAlt')} />
                                 </span>
 
                                 <span className="text">
-                                    Seleccionar Archivo
+                                    {t('editSelectFile')}
                                 </span>
                             </label>
 
@@ -321,8 +323,8 @@ const ProfileEdit = () => {
                             disabled={isUpdating}
                         >
                             {isUpdating
-                                ? 'Actualizando...'
-                                : 'Actualizar'
+                                ? t('editUpdating')
+                                : t('editUpdate')
                             }
                         </button>
 
@@ -332,7 +334,7 @@ const ProfileEdit = () => {
                     <div className="avatar-preview-container">
                         <img
                             src={preview}
-                            alt="Avatar"
+                            alt={t('editAvatarAlt')}
                             style={{ borderColor: newColor }}
                             onError={(e) => {
                                 e.target.src = Placeholder;

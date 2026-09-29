@@ -1,24 +1,11 @@
 import React, { Fragment, useEffect, useState } from "react";
 import "./BugReportPage.css"
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useReportBugs } from "../../hooks/useReportBugs.js";
 import Loading from "../Loading.jsx";
 import { useUser } from "../../hooks/useUser.js";
-
-const ESTADOS = [
-    { value: 'abierto', label: 'Abierto' },
-    { value: 'en_revision', label: 'En revisión' },
-    { value: 'solucionado', label: 'Solucionado' },
-    { value: 'descartado', label: 'Descartado' },
-    { value: 'duplicado', label: 'Duplicado' },
-];
-
-const SEVERIDADES = [
-    { value: 'baja', label: 'Baja' },
-    { value: 'media', label: 'Media' },
-    { value: 'alta', label: 'Alta' },
-    { value: 'critica', label: 'Crítica' },
-];
+import { fmtDate } from "../../i18n/format.js";
 
 const parseLogsPartida = (logsPartida) => {
     if (!logsPartida) return null;
@@ -38,6 +25,25 @@ const BugReportPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useUser();
+    const { t, i18n } = useTranslation('bugs');
+
+    // `value` es el identificador que se envía al backend: NO se traduce.
+    // Las etiquetas se traducen con las claves compartidas `bugs:status.*` / `bugs:severity.*`,
+    // las mismas que usa AdminPanel.
+    const ESTADOS = [
+        { value: 'abierto', label: t('bugs:status.abierto') },
+        { value: 'en_revision', label: t('bugs:status.en_revision') },
+        { value: 'solucionado', label: t('bugs:status.solucionado') },
+        { value: 'descartado', label: t('bugs:status.descartado') },
+        { value: 'duplicado', label: t('bugs:status.duplicado') },
+    ];
+
+    const SEVERIDADES = [
+        { value: 'baja', label: t('bugs:severity.baja') },
+        { value: 'media', label: t('bugs:severity.media') },
+        { value: 'alta', label: t('bugs:severity.alta') },
+        { value: 'critica', label: t('bugs:severity.critica') },
+    ];
 
     const {
         useReporte,
@@ -112,27 +118,27 @@ const BugReportPage = () => {
     };
 
     if (isLoadingReporte) return <Loading />;
-    if (reporteError) return <p className="bug-report-page-error">No se ha podido cargar el reporte.</p>;
+    if (reporteError) return <p className="bug-report-page-error">{t('bugs:detail.loadError')}</p>;
     if (!reporte) return null;
     const logsData = parseLogsPartida(reporte.logs_partida);
 
     return (
         <Fragment>
             <div className="bug-report-page">
-                <button type="button" onClick={() => navigate(-1)}>Volver</button>
+                <button type="button" onClick={() => navigate(-1)}>{t('bugs:detail.back')}</button>
 
                 <div className="bug-report-detail">
                     <h2>{reporte.titulo}</h2>
                     <div className="bug-report-meta">
                         <span className={`tipo tipo-${reporte.tipo}`}>{reporte.tipo}</span>
-                        <span>Reportado por: {reporte.usuario?.nick ?? `Usuario#${reporte.usuario_id}`}</span>
-                        <span>{new Date(reporte.created_at).toLocaleString()}</span>
+                        <span>{t('bugs:detail.reportedBy', { nick: reporte.usuario?.nick ?? `Usuario#${reporte.usuario_id}` })}</span>
+                        <span>{fmtDate(i18n.language, reporte.created_at, { dateStyle: 'short', timeStyle: 'short' })}</span>
                     </div>
 
                     <p className="bug-report-descripcion">{reporte.descripcion}</p>
                     {logsData && (
                         <div className="bug-report-tecnico">
-                            <h4>Información técnica</h4>
+                            <h4>{t('bugs:detail.techInfo')}</h4>
 
                             {logsData.raw ? (
                                 <pre>{logsData.raw}</pre>
@@ -140,21 +146,21 @@ const BugReportPage = () => {
                                 <div className="bug-report-tecnico-grid">
                                     {logsData.personaje && (
                                         <div className="bug-report-tecnico-item">
-                                            <span className="label">Personaje: </span>
+                                            <span className="label">{t('bugs:detail.character')}{' '}</span>
                                             <span className="value">{logsData.personaje}</span>
                                         </div>
                                     )}
 
                                     {logsData.error && (
                                         <div className="bug-report-tecnico-item full">
-                                            <span className="label">Error: </span>
+                                            <span className="label">{t('bugs:detail.error')}{' '}</span>
                                             <span className="value error-value">{logsData.error}</span>
                                         </div>
                                     )}
 
                                     {Array.isArray(logsData.modificadores) && logsData.modificadores.length > 0 && (
                                         <div className="bug-report-tecnico-item full">
-                                            <span className="label">Modificadores activos:</span>
+                                            <span className="label">{t('bugs:detail.activeModifiers')}</span>
                                             <div className="modificadores-list">
                                                 {logsData.modificadores.map((mod, idx) => (
                                                     <span key={mod.id ?? idx} className="modificador-badge">
@@ -166,7 +172,7 @@ const BugReportPage = () => {
                                     )}
                                     {Array.isArray(logsData.room) && logsData.room.length > 0 && (
                                         <div className="bug-report-tecnico-item full">
-                                            <span className="label">Cartas en mano: ({logsData.room.length})</span>
+                                            <span className="label">{t('bugs:detail.handCards', { count: logsData.room.length })}</span>
                                             <div className="room-list">
                                                 {logsData.room.map((card, index) => (
                                                     <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos ?? 'Sin efectos')}</pre>
@@ -176,7 +182,7 @@ const BugReportPage = () => {
                                     )}
                                     {Array.isArray(logsData.dungeon) && logsData.dungeon.length > 0 && (
                                         <div className="bug-report-tecnico-item full">
-                                            <span className="label">Cartas en baraja: ({logsData.dungeon.length})</span>
+                                            <span className="label">{t('bugs:detail.deckCards', { count: logsData.dungeon.length })}</span>
                                             <div className="dungeon-list">
                                                 {logsData.map((card, index) => (
                                                     <pre> {index} - {card.key} {card.valor} {card.palo} {JSON.stringify(card.efectos ?? 'Sin efectos')}</pre>
@@ -186,12 +192,12 @@ const BugReportPage = () => {
                                     )}
                                     {logsData[0] && (
                                         <div className="bug-report-tecnico-item full">
-                                            <span className="label">Información del usuario</span>
+                                            <span className="label">{t('bugs:detail.userInfo')}</span>
                                             <div className="user-info">
-                                                <pre>Nick: {logsData[0]?.nick}</pre>
-                                                <pre>Id: {logsData[0]?.id}</pre>
-                                                <pre>Es admin: {logsData[0]?.es_admin ? 'Si' : 'No'}</pre>
-                                                <pre>Es tester: {logsData[0]?.is_tester ? 'Si' : 'No'}</pre>
+                                                <pre>{t('bugs:detail.nickLabel')} {logsData[0]?.nick}</pre>
+                                                <pre>{t('bugs:detail.idLabel')} {logsData[0]?.id}</pre>
+                                                <pre>{t('bugs:detail.isAdmin')} {logsData[0]?.es_admin ? t('bugs:detail.yes') : t('bugs:detail.no')}</pre>
+                                                <pre>{t('bugs:detail.isTester')} {logsData[0]?.is_tester ? t('bugs:detail.yes') : t('bugs:detail.no')}</pre>
                                                 <img src={logsData[0]?.avatar} alt="" width={"50px"} height={"50px"}/>
                                                 <img src={logsData[0]?.banner} alt="" width={"200px"} height={"80px"}/>
                                             </div>
@@ -199,7 +205,7 @@ const BugReportPage = () => {
                                     )}
                                     {logsData.logs && (
                                         <div className="bug-report-tecnico-item full">
-                                            <span className="label">Logs de consola</span>
+                                            <span className="label">{t('bugs:detail.consoleLogs')}</span>
                                             <pre>{logsData.logs}</pre>
                                         </div>
                                     )}
@@ -210,16 +216,16 @@ const BugReportPage = () => {
 
                     {reporte.screenshot_url && (
                         <div className="bug-report-screenshot">
-                            <h4>Captura</h4>
+                            <h4>{t('bugs:detail.screenshot')}</h4>
                             <a href={reporte.screenshot_url} target="_blank" rel="noreferrer">
-                                <img src={reporte.screenshot_url} alt="Captura del bug" />
+                                <img src={reporte.screenshot_url} alt={t('bugs:detail.screenshotAlt')} />
                             </a>
                         </div>
                     )}
 
                     <div className="bug-report-controls">
                         <div className="bug-report-field">
-                            <label htmlFor="estado">Estado</label>
+                            <label htmlFor="estado">{t('bugs:detail.stateLabel')}</label>
                             <select id="estado" value={estado} onChange={(e) => setEstado(e.target.value)}>
                                 {ESTADOS.map((e) => (
                                     <option key={e.value} value={e.value}>{e.label}</option>
@@ -228,7 +234,7 @@ const BugReportPage = () => {
                         </div>
 
                         <div className="bug-report-field">
-                            <label htmlFor="severidad">Severidad</label>
+                            <label htmlFor="severidad">{t('bugs:detail.severityLabel')}</label>
                             <select id="severidad" value={severidad} onChange={(e) => setSeveridad(e.target.value)}>
                                 {SEVERIDADES.map((s) => (
                                     <option key={s.value} value={s.value}>{s.label}</option>
@@ -237,18 +243,18 @@ const BugReportPage = () => {
                         </div>
 
                         <button type="button" onClick={handleGuardarCambios} disabled={isSaving}>
-                            {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                            {isSaving ? t('bugs:detail.saving') : t('bugs:detail.save')}
                         </button>
                     </div>
                 </div>
 
                 <div className="bug-report-comentarios">
-                    <h3>Comentarios</h3>
+                    <h3>{t('bugs:comments.title')}</h3>
 
                     {isLoadingComentarios && <Loading />}
 
                     {!isLoadingComentarios && comentarios?.length === 0 && (
-                        <p>Aún no hay comentarios.</p>
+                        <p>{t('bugs:comments.empty')}</p>
                     )}
 
                     {!isLoadingComentarios && comentarios?.length > 0 && (
@@ -257,10 +263,10 @@ const BugReportPage = () => {
                                 <div key={c.id} className="bug-report-comentario">
                                     <span className="comentario-autor">{c.usuario?.nick ?? `Usuario#${c.usuario_id}`}</span>
                                     <p className="comentario-texto">{c.comentario}</p>
-                                    <span className="comentario-fecha">{new Date(c.created_at).toLocaleString()}</span>
+                                    <span className="comentario-fecha">{fmtDate(i18n.language, c.created_at, { dateStyle: 'short', timeStyle: 'short' })}</span>
                                     {(user?.id === c.usuario_id || user?.es_admin) && (
                                         <button type="button" onClick={() => handleEliminarComentario(c.id)}>
-                                            Eliminar
+                                            {t('bugs:comments.delete')}
                                         </button>
                                     )}
                                 </div>
@@ -274,10 +280,10 @@ const BugReportPage = () => {
                             onChange={(e) => setNuevoComentario(e.target.value)}
                             maxLength={250}
                             rows={2}
-                            placeholder="Escribe un comentario..."
+                            placeholder={t('bugs:comments.placeholder')}
                         />
                         <button type="submit" disabled={isSendingComentario || !nuevoComentario.trim()}>
-                            {isSendingComentario ? 'Enviando...' : 'Comentar'}
+                            {isSendingComentario ? t('bugs:comments.sending') : t('bugs:comments.submit')}
                         </button>
                     </form>
                 </div>

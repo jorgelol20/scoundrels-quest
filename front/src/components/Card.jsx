@@ -98,6 +98,11 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
     const colorRef = useRef('');
 
     // --- SISTEMA DE CACHÉ PARA LA CARTA ---
+    // pixelRatio capado: 2x en caché por carta es muy caro en Firefox/integradas.
+    // Firefox usa 1, el resto como máximo 1.5 (el pixelart no gana con más).
+    const cachePixelRatio = typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent)
+        ? 1
+        : Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 1.5);
     useEffect(() => {
         const imagesLoaded = image && suit && (!hasEffect || effectIcon);
 
@@ -111,7 +116,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
                         y: -5,
                         width: 130,     // Un poco más ancho que los 120 del Rect
                         height: 160,    // Un poco más alto que los 150 del Rect
-                        pixelRatio: 2   // Forzamos alta densidad para que fuentes y pixelart se vean nítidos
+                        pixelRatio: cachePixelRatio
                     });
 
                     // Desactivamos el suavizado de curvas en el canvas interno del caché
@@ -127,7 +132,7 @@ const Card = forwardRef(({ cardInfo, x, y, onDragEnd, onClick, isDraggable = tru
 
             return () => clearTimeout(timeoutId);
         }
-    }, [image, suit, effectIcon, hasEffect, cardInfo?.valor, strokeWidth, onDeck, isWizard]);
+    }, [image, suit, effectIcon, hasEffect, cardInfo?.valor, strokeWidth, onDeck, isWizard, cachePixelRatio]);
 
     const handleDragEndInternal = (e) => {
         const finalX = e.target.x();

@@ -1,8 +1,10 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { useUser } from '../../hooks/useUser.js';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { settingsContext } from '../../context/SettingsProvider.jsx';
+import { fmtDate, fmtRel } from '../../i18n/format.js';
 
 import Placeholder from '/images/placeholder.webp'
 import ReportUserIcon from '/images/report_user.svg'
@@ -17,6 +19,7 @@ import { bugReportContext } from '../../context/BugReportProvider.jsx';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation('profile');
     const { startButtonSound, setBannerImage } = useContext(settingsContext)
     const {openBugReport} = useContext(bugReportContext);
 
@@ -40,7 +43,7 @@ const ProfilePage = () => {
                 localStorage.removeItem('auth_token');
                 navigate('/login');
             } else {
-                return <p>Error al conectar con el servidor</p>
+                return <p>{t('serverError')}</p>
             }
         }
     }, [isLoading, nick])
@@ -100,12 +103,14 @@ const ProfilePage = () => {
 
     // Controlar y formatear la fecha de la última vez que el usuario se conectó.
     const handleLastTimeConnected = (lastTimeConnected) => {
+        const lang = i18n.language;
 
-        if (!lastTimeConnected) return "Desconectado";
+        if (!lastTimeConnected) return t('lastSeen.offline');
 
         // Convertir la fecha de la BD (ultima_vez_visto) a milisegundos
         const formatedDate = lastTimeConnected.replace(' ', 'T') + 'Z';
         const sendedDate = new Date(formatedDate).getTime();
+        if (Number.isNaN(sendedDate)) return t('lastSeen.offline');
         const now = Date.now();
 
         // Pasa la hora a milisegundos y se comprueba la diferencia.
@@ -113,28 +118,24 @@ const ProfilePage = () => {
 
         // Menos de 60 segundos
         if (diferenceInSeconds < 60) {
-            return "En línea";
+            return t('lastSeen.online');
         }
 
         // Menos de 1 hora
         const diferenceInMinutes = Math.floor(diferenceInSeconds / 60);
         if (diferenceInMinutes < 60) {
-            return `Hace ${diferenceInMinutes} ${diferenceInMinutes === 1 ? 'minuto' : 'minutos'}`;
+            return fmtRel(lang, -diferenceInMinutes, 'minute');
         }
 
         // Menos de 24 horas
         const diferenceInHours = Math.floor(diferenceInMinutes / 60);
         if (diferenceInHours < 24) {
-            return `Hace ${diferenceInHours} ${diferenceInHours === 1 ? 'hora' : 'horas'}`;
+            return fmtRel(lang, -diferenceInHours, 'hour');
         }
 
-        // Más de 24 horas
+        // Más de 24 horas (con -1 "ayer" y "el nn de mes" para días mayores)
         const diferenceInDays = Math.floor(diferenceInHours / 24);
-        if (diferenceInDays === 1) {
-            return "Ayer";
-        } else {
-            return `Hace ${diferenceInDays} días`;
-        }
+        return fmtRel(lang, -diferenceInDays, 'day');
     };
 
 
@@ -183,39 +184,39 @@ const ProfilePage = () => {
             <div className='profile-container' style={{ display: "flex", justifyContent: 'center' }}>
                 <button 
                 className='report-user-button' 
-                title={`Reportar a ${userInfo?.nick}`}
+                title={t('report.buttonTitle', { nick: userInfo?.nick })}
                 onClick={()=>openBugReport(null,true,userInfo)}
                 >
-                    <img src={ReportUserIcon} alt="Reportar usuario"/>
+                    <img src={ReportUserIcon} alt={t('report.buttonAlt')}/>
                 </button>
                 <div className='user-background'>
                     <div className='userInfo'>
                         <div className='user-profile'>
                             <div className='user-basic' style={{ position: 'relative' }}>
-                                <img className='user-avatar' style={{ borderColor: userInfo?.color }} src={userInfo?.avatar !== "" && userInfo?.avatar ? userInfo?.avatar : Placeholder} alt={`Avatar de ${userInfo?.nick}`} />
-                                {user.es_admin ? <button className="delete-button" onClick={() => { confirm("Se eliminará la foto de perfil") ? handleDelete() : null }}><img className="delete-icon" src={DeleteIcon} alt="" /></button> : <></>}
+                                <img className='user-avatar' style={{ borderColor: userInfo?.color }} src={userInfo?.avatar !== "" && userInfo?.avatar ? userInfo?.avatar : Placeholder} alt={t('avatarOf', { nick: userInfo?.nick })} />
+                                {user.es_admin ? <button className="delete-button" onClick={() => { confirm(t('deletePhotoConfirm')) ? handleDelete() : null }}><img className="delete-icon" src={DeleteIcon} alt="" /></button> : <></>}
                                 <h1 className={userInfo?.es_admin ? 'admin userNick' : userInfo.is_tester ? 'tester userNick' : 'user userNick'}>{userInfo.nick}</h1>
                                 <div className='titles'>
-                                    {userInfo?.es_admin ? <h3 title='Título por ser admin'>➤ <span className='admin'>Administrador</span></h3> : <></>}
-                                    {userInfo?.is_tester ? <h3 title='Título por ser tester' >➤ <span className='tester'>{userInfo.nick === "krm2707" ? 'Beater' : 'Tester'}</span></h3> : <></>}
+                                    {userInfo?.es_admin ? <h3 title={t('roles.adminTitle')}>➤ <span className='admin'>{t('roles.admin')}</span></h3> : <></>}
+                                    {userInfo?.is_tester ? <h3 title={t('roles.testerTitle')} >➤ <span className='tester'>{userInfo.nick === "krm2707" ? t('roles.beater') : t('roles.tester')}</span></h3> : <></>}
                                 </div>
                             </div>
                             <div>
-                                <p>Desde: {new Date(userInfo.created_at).toLocaleDateString('es-ES')}</p>
-                                <p>Última vez visto: {handleLastTimeConnected(userInfo?.ultima_vez_visto)}</p>
-                                <p>Partidas jugadas: {userInfo?.tiene_jugadas?.length}</p>
+                                <p>{t('meta.since', { date: fmtDate(i18n.language, userInfo.created_at) })}</p>
+                                <p>{t('meta.lastSeen', { status: handleLastTimeConnected(userInfo?.ultima_vez_visto) })}</p>
+                                <p>{t('meta.playedCount', { count: userInfo?.tiene_jugadas?.length })}</p>
                             </div>
                             <div className='user-buttons'>
                                 {canEdit ?
                                     <>
-                                        <button onClick={(event) => { startButtonSound(true); navigate(`/perfil/${userInfo.nick}/editar`) }}>Editar perfil</button>
-                                        <button onClick={(event) => { startButtonSound(true); logout() }}>Cerrar sesión</button>
+                                        <button onClick={(event) => { startButtonSound(true); navigate(`/perfil/${userInfo.nick}/editar`) }}>{t('actions.editProfile')}</button>
+                                        <button onClick={(event) => { startButtonSound(true); logout() }}>{t('actions.logout')}</button>
                                     </>
                                     : <></>}
                             </div>
                         </div>
                         <div className='user-history'>
-                            <h1>Historial de partidas</h1>
+                            <h1>{t('history.title')}</h1>
                             <section className='match-history'>
                                 {userMatchs?.length > 0 && showMatches ?
                                     userMatchs?.map((match, index) => {
@@ -227,22 +228,22 @@ const ProfilePage = () => {
                                             return <div key={index + crypto.randomUUID()} onClick={() => { navigate(`/partida/${match.id}`) }}><Match key={index + crypto.randomUUID()} match={match} /></div>
                                         }
                                     })
-                                    : <h1>Sin partidas jugadas</h1>}
+                                    : <h1>{t('history.empty')}</h1>}
                             </section>
                             <form style={{ display: 'flex', justifyContent: 'start', alignItems: 'center' }}>
                                 <select name="show" id="show" onChange={(e) => { handleFilterChange(e.currentTarget.value) }}>
-                                    <option value="all">Todas</option>
-                                    <option style={{ color: 'var(--main-gold)' }} value="victory">Victorias</option>
-                                    <option style={{ color: 'var(--main-red)' }} value="lose">Derrotas</option>
+                                    <option value="all">{t('filters.all')}</option>
+                                    <option style={{ color: 'var(--main-gold)' }} value="victory">{t('filters.victories')}</option>
+                                    <option style={{ color: 'var(--main-red)' }} value="lose">{t('filters.defeats')}</option>
                                 </select>
                                 <select defaultValue={0} name="order" id="order" onChange={(e) => { handleOrderChange(e.currentTarget.value) }}>
-                                    <option value="1-0">Más reciente a más antigua</option>
-                                    <option value="0-1">Más antigua a más reciente</option>
+                                    <option value="1-0">{t('filters.newestFirst')}</option>
+                                    <option value="0-1">{t('filters.oldestFirst')}</option>
                                 </select>
                             </form>
                         </div>
                         <div className='achievements'>
-                            <h1>Logros</h1>
+                            <h1>{t('achievements.title')}</h1>
                             <div className='user-achievements'>
                                 {userAchievements.length > 0 && userAchievements.sort((a, b) => a.codigo.localeCompare(b.codigo)).map(achievement => <Achievement key={achievement.nombre} achievementInfo={achievement} />)}
                             </div>
@@ -250,7 +251,7 @@ const ProfilePage = () => {
                     </div>
                     {canEdit || user?.es_admin && userInfo.reportes_bug.lenth > 0 ?
                         <div className='user-reports'>
-                            <h1>Reportes de usuario</h1>
+                            <h1>{t('reports.title')}</h1>
                             <div className='user-reports-list'>
                                 {userInfo.reportes_bug.map((reporte) => (
                                 <div key={reporte.id} className="bug-report-row"  onClick={()=>{navigate(`/reportes-bug/${reporte.id}`)}}>

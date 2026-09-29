@@ -1,0 +1,76 @@
+{
+  "avatarOf": "Avatar of {{nick}}",
+  "confirmDeleteTitle": "Confirm deletion",
+  "confirmDeleteMessage": "Are you sure you want to delete the profile picture? This action is irreversible.",
+  "changeAdminTitle": "Change administrator role",
+  "revokeAdmin": "The user will stop being an administrator. Are you sure?",
+  "grantAdmin": "The user will become an administrator. Are you sure?",
+  "revokeTester": "The user will stop being a tester. Are you sure?",
+  "grantTester": "The user will become a tester. Are you sure?",
+  "admin": "Admin:",
+  "tester": "Tester:",
+  "yes": "Yes",
+  "no": "No",
+  "played": "Played:",
+  "deletePhoto": "Delete photo",
+  "changeAdminState": "Change admin status",
+  "changeTesterState": "Change tester status",
+  "viewProfile": "View profile",
+  "serverError": "Error connecting to the server",
+  "deletePhotoConfirm": "The profile photo will be deleted",
+  "report": {
+    "buttonTitle": "Report {{nick}}",
+    "buttonAlt": "Report user"
+  },
+  "roles": {
+    "adminTitle": "Title for being admin",
+    "admin": "Administrator",
+    "testerTitle": "Title for being tester",
+    "tester": "Tester",
+    "beater": "Beater"
+  },
+  "meta": {
+    "since": "Since: {{date}}",
+    "lastSeen": "Last seen: {{status}}",
+    "playedCount": "Matches played: {{count}}"
+  },
+  "lastSeen": {
+    "offline": "Offline",
+    "online": "Online"
+  },
+  "actions": {
+    "editProfile": "Edit profile",
+    "logout": "Log out"
+  },
+  "history": {
+    "title": "Match history",
+    "empty": "No matches played"
+  },
+  "filters": {
+    "all": "All",
+    "victories": "Victories",
+    "defeats": "Defeats",
+    "newestFirst": "Newest to oldest",
+    "oldestFirst": "Oldest to newest"
+  },
+  "achievements": {
+    "title": "Achievements"
+  },
+  "reports": {
+    "title": "User reports"
+  },
+  "match": {
+    "idLabel": "Match ID: {{id}}",
+    "time": "Time: {{time}}",
+    "rounds": "Rounds cleared: {{count}}",
+    "totalGold": "Total gold earned:",
+    "totalHealed": "Total health healed:",
+    "enemiesFaced": "Enemies faced:",
+    "commentPlaceholder": "Write your comment...",
+    "commentSubmit": "Comment"
+  },
+  "comments": {
+    "deleteTitle": "Delete comment",
+    "deleteMessage": "Are you sure you want to delete the comment?"
+  }
+}

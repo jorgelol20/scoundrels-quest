@@ -22,7 +22,7 @@ class UpdateReporteBugRequest extends FormRequest
             'tipo' => [
                 'sometimes',
                 'string',
-                'in:visual,jugabilidad,rendimiento,error,otro'
+                'in:visual,jugabilidad,rendimiento,error,usuario,otro'
             ],
             'plataforma' => 'sometimes|nullable|string|max:100',
             'screenshot' => 'sometimes|image|mimes:jpg,jpeg,png,webp|max:4096',
@@ -32,15 +32,15 @@ class UpdateReporteBugRequest extends FormRequest
     public function messages()
     {
         return [
-            'descripcion.string' => 'La descripción no puede estar vacía.',
-            'descripcion.max' => 'La descripción no puede superar los 2000 carácteres.',
-            'logs_partida.string' => 'Los logs de la partida no son válidos.',
-            'tipo.in' => 'El tipo debe ser: visual, jugabilidad, rendimiento, error u otro.',
-            'plataforma.string' => 'La plataforma no es válida.',
-            'plataforma.max' => 'La plataforma no puede superar los 100 carácteres.',
-            'screenshot.image' => 'Solo se admiten los formatos JPG, JPEG, PNG y WEBP',
-            'screenshot.mimes' => 'Solo se admiten los formatos JPG, JPEG, PNG y WEBP',
-            'screenshot.max' => 'Tamaño máximo de la captura: 4MB',
+            'descripcion.string' => __('api.reporte_descripcion_string'),
+            'descripcion.max' => __('api.reporte_descripcion_max'),
+            'logs_partida.string' => __('api.reporte_logs_string'),
+            'tipo.in' => __('api.reporte_tipo_in'),
+            'plataforma.string' => __('api.reporte_plataforma_string'),
+            'plataforma.max' => __('api.reporte_plataforma_max'),
+            'screenshot.image' => __('api.reporte_screenshot_image'),
+            'screenshot.mimes' => __('api.reporte_screenshot_mimes'),
+            'screenshot.max' => __('api.reporte_screenshot_max'),
         ];
     }
 }

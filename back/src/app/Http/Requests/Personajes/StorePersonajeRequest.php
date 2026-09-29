@@ -17,7 +17,9 @@ class StorePersonajeRequest extends FormRequest
             'nombre' => 'required|string|max:30',
             'descripcion' => 'nullable|string|max:300',
             'imagen' => 'nullable|image|max:2048',
-            'habilidad_id' => 'required|exists:habilidades,id'
+            'habilidad_id' => 'required|exists:habilidades,id',
+            'activo' => 'sometimes|boolean',
+            'translations' => 'sometimes|nullable|array',
         ];
     }
 }

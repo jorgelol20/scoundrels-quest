@@ -1,8 +1,7 @@
 import { Fragment, useCallback, useContext, useEffect, useRef, useState, ViewTransition } from "react";
-import { Stage, Layer, Text, Group, Rect } from 'react-konva';
 // 1. Librerías externas (React, React Router, Lodash, etc.)
 import { useNavigate } from "react-router-dom";
-import lodash from 'lodash';
+import shuffle from 'lodash/shuffle';
 import useImage from "use-image";
 
 // 2. Contextos y Hooks propios
@@ -10,14 +9,61 @@ import { matchContext } from "../../context/MatchProvider.jsx";
 import { settingsContext } from "../../context/SettingsProvider.jsx";
 import { useUser } from "../../hooks/useUser.js";
 import { bugReportContext } from "../../context/BugReportProvider.jsx";
+import { uid } from "../../game/utils.js";
+import { applyCardEffectToState, resolveSealExpiry } from "../../game/cardEffects.js";
+import { shouldStartNewGame } from "../../game/boot.js";
+import { applyModifierToState } from "../../game/modifiers.js";
+import {
+    enemyQuantityForRound,
+    buildShuffledDeck,
+    prependToDeck,
+    insertAndShuffle,
+} from "../../game/cards.js";
+import {
+    calcCombatDamage,
+    calcGoldReward,
+    resolveDeath,
+    calcWeaponLifesteal,
+    calcBarehandLifesteal,
+} from "../../game/combat.js";
+import {
+    getMinibossEffectName,
+    planMinibossSpawn,
+    planMinibossDefeat,
+    countChamanPower,
+} from "../../game/minibosses.js";
+import {
+    applyPassiveToState,
+    warriorScare,
+    elfCaltrops,
+    calcVampireAbility,
+    applyBounty,
+} from "../../game/characters.js";
+import {
+    calcStageLayout,
+    PORTRAIT_DUNGEON_ZONE,
+    PORTRAIT_DISCARD_ZONE,
+    PORTRAIT_WEAPON_ZONE,
+} from "../../game/layout.js";
+import { useScheduledTimeouts } from "../../hooks/game/useScheduledTimeouts.js";
+import { usePlayerState } from "../../hooks/game/usePlayerState.js";
+import {
+    useBoardState,
+    DUNGEON_ZONE,
+    DISCARD_ZONE,
+    WEAPON_ZONE,
+} from "../../hooks/game/useBoardState.js";
+import { useTimer } from "../../hooks/game/useTimer.js";
+import { useGamePersistence } from "../../hooks/game/useGamePersistence.js";
 
 // 3. Componentes de tu aplicación
-import Card from "../Card";
 import SelectCharacter from "../game-components/SelectCharacter.jsx";
 import SelectModifier from "../game-components/SelectModifier.jsx";
-import Modifier from "../Modifier.jsx";
 import Loading from "../Loading.jsx";
 import GameShop from "../game-components/GameShop.jsx";
+import GameHud from "../game-components/GameHud.jsx";
+import GameOverMenu from "../game-components/GameOverMenu.jsx";
+import GameBoard from "../game-components/GameBoard.jsx";
 
 // 4. Estilos CSS
 import './GamePage.css';
@@ -42,9 +88,8 @@ import GoldAnimation from '/images/gold.webp';
 import AllDamageAnimation from '/images/animations/AllDamageAnimation.webp';
 import DamageAnimation from '/images/animations/DamageAnimation.webp';
 import ConfirmationModal from "../modals/ConfirmationModal.jsx";
-import PlayerEffects from "../game-components/PlayerEffects.jsx";
-import TooltipLayer from "../game-components/TooltipLayer.jsx";
 import ErrorBoundary from "../structure/ErrorBoundary.jsx";
+import { useTranslation } from "react-i18next";
 
 // 8. Iconos de efectos
 import PoisonIcon from '/images/cardEffects/Poison.webp';
@@ -69,8 +114,9 @@ const GamePageInner = () => {
     // =====================================================
 
     const navigate = useNavigate();
+    const { t } = useTranslation('game');
     const { startButtonSound, startPlayCardSound, startPlaceCardSound, showLogs } = useContext(settingsContext)
-    const { matchDeck, character, activeModifiers: modifiers, setNewDeck, setNewMatchDeck, setNewCharacter, startNewGame, addCardToMatchDeck, gameLoading, getWeapon, getHealItem, getRandomMiniboss, getHairball, endGame, updateActualGame, setActiveModifiers, setGameLoading, addEnemysToMatchDeck, addEnemyToMatchDeck, handleNewAchievement, deleteCardFromMatchDeck, getCustomSlime } = useContext(matchContext);
+    const { matchDeck, character, activeModifiers: modifiers, setNewDeck, setNewMatchDeck, setNewCharacter, startNewGame, addCardToMatchDeck, gameLoading, baseDeck, getWeapon, getHealItem, getRandomMiniboss, getHairball, endGame, updateActualGame, saveLossOnUnload, setActiveModifiers, setGameLoading, addEnemysToMatchDeck, addEnemyToMatchDeck, handleNewAchievement, deleteCardFromMatchDeck, getCustomSlime, trackMissionEvent, resetMissions } = useContext(matchContext);
     const { user, isLoading } = useUser();
     const { openBugReport } = useContext(bugReportContext);
 
@@ -97,22 +143,29 @@ const GamePageInner = () => {
     const logsRef = useRef([]);
     const [isRestarting, setIsRestarting] = useState(false);
 
-    // Timer
-    const formatedTimeRef = useRef(null);
-    const timeRef = useRef(0);
-    const intervalRef = useRef(null);
+    // Timer (Fase 2: front/src/hooks/game/useTimer.js).
+    // Se mantienen los nombres timeRef/formatedTimeRef/stopTimer
+    // para no tocar los call sites existentes.
+    const { timeRef, formatedTimeRef, start: startTimer, stop: stopTimer, reset: resetTimer } = useTimer(t('game:hud.timeLabel'));
+    // Persistencia (Fase 2: front/src/hooks/game/useGamePersistence.js).
+    // Funciones estables: seguras en effects con deps [].
+    const { resetSaveFlag, hasActiveGame, hasCharacter, saveExit, saveAuto, saveManual } = useGamePersistence({
+        user,
+        character,
+        gameWin,
+        rounds,
+        enemysDefeated,
+        endGame,
+        updateActualGame,
+    });
 
     // Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Vida
-    const [maxHealth, setMaxHealth] = useState(20);
-    const [health, setHealth] = useState(20);
+    // Vida y oro (Fase 4: usePlayerState). healedRef es flag de ronda (flujo).
     const healedRef = useRef(null);
-    const [healthIcon, setHealthIcon] = useState(FullHealthIcon);
 
-    // Oro
-    const [gold, setGold] = useState(0);
+    // Tienda (flujo, se queda)
     const [shopAvailable, setShopAvailable] = useState(false);
     const [boughtCards, setBoughtCards] = useState(new Map());
 
@@ -126,33 +179,44 @@ const GamePageInner = () => {
         });
     }
 
-    // Cartas y zonas Konva
-    const layerRef = useRef(null);
+    // Tablero (Fase 4: useBoardState). canBeClicked/tooltip/overDungeonZone
+    // son UI efímera y se quedan.
     const [canBeClicked, setCanBeClicked] = useState(true);
-    const cardRefs = useRef({});
-    const [room, setRoom] = useState([]);
-    const [DUNGEON_ZONE, setDUNGEON_ZONE] = useState({ x: 10, y: 5, width: 130, height: 160 });
-    const [dungeon, setDungeon] = useState([]);
-    const [DISCARD_ZONE, setDISCARD_ZONE] = useState({ x: 650, y: 200, width: 130, height: 160 });
     const [overDungeonZone, setOverDungeonZone] = useState(false);
-    const [discardPile, setDiscardPile] = useState([]);
-    const [WEAPON_ZONE, setWEAPON_ZONE] = useState({ x: 200, y: 200, width: 400, height: 240 });
-    const [weapon, setWeapon] = useState(null);
-    const [slainMonsters, setSlainMonsters] = useState([]);
     const [tooltip, setTooltip] = useState(null);
 
-    // Layout
-    const VIRTUAL_WIDTH = 800;
-    const [layout, setLayout] = useState(() => {
-        const isDesktop = window.innerWidth > 1024;
-        const physicalWidth = isDesktop ? window.innerWidth / 2 : window.innerWidth / 1.5;
-        const physicalHeight = window.innerHeight;
-        return {
-            width: physicalWidth,
-            height: physicalHeight,
-            scale: physicalWidth / VIRTUAL_WIDTH,
+    // Layout del tablero (game/layout.js). Se inicializa con la ventana
+    // y se corrige al medir el contenedor real (ResizeObserver).
+    // Callback ref (no effect []): el wrapper no existe en las ramas
+    // tempranas (Loading/SelectCharacter), así que se observa al aparecer.
+    const boardObserverRef = useRef(null);
+    const [layout, setLayout] = useState(() => calcStageLayout(window.innerWidth, window.innerHeight));
+    const observeBoard = useCallback((el) => {
+        if (boardObserverRef.current) {
+            boardObserverRef.current.disconnect();
+            boardObserverRef.current = null;
+        }
+        if (!el || typeof ResizeObserver === 'undefined') return;
+        const update = () => {
+            const rect = el.getBoundingClientRect();
+            if (rect.width < 10 || rect.height < 10) return;
+            const next = calcStageLayout(rect.width, rect.height);
+            setLayout(prev => (
+                prev && prev.mode === next.mode
+                && prev.width === next.width && prev.height === next.height
+                    ? prev
+                    : next
+            ));
         };
-    });
+        update();
+        const observer = new ResizeObserver(update);
+        observer.observe(el);
+        boardObserverRef.current = observer;
+    }, []);
+    const layoutMode = layout.mode;
+    const dungeonZone = layoutMode === 'portrait' ? PORTRAIT_DUNGEON_ZONE : DUNGEON_ZONE;
+    const discardZone = layoutMode === 'portrait' ? PORTRAIT_DISCARD_ZONE : DISCARD_ZONE;
+    const weaponZone = layoutMode === 'portrait' ? PORTRAIT_WEAPON_ZONE : WEAPON_ZONE;
 
 
 
@@ -233,6 +297,9 @@ const GamePageInner = () => {
     const breakWeapon = useRef(false);
     const souleaterTurns = useRef(0);
     const sealTurns = useRef(0);
+    // Disponibilidad al aplicar el sello: al expirar se restaura ESTO,
+    // no `true` a ciegas (fix bug sello arcano vs habilidad ya usada).
+    const sealedFromAvailableRef = useRef(true);
 
     // Minibosses
     const [minibossActive, setMinibossActive] = useState(false);
@@ -255,64 +322,55 @@ const GamePageInner = () => {
     const spiderPartsLeft = useRef(0);
     const webTurns = useRef(0);
 
-    // Animaciones
-    const [healthAnimation, setHealthAnimation] = useState(null);
-    const [goldAnimation, setGoldAnimation] = useState(null);
-    const [healthAnimationValue, setHealthAnimationValue] = useState(null);
-    const [goldAnimationValue, setGoldAnimationValue] = useState(null);
-
     // Control de robo
     const isDrawingRef = useRef(false);
 
     const hasStartedNewGameRef = useRef(false);
 
-    const gameSavedRef = useRef(false);
-
-    const userRef = useRef(user);
-    const characterRef = useRef(character);
-    const gameWinRef = useRef(gameWin);
-    const roundsRef = useRef(rounds);
-    const modifiersRef = useRef(modifiers);
-    const enemysDefeatedRef = useRef(enemysDefeated);
-
-    useEffect(() => { userRef.current = user; }, [user]);
-    useEffect(() => { characterRef.current = character; }, [character]);
-    useEffect(() => { gameWinRef.current = gameWin; }, [gameWin]);
-    useEffect(() => { roundsRef.current = rounds; }, [rounds]);
-    useEffect(() => { modifiersRef.current = modifiers; }, [modifiers]);
-    useEffect(() => { enemysDefeatedRef.current = enemysDefeated; }, [enemysDefeated]);
+    // Guardado y refs espejo (Fase 2: useGamePersistence).
+    // modifiersRef era dead code (solo se escribía, nunca se leía).
 
     // =====================================================
-    // HELPERS — claves de cartas y timers cancelables
+    // HELPERS — claves de cartas y timers cancelables (Fase 0: extraídos)
     // =====================================================
-    const uid = () => {
-        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-            return crypto.randomUUID();
-        }
-        return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-    };
+    // uid -> front/src/game/utils.js
+    // Timers cancelables -> front/src/hooks/game/useScheduledTimeouts.js
+    // (registrados para poder limpiarlos al reiniciar o desmontar).
+    const { scheduleTimeout, cancelTimeout, clearScheduledTimeouts } = useScheduledTimeouts();
 
-    // Timers cancelables: registrados para poder limpiarlos al reiniciar o
-    // desmontar (evita setState tras desmontar y timeouts huérfanos).
-    const pendingTimeoutsRef = useRef(new Set());
-    const scheduleTimeout = (fn, delay) => {
-        const id = setTimeout(() => {
-            pendingTimeoutsRef.current.delete(id);
-            fn();
-        }, delay);
-        pendingTimeoutsRef.current.add(id);
-        return id;
-    };
-    const cancelTimeout = (id) => {
-        if (id !== undefined && id !== null) {
-            clearTimeout(id);
-            pendingTimeoutsRef.current.delete(id);
-        }
-    };
-    const clearScheduledTimeouts = () => {
-        pendingTimeoutsRef.current.forEach((id) => clearTimeout(id));
-        pendingTimeoutsRef.current.clear();
-    };
+    // Estado del jugador y del tablero (Fase 4). Mismos nombres para
+    // no tocar los call sites. Iconos congelados en el hook.
+    const {
+        maxHealth, setMaxHealth,
+        health, setHealth,
+        healthIcon,
+        gold, setGold,
+        healthAnimation, goldAnimation,
+        healthAnimationValue, goldAnimationValue,
+        healAnimation, healthStealAnimation,
+        damageAnimation, coinAnimation,
+    } = usePlayerState({
+        scheduleTimeout,
+        icons: {
+            full: FullHealthIcon,
+            mid: MidHealthIcon,
+            none: NoHealthIcon,
+            heal: HealAnimation,
+            steal: HealthStealIcon,
+            damage: DamageAnimation,
+            allDamage: AllDamageAnimation,
+            gold: GoldAnimation,
+        },
+    });
+    const {
+        layerRef, cardRefs,
+        room, setRoom,
+        dungeon, setDungeon,
+        discardPile, setDiscardPile,
+        weapon, setWeapon,
+        slainMonsters, setSlainMonsters,
+        deleteFromRoom, moveCardToDiscard,
+    } = useBoardState({ scheduleTimeout });
 
     // Refs de sincronización y control de reentrada / unicidad
     const matchDeckRef = useRef(matchDeck);
@@ -336,117 +394,25 @@ const GamePageInner = () => {
         const handleConfirmAction = useCallback(() => {
             setIsModalOpen(false);
 
-            // El modal indica que la partida contará como derrota → se envía false
-            // y se lee el estado actual vía refs (evita closures obsoletas).
-            if (!gameSavedRef.current && userRef.current?.id) {
-                gameSavedRef.current = true;
-                Promise.resolve(
-                    endGame(
-                        userRef.current.id,
-                        timeRef.current,
-                        false,
-                        roundsRef.current,
-                        totalEarnedGold.current,
-                        healedLife.current,
-                        enemysDefeatedRef.current
-                    )
-                ).catch((saveError) => console.error("Error al guardar la partida:", saveError));
-            }
+            // El modal indica que la partida contará como derrota → se envía false.
+            saveExit({
+                time: timeRef.current,
+                gold: totalEarnedGold.current,
+                healed: healedLife.current,
+                victory: false,
+                reason: 'modal',
+            });
             navigate('/');
-        }, [navigate, endGame]);
+        }, [navigate, saveExit]);
 
         // =====================================================
         // CAPA 2 — FUNCIONES HOJA / PRIMITIVAS
         // =====================================================
 
-        const stopTimer = () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
-        };
+        // calculateLayout eliminado (Fase 4): el canvas Konva usa tamaño
+        // fijo y se dimensiona al contenedor real (ResizeObserver).
 
-        const calculateLayout = () => {
-            const isDesktop = window.innerWidth > 1024;
-            // En desktop el canvas mide la mitad de la pantalla (deja espacio al HUD lateral)
-            // En móvil/vertical mide el 100% de la pantalla para aprovechar todo el ancho disponible
-            const physicalWidth = isDesktop ? window.innerWidth / 2 : window.innerWidth / 1.5;
-            const physicalHeight = window.innerHeight;
-
-            return {
-                width: physicalWidth,
-                height: physicalHeight,
-                // Escala proporcional basada en el ancho disponible real frente al virtual
-                scale: physicalWidth / VIRTUAL_WIDTH,
-
-            };
-        };
-
-        const healAnimation = (value) => {
-            setHealthAnimationValue("+" + (value))
-            setHealthAnimation(HealAnimation)
-            scheduleTimeout(() => {
-                setHealthAnimation(null)
-            }, 300)
-        }
-
-        const healthStealAnimation = (value) => {
-            setHealthAnimationValue("+" + (value))
-            setHealthAnimation(HealthStealIcon)
-            scheduleTimeout(() => {
-                setHealthAnimation(null)
-            }, 300)
-        }
-
-        const damageAnimation = (value, allDamage = false) => {
-            setHealthAnimationValue(value * -1)
-            if (allDamage) {
-                setHealthAnimation(AllDamageAnimation)
-            } else {
-                setHealthAnimation(DamageAnimation)
-            }
-
-            scheduleTimeout(() => {
-                setHealthAnimation(null)
-            }, 300)
-        }
-
-        const coinAnimation = (value) => {
-            setGoldAnimationValue(value)
-            setGoldAnimation(GoldAnimation)
-            scheduleTimeout(() => {
-                setGoldAnimation(null)
-            }, 300)
-        }
-
-        const deleteFromRoom = (card) => {
-            setRoom(prev => prev.filter(c => c.key !== card?.key));
-        }
-
-        // Función para ejecutar la animación para mover a descartes
-        const moveCardToDiscard = (cardsToMove, moved = false) => {
-            if (moved) {
-                cardsToMove.forEach((card) => {
-                    if (cardRefs.current[card.key]) {
-                        const x = 660 - card?.x - 2
-                        cardRefs.current[card.key].animateTo(x, 6, 0.2);
-                    }
-                });
-            } else {
-                cardsToMove.forEach((card) => {
-                    if (cardRefs.current[card.key]) {
-                        cardRefs.current[card.key].animateTo(660, 204, 0.4);
-                    }
-                });
-            }
-            scheduleTimeout(() => {
-                setDiscardPile(prev => [...prev, ...cardsToMove]);
-                setRoom(prev => prev.filter(c => !cardsToMove.find(moved => moved.key === c.key)));
-                cardsToMove.forEach(card => {
-                    delete cardRefs.current[card.key];
-                });
-            }, 450);
-        };
+        // Animaciones y descarte (Fase 4: usePlayerState/useBoardState).
 
         const heal_roulete = (execute = false) => {
             if (execute) {
@@ -482,34 +448,21 @@ const GamePageInner = () => {
             souleaterTurns.current = 0;
         }
 
+        // Cálculo puro en game/cards.js (preserva claves existentes).
         const shuffleDeck = (deck) => {
-            // Acepta entradas no-array (null/undefined) y preserva las claves
-            // existentes: regenerar keys en cada baraja rompe los refs y keys
-            // referenciados por las cartas ya colocadas.
-            const source = Array.isArray(deck) ? deck : [];
-            const shuffled = lodash.shuffle(source)
-                .filter((card) => card)
-                .map((card) => ({
-                    ...card,
-                    key: card.key ?? uid()
-                }));
-
-            setDungeon(shuffled);
+            setDungeon(buildShuffledDeck(deck, uid, shuffle));
         };
 
         const addCardToDungeon = (card) => {
             if (!card) return;
-            setDungeon(prev => [card, ...prev])
+            setDungeon(prev => prependToDeck(prev, card))
         }
 
         const addCardAndShuffle = (card) => {
             if (!card) return;
-            setDungeon(prev => {
-                // Solo asigna clave si la carta no la trae: re-clavar todas las
-                // cartas en cada inserción duplica keys referenciadas por refs.
-                const normalized = card.key ? card : { ...card, key: uid() };
-                return lodash.shuffle([...prev, normalized]);
-            });
+            // Solo asigna clave si la carta no la trae: re-clavar todas las
+            // cartas en cada inserción duplica keys referenciadas por refs.
+            setDungeon(prev => insertAndShuffle(prev, card, uid, shuffle));
         }
 
         const addEnemy = async (anti_exec) => {
@@ -517,39 +470,25 @@ const GamePageInner = () => {
             return newEnemy[0];
         }
         const addEnemies = async (round = rounds) => {
-            // Fórmula de enemigos por ronda: 5, 7, 9, 5, 7, 9, ...
-            const quantity = 5 + (((round - 1) % 3) * 2);
+            // Fórmula de enemigos por ronda: 5, 7, 9, 5, 7, 9, ... (game/cards.js)
+            const quantity = enemyQuantityForRound(round);
             const newEnemys = await addEnemysToMatchDeck(quantity, round);
             return newEnemys;
         };
 
         const warrior = () => {
             handleNewAchievement('habilidad_guerrero')
-            logsRef.current.push((logsRef.current.length + 1) + " - " + `Asustas a los enemigos en la sala.`)
-            let actualRoom = [...room];
-            let currentDungeon = [...dungeon];
-            const allEnemys = actualRoom.filter(card => card?.palo === 'Pica' || card?.palo === "Trebol");
-            const enemys = allEnemys.slice(0, 2);
-            const noEnemys = actualRoom.filter(card => card?.palo !== 'Pica' && card?.palo !== "Trebol");
-            if (enemys.length > 0) {
-                enemys.forEach((card) => {
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `${card?.valor} de ${card?.palo} ha huido`)
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.scareStart'))
+            // Susto puro en game/characters.js; aquí solo se aplica.
+            const result = warriorScare(room, dungeon);
+            if (result.scared.length > 0) {
+                result.scared.forEach((card) => {
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.scareFled', { valor: card?.valor, palo: card?.palo }))
                 })
-                // Reposición: se roba desde el TOPE del dungeon (final del array),
-                // así que `pop` es la carta que saldría a continuación. Se guarda
-                // el guard por si el mazo está vacío (push(undefined) rompía la sala).
-                const newCards = [];
-                for (let i = 0; i < enemys.length && currentDungeon.length > 0; i++) {
-                    newCards.push(currentDungeon.pop());
-                }
-                // Los enemigos asustados vuelven al FONDO (se robarán al final).
-                currentDungeon.unshift(...enemys);
-                const remainingEnemys = allEnemys.slice(2);
-                const newRoom = [...newCards, ...remainingEnemys, ...noEnemys];
-                setRoom(newRoom);
-                setDungeon(currentDungeon);
+                setRoom(result.room);
+                setDungeon(result.dungeon);
             } else {
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `No has asustado a nada...`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.scareNone'))
             }
             actualScapes.current - 1 > 0 ?
                 actualScapes.current -= 1 :
@@ -559,30 +498,13 @@ const GamePageInner = () => {
         }
 
         const elf = () => {
-            let actualRoom = [...room];
-            let newCards = [];
-            logsRef.current.push((logsRef.current.length + 1) + " - " + `Has lanzado unos abrojos, bajando el valor a dos cartas.`)
-            if (actualRoom.length <= 2) {
-                newCards = actualRoom.map((card) => {
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `${card?.valor} de ${card?.palo} ahora vale ${Math.max(0, card?.valor - 5)}`)
-                    return {
-                        ...card,
-                        valor: Math.max(0, card?.valor - 5)
-                    };
-                });
-            } else {
-                newCards = actualRoom.map((card, index) => {
-                    if (index == actualRoom.length - 1 || index == actualRoom.length - 2) {
-                        logsRef.current.push((logsRef.current.length + 1) + " - " + `${card?.valor} de ${card?.palo} ahora vale ${Math.max(0, card?.valor - 5)}`)
-                        return {
-                            ...card,
-                            valor: Math.max(0, card?.valor - 5)
-                        };
-                    }
-                    return card;
-                });
-            }
-            setRoom(newCards);
+            // Abrojos puros en game/characters.js; aquí solo logs y commit.
+            const result = elfCaltrops(room);
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.caltrops'))
+            result.weakened.forEach((weakened) => {
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.caltropsWeakened', { prevValor: weakened.prevValor, palo: weakened.palo, valor: weakened.valor }))
+            });
+            setRoom(result.room);
         }
 
         const scape = () => {
@@ -591,7 +513,7 @@ const GamePageInner = () => {
             // Telaraña de la Araña gigante: bloquea la huida sin consumir intentos
             // (no se toca canScape ni actualScapes).
             if (webTurns.current > 0) {
-                logsRef.current.push(`${logsRef.current.length + 1} - Una telaraña te impide huir.`);
+                logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.webBlock')}`);
                 return;
             }
 
@@ -694,26 +616,26 @@ const GamePageInner = () => {
         const applyThorny = () => {
             damageAnimation(3, true);
             setHealth(prev => Math.max(0, prev - 3))
-            logsRef.current.push((logsRef.current.length + 1) + " - " + "El enemigo tenía unas espinas que te han inflingido 3 de daño.")
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.thorns'))
         }
 
         const applyPlunder = (quantity) => {
             coinAnimation(-quantity)
             setGold(prev => Math.max(0, prev - quantity));
-            logsRef.current.push((logsRef.current.length + 1) + " - " + `¡El enemigo te ha robado ${quantity} de oro!`)
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.plunderGold', { quantity }))
         }
 
         const applyExtraGold = (quantity) => {
             coinAnimation(quantity)
             setGold(prev => prev + quantity);
             totalEarnedGold.current += quantity;
-            logsRef.current.push((logsRef.current.length + 1) + " - " + `El enemigo llevaba una bolsita de oro con él. +${quantity} de oro.`)
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.extraGold', { quantity }))
         }
 
         const weaponBreaker = () => {
             if (weapon) {
                 moveCardToDiscard([weapon], true)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + "El enemigo ha roto tu arma.")
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.weaponBroke'))
                 cleanWeaponEffects();
                 setWeapon(null)
                 if (slainMonsters.length > 0) {
@@ -730,14 +652,14 @@ const GamePageInner = () => {
             const cardPower = Math.min(14, Math.max(Math.floor(cardValue / 2), 2));
             const card1 = await addEnemyToMatchDeck(cardPower, rounds);
             const card2 = await addEnemyToMatchDeck(cardPower, rounds);
-            logsRef.current.push((logsRef.current.length + 1) + " - " + "¡El enemigo ha hecho mitosis!")
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.mitosis'))
             if (card1 !== null) {
                 addCardToDungeon(card1)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Se ha añadido un ${card1?.valor} de ${card1?.palo}`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.mitosisAdded', { valor: card1?.valor, palo: card1?.palo }))
             }
             if (card2 !== null) {
                 addCardToDungeon(card2)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Se ha añadido un ${card2?.valor} de ${card2?.palo}`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.mitosisAdded', { valor: card2?.valor, palo: card2?.palo }))
             }
         }
 
@@ -752,22 +674,20 @@ const GamePageInner = () => {
                 setHealth(prev => Math.max(1, Math.min(prev, newMax)));
             }
             souleaterTurns.current += 3;
-            logsRef.current.push((logsRef.current.length + 1) + " - " + `El enemigo te ha robado 3 de vida máxima durante ${souleaterTurns.current} turnos.`)
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.souleater', { turns: souleaterTurns.current }))
         }
 
         const applySeal = () => {
+            // Solo se fotografía en aplicación fresca, no al refrescar la pila.
+            if (sealTurns.current === 0) {
+                sealedFromAvailableRef.current = availableAbility;
+            }
             sealTurns.current += 3;
             setAvailableAbility(false);
-            logsRef.current.push((logsRef.current.length + 1) + " - " + `El enemigo estaba maldito y te ha sellado la habilidad.`)
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.seal'))
         }
 
-        const getChamanPower = useCallback(() => {
-            const remainingEnemies = [...dungeon, ...room].filter(
-                (card) => ['Trebol', 'Pica'].includes(card?.palo)
-            ).length;
-
-            return remainingEnemies;
-        }, [dungeon, room]);
+        const getChamanPower = useCallback(() => countChamanPower(dungeon, room), [dungeon, room]);
 
         const fillRoom = useCallback((onComplete) => {
             const roomSize = room.length;
@@ -859,7 +779,7 @@ const GamePageInner = () => {
             // Efectos de estado de la ronda
             if (poison.current > 0) {
                 poison.current -= 1;
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `El veneno te resta 1 de salud.`);
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.poison'));
                 damageAnimation(1);
                 setHealth(prev => prev - 1);
             }
@@ -868,9 +788,9 @@ const GamePageInner = () => {
                 antihealTurns.current -= 1;
                 if (antihealTurns.current !== 0) {
                     antiheal.current = true;
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Turnos restantes de anticura: ${antihealTurns.current}.`);
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.antihealTurns', { turns: antihealTurns.current }));
                 } else {
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Anticuras desactivado.`);
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.antihealOff'));
                     antiheal.current = false;
                 }
 
@@ -881,9 +801,9 @@ const GamePageInner = () => {
                     setHealth(prev => Math.min(maxHealth, prev + progresiveHeal.current));
                     healAnimation(progresiveHeal.current);
                     healedLife.current += progresiveHeal.current;
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Te has curado ${progresiveHeal.current}.`);
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.progHeal', { amount: progresiveHeal.current }));
                 } else {
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `La curación progresiva no hace efecto: estás bajo anticura.`);
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.progHealBlocked'));
                 }
                 progresiveHealTurns.current -= 1;
             }
@@ -895,9 +815,9 @@ const GamePageInner = () => {
                     if (!antiheal.current) {
                         healAnimation(regeneratorHealth.current);
                         setHealth(prev => Math.min(maxHealth, prev + regeneratorHealth.current));
-                        logsRef.current.push((logsRef.current.length + 1) + " - " + `Te has curado ${regeneratorHealth.current} de tu curación pasiva.`);
+                        logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.passiveHeal', { amount: regeneratorHealth.current }));
                     } else {
-                        logsRef.current.push((logsRef.current.length + 1) + " - " + `Tu curación pasiva no hace efecto: estás bajo anticura.`);
+                        logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.passiveHealBlocked'));
                     }
                 }
             }
@@ -909,7 +829,7 @@ const GamePageInner = () => {
                     if (restore > 0) {
                         setMaxHealth(prev => prev + restore);
                         setHealth(prev => (prev >= maxHealth ? Math.min(maxHealth + restore, prev + restore) : prev));
-                        logsRef.current.push((logsRef.current.length + 1) + " - " + `Has recuperado tu salud máxima.`);
+                        logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.maxHealthRestored'));
                     }
                 }
                 souleaterTurns.current -= 1;
@@ -917,15 +837,18 @@ const GamePageInner = () => {
 
             if (sealTurns.current > 0) {
                 if (sealTurns.current === 1) {
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Tu habilidad ya no está sellada.`);
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.sealExpired'));
                     // Re-evaluar la disponibilidad real al expirar el sello
-                    if (isGambler) {
-                        setAvailableAbility(gold >= 25);
-                    } else if (isVampire) {
-                        setAvailableAbility(health > 5 && !vampireAbilityUsed.current);
-                    } else {
-                        setAvailableAbility(true);
-                    }
+                    // (puro en game/cardEffects.js; fix bug sello arcano).
+                    const { available } = resolveSealExpiry({
+                        isGambler,
+                        isVampire,
+                        gold,
+                        health,
+                        vampireUsed: vampireAbilityUsed.current,
+                        wasAvailable: sealedFromAvailableRef.current,
+                    });
+                    setAvailableAbility(available);
                 } else {
                     setAvailableAbility(false);
                 }
@@ -939,28 +862,49 @@ const GamePageInner = () => {
             // de la tienda o al re-ejecutar el effect de rounds === 1).
             if (!char || passiveAppliedRef.current) return;
             passiveAppliedRef.current = true;
-            if (char?.habilidad_personaje?.codigo === 'guerrero') {
-                setIsWarrior(true);
-            } else if (char?.habilidad_personaje?.codigo === 'paladin') {
-                setMaxHealth(prev => 25);
-                setHealth(prev => 25);
-            } else if (char?.habilidad_personaje?.codigo === 'elfo') {
-                setMaxScapes(2);
-                actualScapes.current = 2;
-            } else if (char?.habilidad_personaje?.codigo === 'mago') {
-                setIsWizard(true);
-            } else if (char?.habilidad_personaje?.codigo === 'apostador') {
-                setIsGambler(true);
-                coinAnimation(50);
-                setGold(prev => 50);
-            } else if (char?.habilidad_personaje?.codigo === 'herrero') {
-                setBlacksmithDmg(1);
-            } else if (char?.habilidad_personaje?.codigo === 'vampiro') {
-                setIsVampire(true);
-                setMaxHealthSteal(10);
-            } else if (char?.habilidad_personaje?.codigo === 'domador') {
-                setTameDamage(1);
+            // Cálculo puro en game/characters.js; aquí solo se vuelca.
+            // Los valores son absolutos (25, 50, 2), no incrementos.
+            const code = char?.habilidad_personaje?.codigo;
+            const { state: next, handled } = applyPassiveToState({
+                isWarrior,
+                maxHealth,
+                health,
+                maxScapes,
+                actualScapes: actualScapes.current,
+                isWizard,
+                isGambler,
+                gold,
+                blacksmithDmg,
+                isVampire,
+                maxHealthSteal,
+                tameDamage,
+            }, code);
+            if (!handled) return;
+            if (next.isWarrior !== isWarrior) {
+                setIsWarrior(next.isWarrior);
             }
+            setMaxHealth(next.maxHealth);
+            setHealth(next.health);
+            setMaxScapes(next.maxScapes);
+            actualScapes.current = next.actualScapes;
+            if (next.isWizard !== isWizard) {
+                setIsWizard(next.isWizard);
+            }
+            if (next.isGambler !== isGambler) {
+                setIsGambler(next.isGambler);
+            }
+            if (next.gold !== gold) {
+                if (code === 'apostador') {
+                    coinAnimation(50);
+                }
+                setGold(next.gold);
+            }
+            setBlacksmithDmg(next.blacksmithDmg);
+            if (next.isVampire !== isVampire) {
+                setIsVampire(next.isVampire);
+            }
+            setMaxHealthSteal(next.maxHealthSteal);
+            setTameDamage(next.tameDamage);
         }, []);
 
         const handleCleanMinibosses = () => {
@@ -981,14 +925,12 @@ const GamePageInner = () => {
         }
 
         /**
-         * 
-         * @param {Object} effect 
-         * @returns 
+         *
+         * @param {Object} effect
+         * @returns
          */
         const handleMiniboss = (miniboss) => {
-            const minibossEffect = miniboss?.efectos;
-            const effectsList = Array.isArray(minibossEffect) ? minibossEffect : [minibossEffect];
-            const effectName = effectsList[0]?.name;
+            const effectName = getMinibossEffectName(miniboss);
 
             // Guard: si la BD no tiene cartas de miniboss (seeder no ejecutado),
             // getRandomMiniboss() devuelve null y no hay nada que activar.
@@ -998,130 +940,46 @@ const GamePageInner = () => {
 
             setMinibossActive(true);
             activeMinibossEffect.current = effectName;
-            switch (effectName) {
-                // Reina slime
-                case 'sticky':
-                    const queenSlime = {
-                        ...miniboss,
-                        palo: 'Miniboss',
-                        codigo: 'slime',
-                        valor: effectsList[0].value,
-                        key: uid()
-                    }
-                    addCardAndShuffle(queenSlime)
-                    break;
-                // Araña gigante: se divide en 9 partes de valor 6 (value del efecto).
-                // Cada parte mantiene el efecto 'spider_web' para identificarla.
-                case 'spider_web':
-                    spiderPartsLeft.current = 9;
-                    const spiderPartValue = effectsList[0].value;
-                    const spiderBaseImage = miniboss?.imagen || '';
-                    for (let spiderIndex = 0; spiderIndex < 9; spiderIndex++) {
-                        // Sprites por pieza: 4 patas derechas (2Miniboss-1), 4 patas
-                        // izquierdas (2Miniboss-2) y 1 cabeza central (2Miniboss.webp,
-                        // la imagen base).
-                        let partImage = spiderBaseImage;
-                        if (spiderIndex < 4) {
-                            partImage = spiderBaseImage.replace('2Miniboss.webp', '2Miniboss-1.webp');
-                        } else if (spiderIndex < 8) {
-                            partImage = spiderBaseImage.replace('2Miniboss.webp', '2Miniboss-2.webp');
-                        }
-                        const spiderPart = {
-                            ...miniboss,
-                            palo: 'Miniboss',
-                            codigo: 'arana',
-                            valor: spiderPartValue,
-                            imagen: partImage || spiderBaseImage,
-                            key: uid()
-                        };
-                        addCardAndShuffle(spiderPart);
-                    }
-                    logsRef.current.push(`${logsRef.current.length + 1} - ¡La Araña gigante aparece con 9 partes de ${spiderPartValue} de valor!`);
-                    break;
-                // Chamán demoniaco
-                // En tu switch dentro de handleMiniboss:
-                case 'chaos_force':
-                    isChamanActive.current = true;
-                    chamanTurns.current = 0;
 
-                    const initialPower = getChamanPower();
-
-                    const chamanCard = {
-                        ...miniboss,
-                        palo: 'Miniboss',
-                        codigo: 'chaman',
-                        valor: initialPower,
-                        key: uid()
-                    };
-
-                    setMinibossCard(chamanCard);
-                    break;
-                // Reina de los aldrones
-                case 'last_pillage':
-                    isPillageQueenActive.current = true;
-                    const pillageQueenMiniboss = {
-                        ...miniboss,
-                        palo: 'Miniboss',
-                        codigo: 'ladrona',
-                        valor: effectsList[0].value,
-                        key: uid()
-                    }
-                    setLastCardBoss(pillageQueenMiniboss)
-                    break;
-                // Rey Hada
-                case 'supplies':
-                    const reyHada = {
-                        ...miniboss,
-                        palo: 'Miniboss',
-                        codigo: 'rey',
-                        valor: effectsList[0].value,
-                        key: uid()
-                    }
-                    addCardAndShuffle(reyHada)
-                    break;
-                // Guantes
-                case 'hairballs':
-                    isGuantesActive.current = true;
-                    const guantesMiniboss = {
-                        ...miniboss,
-                        palo: 'Miniboss',
-                        codigo: 'guantes',
-                        valor: effectsList[0].value,
-                        key: uid()
-                    };
-                    setLastCardBoss(guantesMiniboss);
-                    break;
-                // Mimico
-                case 'mimicry':
-                    // Camuflaje: adopta el aspecto y el valor de una carta de
-                    // curación aleatoria usando los sprites especiales
-                    // 8Miniboss-{valor}.webp (existentes para los valores 2-10).
-                    // Disfraz único por partida. Su valor interno es SIEMPRE el
-                    // verdadero (16): el render muestra el disfraz mientras
-                    // `disfrazado` sea true y no hay ninguna revelación —
-                    // "le pegas sin saber que es él" y el combate golpea con 16.
-                    if (!mimicDisguiseRef.current) {
-                        const disguiseValue = 2 + Math.floor(Math.random() * 9); // 2-10
-                        mimicDisguiseRef.current = {
-                            imagen: (miniboss?.imagen || '').replace('8Miniboss.webp', `8Miniboss-${disguiseValue}.webp`),
-                            valor: disguiseValue,
-                            suit: HeartIcon
-                        };
-                    }
-                    const mimicCard = {
-                        ...miniboss,
-                        palo: 'Miniboss',
-                        codigo: 'mimic',
-                        valor: effectsList[0].value, // valor VERDADERO del mímico (16)
-                        disfrazado: true,
-                        disfraz: mimicDisguiseRef.current,
-                        key: uid()
-                    };
-                    addCardAndShuffle(mimicCard)
-                    break;
-                default:
-                    return false;
+            // Plan puro en game/minibosses.js; aquí solo se aplica.
+            // El roll del disfraz solo se genera si no hay uno (único por partida).
+            const plan = planMinibossSpawn(miniboss, {
+                uidFn: uid,
+                chamanPower: getChamanPower(),
+                mimicDisguise: mimicDisguiseRef.current,
+                mimicRoll: mimicDisguiseRef.current ? undefined : 2 + Math.floor(Math.random() * 9),
+                mimicSuit: HeartIcon,
+            });
+            if (!plan.handled) {
+                return false;
             }
+
+            plan.shuffleCards.forEach((spawnCard) => addCardAndShuffle(spawnCard));
+            if (plan.lastCardBoss) {
+                setLastCardBoss(plan.lastCardBoss);
+            }
+            if (plan.chamanCard) {
+                setMinibossCard(plan.chamanCard);
+            }
+            if (plan.patch.spiderPartsLeft !== undefined) {
+                spiderPartsLeft.current = plan.patch.spiderPartsLeft;
+            }
+            if (plan.patch.pillageQueenActive) {
+                isPillageQueenActive.current = true;
+            }
+            if (plan.patch.guantesActive) {
+                isGuantesActive.current = true;
+            }
+            if (plan.patch.chamanActive) {
+                isChamanActive.current = true;
+                chamanTurns.current = plan.patch.chamanTurns;
+            }
+            if (plan.newDisguise && !mimicDisguiseRef.current) {
+                mimicDisguiseRef.current = plan.newDisguise;
+            }
+            plan.logs.forEach((entry) => {
+                logsRef.current.push(`${logsRef.current.length + 1} - ${t(entry.key, entry.params)}`);
+            });
             return true;
         }
 
@@ -1131,21 +989,21 @@ const GamePageInner = () => {
                 weaponBreaker();
                 deleteCardFromMatchDeck(weapon.key)
                 logsRef.current.push(
-                    `${logsRef.current.length + 1} - Tu arma ha sido destruida.`
+                    `${logsRef.current.length + 1} - ${t('game:logs.pillageWeaponDestroyed')}`
                 );
             }
             // Último saqueo: la reina se lleva un 25% del oro actual
             setGold(prev => Math.floor(prev * 0.75));
             logsRef.current.push(
-                `${logsRef.current.length + 1} - La Reina de los Ladrones te ha robado un 25% de tu oro.`
+                `${logsRef.current.length + 1} - ${t('game:logs.pillageQueenSteal')}`
             );
             logsRef.current.push(
-                `${logsRef.current.length + 1} - ¡Has derrotado a la Reina de los Ladrones!`
+                `${logsRef.current.length + 1} - ${t('game:logs.pillageQueenDefeated')}`
             );
         }
         const handleMinibossGuantes = () => {
             logsRef.current.push(
-                `${logsRef.current.length + 1} - ¡Has derrotado a Guantes!`
+                `${logsRef.current.length + 1} - ${t('game:logs.guantesDefeated')}`
             );
         }
 
@@ -1172,7 +1030,7 @@ const GamePageInner = () => {
             setMaxScapes(1);
             setLastGamblerEffect(null);
             setContinuedGame(false);
-            gameSavedRef.current = false;
+            resetSaveFlag();
 
             // Reiniciar minibosses
             handleCleanMinibosses()
@@ -1197,6 +1055,7 @@ const GamePageInner = () => {
             // Reiniciar contexto
             setNewDeck();
             setActiveModifiers([]);
+            resetMissions();
             if (resetCharacter) {
                 setNewCharacter(null);
             }
@@ -1231,11 +1090,7 @@ const GamePageInner = () => {
             setOverDungeonZone(false);
 
             // Reset del Timer
-            stopTimer();
-            timeRef.current = 0;
-            if (formatedTimeRef.current) {
-                formatedTimeRef.current.textContent = `Tiempo: 00:00`;
-            }
+            resetTimer();
             // Se difiere para que la pantalla de carga se pinte al menos un frame
             // (evita el parpadeo del cambio de partida).
             scheduleTimeout(() => {
@@ -1271,7 +1126,7 @@ const GamePageInner = () => {
                     applyCharacterPassive(character);
                     setGameOn(true);
                     // Nueva partida activa: se vuelve a permitir el guardado
-                    gameSavedRef.current = false;
+                    resetSaveFlag();
                     setRounds(startedRound);
                 }
                 else if (isActiveMatch) { // Ya sabemos implícitamente que rounds >= 1
@@ -1315,6 +1170,9 @@ const GamePageInner = () => {
                     setAvailableAbility(true);
                 }
 
+                // Misiones: la meta de rondas avanza al empezar cada ronda.
+                trackMissionEvent({ round: startedRound });
+
                 cardRefs.current = [];
             } finally {
                 isStartingRoundRef.current = false;
@@ -1331,31 +1189,31 @@ const GamePageInner = () => {
                 }
                 userExtraDmg.current += 10;
                 setLastGamblerEffect(`¡JACKPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ¡JACKPOT! +50 oro, +10 vida y +10 daño en la siguiente acción.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerJackpot'))
                 handleNewAchievement('desafio_apostador')
             }
             else if (roll === 1) {
                 setGold(0)
                 setLastGamblerEffect(`La banca gana, tú pierdes todo tu dinero.`);
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> La banca gana, tú pierdes todo tu dinero.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerBust'))
             }
             else if (roll <= 10) {
                 //Veneno
                 poison.current += 3;
                 setLastGamblerEffect(`Estás envenenado 3 turnos. Ese chupito tenia un sabor raro...`)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Estás envenenado 3 turnos. Ese chupito tenía un sabor raro...`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerPoison'))
             }
             else if (roll <= 20) {
                 //Modificar daño
                 const randomDmg = Math.floor(Math.random() * 7) - 3;
                 userExtraDmg.current += randomDmg;
                 setLastGamblerEffect(`${randomDmg} de daño extra en la siguiente acción.`)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ${randomDmg} de daño extra en la siguiente acción.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerDmg', { amount: randomDmg }))
             } else if (roll <= 30) {
                 progresiveHeal.current = 1;
                 progresiveHealTurns.current = 3;
                 setLastGamblerEffect(`Curación progresiva 3 turnos. ¡La hidromiel no falla!`)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Curación progresiva 3 turnos. ¡La hidromiel no falla!.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerProgHeal'))
             }
             else if (roll <= 40) {
                 //Curación/Daño
@@ -1369,7 +1227,7 @@ const GamePageInner = () => {
                 }
                 setHealth(prev => Math.min(maxHealth, Math.max(0, prev + appliedHeal)));
                 setLastGamblerEffect(`${appliedHeal} de vida.`)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ${appliedHeal} de vida.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerHeal', { amount: appliedHeal }))
             } else if (roll <= 60) {
                 //Añadir arma
                 const randomPower = Math.floor(Math.random() * (rounds + 3))
@@ -1379,11 +1237,11 @@ const GamePageInner = () => {
                 if (newWeapon) {
                     addCardToMatchDeck(newWeapon);
                     setLastGamblerEffect(`Añadida una nueva arma con valor ${newWeapon?.valor}.`)
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Añadida una nueva arma con valor ${newWeapon?.valor}.`)
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerWeapon', { valor: newWeapon?.valor }))
                     addCardToDungeon(newWeapon);
                 } else {
                     setLastGamblerEffect(`La banca no ha podido preparar tu arma esta vez.`)
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> La banca no ha podido preparar tu arma esta vez.`)
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerWeaponFail'))
                 }
             } else if (roll <= 80) {
                 //Añadir curación
@@ -1394,11 +1252,11 @@ const GamePageInner = () => {
                 if (newHeal) {
                     addCardToMatchDeck(newHeal);
                     setLastGamblerEffect(`Añadida una nueva curación con valor ${newHeal?.valor}.`)
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Añadida una nueva curación con valor ${newHeal?.valor}.`)
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerHealCard', { valor: newHeal?.valor }))
                     addCardToDungeon(newHeal)
                 } else {
                     setLastGamblerEffect(`La banca no ha podido preparar tu curación esta vez.`)
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> La banca no ha podido preparar tu curación esta vez.`)
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerHealCardFail'))
                 }
             } else if (roll <= 90) {
                 const randomHealth = Math.floor(Math.random() * 3) - 1;
@@ -1409,17 +1267,17 @@ const GamePageInner = () => {
                 }
                 setMaxHealth(prev => prev + randomHealth);
                 setLastGamblerEffect(`${randomHealth} de vida máxima.`)
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> ${randomHealth} de vida máxima.`)
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerMaxHealth', { amount: randomHealth }))
             } else {
                 //Añadir enemigo
                 const newEnemy = await addEnemy();
                 if (newEnemy) {
                     setLastGamblerEffect(`Añadido un nuevo enemigo con valor ${newEnemy?.valor}.`)
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> Añadido un nuevo enemigo con valor ${newEnemy?.valor}.`)
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerEnemy', { valor: newEnemy?.valor }))
                     addCardToDungeon(newEnemy);
                 } else {
                     setLastGamblerEffect(`La banca no ha encontrado un enemigo esta vez.`)
-                    logsRef.current.push((logsRef.current.length + 1) + " - " + `Gambler -> La banca no ha encontrado un enemigo esta vez.`)
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.gamblerEnemyFail'))
                 }
             }
         }
@@ -1427,79 +1285,87 @@ const GamePageInner = () => {
         // CAPA 4 — ORQUESTACIÓN
         // =====================================================
 
-        const applyCardEffect = (effect, cardValue) => {
-            switch (effect?.name) {
-                case 'restore_ability':
-                    if (!isGambler && !isVampire) {
+        // Adaptador Fase 1: el cálculo puro vive en game/cardEffects.js;
+        // aquí solo se vuelca al estado/refs y se ejecutan los eventos
+        // con las funciones existentes (sin cambios de comportamiento).
+        const snapshotCardEffects = () => ({
+            currentHeal: currentHeal.current,
+            dmgReduction: dmgReduction.current,
+            progresiveHeal: progresiveHeal.current,
+            progresiveHealTurns: progresiveHealTurns.current,
+            weaponDmg: weaponDmg.current,
+            invincibilityTurns: invincibilityTurns.current,
+            revive: revive.current,
+            reviveHealth: reviveHealth.current,
+            weaponHealthSteal: weaponHealthSteal.current,
+            weaponHealthStealQuantity: weaponHealthStealQuantity.current,
+            antiheal: antiheal.current,
+            antihealTurns: antihealTurns.current,
+            breakWeapon: breakWeapon.current,
+            poison: poison.current,
+            sealTurns: sealTurns.current,
+            availableAbility,
+            isGambler,
+            isVampire,
+        });
 
-                        setAvailableAbility(true);
-                    }
-                    sealTurns.current = 0
-                    currentHeal.current = 0;
-                    break
-                case 'heal':
-                    currentHeal.current = effect?.value;
-                    break;
-                case 'dmg_reduction':
-                    dmgReduction.current = effect?.value
-                    break;
-                case 'heal_roulete':
-                    heal_roulete(true)
-                    handleNewAchievement('gelatina')
-                    break;
-                case 'progresive_heal':
-                    progresiveHeal.current = effect?.value
-                    break;
-                case 'progresive_heal_turns':
-                    progresiveHealTurns.current += effect?.value
-                    break;
-                case 'weapon_dmg':
-                    weaponDmg.current = effect?.value
-                    break;
-                case 'invincibility_turns':
-                    invincibilityTurns.current += effect?.value
-                    break;
-                case 'revive':
-                    revive.current = true;
-                    break;
-                case 'revive_health':
-                    reviveHealth.current = effect?.value
-                    break;
-                case 'health_steal':
-                    weaponHealthSteal.current = true;
-                    weaponHealthStealQuantity.current = effect?.value;
-                    break;
-                case 'antiheal':
-                    antiheal.current = true;
-                    antihealTurns.current += 2;
-                    break;
-                case 'weapon_breaker':
-                    breakWeapon.current = true;
-                    break;
-                case 'poison':
-                    poison.current = effect?.value;
-                    break;
-                case 'thorny':
-                    applyThorny()
-                    break;
-                case 'plunder':
-                    applyPlunder(cardValue)
-                    break;
-                case 'extra_gold':
-                    applyExtraGold(cardValue);
-                    break;
-                case 'mitosis':
-                    applyMitosis(cardValue).catch((mitosisError) => console.error("Error en la mitosis:", mitosisError));
-                    break;
-                case 'souleater':
-                    applySouleater();
-                    break;
-                case 'seal':
-                    applySeal();
-                    break;
-                default:
-                    return false;
+        const commitCardEffects = (next) => {
+            currentHeal.current = next.currentHeal;
+            dmgReduction.current = next.dmgReduction;
+            progresiveHeal.current = next.progresiveHeal;
+            progresiveHealTurns.current = next.progresiveHealTurns;
+            weaponDmg.current = next.weaponDmg;
+            invincibilityTurns.current = next.invincibilityTurns;
+            revive.current = next.revive;
+            reviveHealth.current = next.reviveHealth;
+            weaponHealthSteal.current = next.weaponHealthSteal;
+            weaponHealthStealQuantity.current = next.weaponHealthStealQuantity;
+            antiheal.current = next.antiheal;
+            antihealTurns.current = next.antihealTurns;
+            breakWeapon.current = next.breakWeapon;
+            poison.current = next.poison;
+            sealTurns.current = next.sealTurns;
+            if (next.availableAbility !== availableAbility) {
+                setAvailableAbility(next.availableAbility);
             }
+        };
+
+        const applyCardEffect = (effect, cardValue) => {
+            const { state: next, handled, events } = applyCardEffectToState(snapshotCardEffects(), effect, cardValue);
+            if (!handled) {
+                return false;
+            }
+            commitCardEffects(next);
+            events.forEach((event) => {
+                switch (event.type) {
+                    case 'healRoulette':
+                        heal_roulete(true);
+                        break;
+                    case 'achievement':
+                        handleNewAchievement(event.id);
+                        break;
+                    case 'thorny':
+                        applyThorny();
+                        break;
+                    case 'plunder':
+                        applyPlunder(event.cardValue);
+                        break;
+                    case 'extraGold':
+                        applyExtraGold(event.cardValue);
+                        break;
+                    case 'mitosis':
+                        applyMitosis(event.cardValue).catch((mitosisError) => console.error("Error en la mitosis:", mitosisError));
+                        break;
+                    case 'souleater':
+                        applySouleater();
+                        break;
+                    case 'seal':
+                        applySeal();
+                        break;
+                    default:
+                        break;
+                }
+            });
             return true;
         }
 
@@ -1532,7 +1398,7 @@ const GamePageInner = () => {
                 handleCardEffect(card)
             }
             if (isVampire || healedRef.current || antiheal.current) {
-                logsRef.current.push((logsRef.current.length + 1) + " - " + card?.valor + " de " + card?.palo + " te no te ha curado nada.")
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.healBlocked', { valor: card?.valor, palo: card?.palo }))
                 moveCardToDiscard([card])
                 setActualStreak(0);
                 return true;
@@ -1548,7 +1414,7 @@ const GamePageInner = () => {
             healAnimation(currentHeal.current)
             healedLife.current += currentHeal.current;
             healedRef.current = true
-            logsRef.current.push((logsRef.current.length + 1) + " - " + card?.valor + " de " + card?.palo + " te ha curado " + currentHeal.current + " de daño.")
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.healed', { valor: card?.valor, palo: card?.palo, amount: currentHeal.current }))
 
             // Efecto "Suministros del reino feérico" (Rey hada):
             // "Cada vez que te curas con cartas de curación, le baja 2 de vida máxima hasta 2 de vida."
@@ -1562,7 +1428,7 @@ const GamePageInner = () => {
                 setRoom(prev => prev.map(c => esReyHada(c) ? { ...c, valor: nuevaVidaRey } : c));
                 setDungeon(prev => prev.map(c => esReyHada(c) ? { ...c, valor: nuevaVidaRey } : c));
                 logsRef.current.push(
-                    `${logsRef.current.length + 1} - Los suministros del reino feérico debilitan al Rey hada: ahora le quedan ${nuevaVidaRey} de vida.`
+                    `${logsRef.current.length + 1} - ${t('game:logs.fairySupplies', { amount: nuevaVidaRey })}`
                 );
             }
 
@@ -1600,14 +1466,14 @@ const GamePageInner = () => {
 
             if (weapon) {
                 moveCardToDiscard([weapon], true);
-                logsRef.current.push(`${logIndex} - Arma de ${weapon?.valor} ha sido cambiada por arma de ${card?.valor}.`);
+                logsRef.current.push(`${logIndex} - ${t('game:logs.weaponSwapped', { oldValor: weapon?.valor, newValor: card?.valor })}`);
 
                 scheduleTimeout(() => {
                     setWeapon(card);
                     deleteFromRoom(card);
                 }, 100);
             } else {
-                logsRef.current.push(`${logIndex} - Nueva arma de ${card?.valor} activa.`);
+                logsRef.current.push(`${logIndex} - ${t('game:logs.weaponEquipped', { valor: card?.valor })}`);
                 setWeapon(card);
                 deleteFromRoom(card);
             }
@@ -1645,51 +1511,72 @@ const GamePageInner = () => {
                 handleCardEffect(card);
             }
 
-            // Cálculos base de combate y modificadores
-            const criticalMultiplier = Math.floor(Math.random() * 100) < criticalPercentage.current ? 1.5 : 1;
+            // Cálculos base de combate (matemática pura en game/combat.js).
+            // La tirada de crítico se genera aquí y se inyecta al puro.
+            const lastSlainCard = slainMonsters[slainMonsters.length - 1];
+            const combat = calcCombatDamage({
+                enemyValor: card?.valor,
+                palo: card?.palo,
+                hasWeapon: Boolean(weapon),
+                lastSlainValor: lastSlainCard?.valor,
+                slainCount: slainMonsters.length,
+                ricochet,
+                weaponDmg: weaponDmg.current,
+                tameDamage,
+                blacksmithDmg,
+                mma: mma.current,
+                pentakillTargetNumber,
+                pentakillDmg,
+                actualStreak,
+                userExtraDmg: userExtraDmg.current,
+                userPermanentExtraDmg: userPermanentExtraDmg.current,
+                userDmgMultiplier: userDmgMultiplier.current,
+                enemyDmgMultiplier: enemyDmgMultiplier.current,
+                enemyExtraDmg: enemyExtraDmg.current,
+                dmgReduction: dmgReduction.current,
+                spadesExtra: spadesExtraTakedDmg.current,
+                clubsExtra: clubsExtraTakedDmg.current,
+                criticalPercentage: criticalPercentage.current,
+                criticalRoll: Math.floor(Math.random() * 100),
+            });
+            const { criticalMultiplier, finalUserDmg } = combat;
+            let { finalDmg, isSlain } = combat;
             if (criticalMultiplier > 1) {
-                logsRef.current.push(`${logsRef.current.length + 1} - ¡Crítico! Multiplicador de ${criticalMultiplier}`);
+                logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.crit', { multiplier: criticalMultiplier })}`);
             }
-            const pentakill = actualStreak >= pentakillTargetNumber ? pentakillDmg : 0;
-            const enemyBaseDmg = Math.floor(card?.valor * enemyDmgMultiplier.current) + enemyExtraDmg.current - dmgReduction.current;
-            const extraSuitDmg = card?.palo === 'Pica' ? spadesExtraTakedDmg.current : card?.palo === 'Trebol' ? clubsExtraTakedDmg.current : 0;
-            let finalDmg = 0;
-            let isSlain = false;
+            const canUseWeapon = combat.canUseWeapon;
 
             // Helpers locales para evitar duplicar lógica recurrente
             const grantGoldReward = () => {
-                const baseGold = isGambler ? 10 : 5;
-                const earnedGold = Math.floor(baseGold * goldMultiplier.current);
+                const earnedGold = calcGoldReward({ isGambler, goldMultiplier: goldMultiplier.current });
                 setGold(prev => prev + earnedGold);
                 coinAnimation(earnedGold);
                 totalEarnedGold.current += earnedGold;
             };
 
             const processDamageAndRevive = (dmg) => {
-                if (health - dmg <= 0 && revive.current) {
+                const outcome = resolveDeath({
+                    health,
+                    dmg,
+                    revive: revive.current,
+                    reviveHealth: reviveHealth.current,
+                    lifeward,
+                });
+                if (outcome.survivedVia === 'revive') {
                     // Consumir SIEMPRE la resurrección (aunque reviveHealth sea 0),
                     // restaurando al menos 1 de vida.
                     revive.current = false;
-                    const restoredHealth = reviveHealth.current > 0 ? reviveHealth.current : 1;
                     reviveHealth.current = 0;
-                    setHealth(restoredHealth);
-                    logsRef.current.push(`${logsRef.current.length + 1} - Tu ángel guardián te ha salvado la vida.`);
-                } else if (lifeward && health - dmg <= 0) {
+                    setHealth(outcome.health);
+                    logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.guardianAngel')}`);
+                } else if (outcome.survivedVia === 'lifeward') {
                     setLifeward(false)
                     setHealth(1);
-                    logsRef.current.push(`${logsRef.current.length + 1} - Tu ángel guardián te ha salvado la vida.`);
+                    logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.guardianAngel')}`);
                 } else {
                     setHealth(prev => Math.max(0, prev - dmg));
                 }
             };
-
-            // Simplificación de la regla del arma
-            const lastSlainCard = slainMonsters[slainMonsters.length - 1];
-            const canUseWeapon = weapon && (
-                slainMonsters.length === 0 ||
-                card?.valor < lastSlainCard?.valor ||
-                (ricochet && card?.valor <= lastSlainCard?.valor)
-            );
 
             // Resolución de Ramas de Combate
             if (invincibilityTurns.current > 0) {
@@ -1701,20 +1588,24 @@ const GamePageInner = () => {
                 if (weapon || midas.current) grantGoldReward();
             } else if (canUseWeapon) {
 
-                // --- ATAQUE CON ARMA ---
-                const finalUserDmg = Math.floor(((pentakill + weaponDmg.current + extraSuitDmg + tameDamage + userExtraDmg.current + userPermanentExtraDmg.current + blacksmithDmg) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
-                finalDmg = Math.max(0, enemyBaseDmg - finalUserDmg);
-                isSlain = true;
+                // --- ATAQUE CON ARMA (daño precalculado en game/combat.js) ---
                 damageAnimation(finalDmg);
                 grantGoldReward();
                 processDamageAndRevive(finalDmg);
 
                 // Robo de vida (Lifesteal)
 
-                if (!antiheal.current && ((healthSteal.current || isVampire) && card?.valor < (weaponDmg.current + (isVampire ? userExtraDmg.current : 0)))) {
-
-                    // Simplificación matemática exacta de tu lógica original
-                    let heal = Math.min(maxHealthSteal, (weaponDmg.current + (isVampire ? userExtraDmg.current : 0)) - card?.valor);
+                const lifestealHeal = calcWeaponLifesteal({
+                    antiheal: antiheal.current,
+                    healthSteal: healthSteal.current,
+                    isVampire,
+                    enemyValor: card?.valor,
+                    weaponDmg: weaponDmg.current,
+                    userExtraDmg: userExtraDmg.current,
+                    maxHealthSteal,
+                });
+                if (lifestealHeal > 0) {
+                    const heal = lifestealHeal;
                     if (isVampire) {
                         handleNewAchievement('desafio_vampiro', heal);
                     }
@@ -1727,11 +1618,7 @@ const GamePageInner = () => {
                 }
             } else {
 
-                // --- ATAQUE SIN ARMA ---
-                const finalUserDmg = Math.floor(((pentakill + extraSuitDmg + userExtraDmg.current + userPermanentExtraDmg.current + mma.current) * userDmgMultiplier.current) * criticalMultiplier + 0.5);
-                finalDmg = Math.max(0, enemyBaseDmg - finalUserDmg);
-                isSlain = false;
-
+                // --- ATAQUE SIN ARMA (daño precalculado en game/combat.js) ---
                 moveCardToDiscard([card]);
                 damageAnimation(finalDmg, true);
                 processDamageAndRevive(finalDmg);
@@ -1739,8 +1626,15 @@ const GamePageInner = () => {
                     grantGoldReward();
                 }
 
-                if (!antiheal.current && isVampire && card?.valor < finalUserDmg) {
-                    let heal = Math.min(maxHealthSteal, (finalUserDmg) - card?.valor);
+                const vampireHeal = calcBarehandLifesteal({
+                    antiheal: antiheal.current,
+                    isVampire,
+                    enemyValor: card?.valor,
+                    finalUserDmg,
+                    maxHealthSteal,
+                });
+                if (vampireHeal > 0) {
+                    const heal = vampireHeal;
                     healedLife.current += heal;
                     handleNewAchievement('desafio_vampiro', heal);
                     healthStealAnimation(heal);
@@ -1756,7 +1650,7 @@ const GamePageInner = () => {
 
             // Actualizar racha global, logs y durabilidad del arma
             setActualStreak(prev => prev + 1);
-            logsRef.current.push(`${logsRef.current.length + 1} - ${card?.valor} de ${card?.palo} te ha hecho ${finalDmg} de daño.`);
+            logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.combatDamage', { valor: card?.valor, palo: card?.palo, dmg: finalDmg })}`);
             if (breakWeapon.current) {
                 weaponBreaker();
             }
@@ -1775,11 +1669,11 @@ const GamePageInner = () => {
             }
             const newWeapon = await getWeapon(weaponValue);
             if (!newWeapon) {
-                logsRef.current.push((logsRef.current.length + 1) + " - " + `El hierro se ha arruinado: no se ha forjado ninguna arma.`);
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.forgeFail'));
                 return;
             }
             handleWeapon(newWeapon);
-            logsRef.current.push((logsRef.current.length + 1) + " - " + `Has forjado una nueva arma con valor ${weaponValue}.`)
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.forged', { valor: weaponValue }))
         }
 
 
@@ -1796,7 +1690,7 @@ const GamePageInner = () => {
                     : [minibossEffect];
 
                 logsRef.current.push(
-                    `${logsRef.current.length + 1} - ¡Te enfrentaste a ${card?.valor} !`
+                    `${logsRef.current.length + 1} - ${t('game:logs.facedMiniboss', { valor: card?.valor })}`
                 );
 
                 // Aplicar efecto especial del miniboss
@@ -1822,22 +1716,26 @@ const GamePageInner = () => {
                     userExtraDmg.current = 0;
                     rechargeVampireAbility();
                     dmgReduction.current = 0;
+                    // Solo hay combate real (y racha) si no es saqueo directo.
+                    const foughtMiniboss = effectsList[0]?.name !== 'last_pillage';
+                    trackMissionEvent({
+                        kills: 1,
+                        streak: foughtMiniboss ? actualStreak + 1 : actualStreak,
+                        goldTotal: totalEarnedGold.current,
+                        round: rounds,
+                        miniboss: true,
+                    });
 
-                    let isMinibossDefeated = true;
+                    // Resolución pura en game/minibosses.js; aquí solo se aplica.
+                    const defeat = planMinibossDefeat(card, {
+                        activeMinibossEffect: activeMinibossEffect.current,
+                        spiderPartsLeft: spiderPartsLeft.current,
+                    });
 
-                    if (effectsList.some(effect => effect?.name === 'sticky')) {
-                        if (card?.valor === 2) {
-                            deleteFromRoom(card);
-                        } else {
+                    if (defeat.isSticky) {
+                        if (defeat.stickySplit) {
                             // La reina no muere: pierde la mitad de su valor y crea 2 slimes
-                            isMinibossDefeated = false;
-                            const halfValue = Math.max(2, Math.floor(card.valor / 2));
-                            const reducedCard = {
-                                ...card,
-                                valor: halfValue,
-                                key: uid()
-                            };
-                            const customSlime = getCustomSlime(halfValue);
+                            const customSlime = getCustomSlime(defeat.stickySplit.halfValue);
                             if (customSlime) {
                                 // Claves distintas por copia: dos copias del mismo
                                 // objeto comparten key y rompen React y los refs.
@@ -1845,7 +1743,9 @@ const GamePageInner = () => {
                                 addCardToDungeon({ ...customSlime, key: uid() });
                             }
                             deleteFromRoom(card);
-                            addCardAndShuffle(reducedCard);
+                            addCardAndShuffle({ ...card, valor: defeat.stickySplit.halfValue, key: uid() });
+                        } else {
+                            deleteFromRoom(card);
                         }
                     } else {
                         // Miniboss normal: se descarta
@@ -1855,63 +1755,21 @@ const GamePageInner = () => {
                     // Araña gigante: sus 9 partes comparten el efecto 'spider_web'.
                     // Al destruir una parte se bloquea la huida 3 turnos (telaraña)
                     // y se descuenta de las partes restantes.
-                    const isSpiderPart = card?.codigo === 'arana' &&
-                        effectsList.some(effect => effect?.name === 'spider_web');
-                    if (isSpiderPart && isMinibossDefeated) {
-                        spiderPartsLeft.current = Math.max(0, spiderPartsLeft.current - 1);
+                    if (defeat.isSpiderPart && defeat.isMinibossDefeated) {
+                        spiderPartsLeft.current = defeat.spiderLeft;
                         webTurns.current = 3;
-                        logsRef.current.push(
-                            `${logsRef.current.length + 1} - Una telaraña te envuelve: no podrás huir durante 3 turnos.`
-                        );
-                        logsRef.current.push(
-                            `${logsRef.current.length + 1} - Partes de la Araña gigante restantes: ${spiderPartsLeft.current}.`
-                        );
-                        if (spiderPartsLeft.current === 0 && activeMinibossEffect.current === 'spider_web') {
-                            logsRef.current.push(
-                                `${logsRef.current.length + 1} - ¡Has derrotado a la Araña gigante!`
-                            );
-                        }
                     }
+                    defeat.logs.forEach((entry) => {
+                        logsRef.current.push(`${logsRef.current.length + 1} - ${t(entry.key, entry.params)}`);
+                    });
 
                     // Solo limpiar el estado si el miniboss derrotado es el que estaba
-                    // activo: las piezas derivadas (slimes, bolas de pelo...) no deben
-                    // cancelar un miniboss pendiente (chamán, ladrona o guantes).
-                    // Regla explícita: atacar una BOLA DE PELO (codigo 'hairball')
-                    // nunca debe matar al miniboss activo (Guantes): se excluye por
-                    // IDENTIDAD, y su efecto aleatorio viene de la pool de efectos
-                    // enemigos, disjunta de los nombres de efecto de miniboss.
-                    // La Araña solo se limpia al morir la ÚLTIMA parte: sus partes
-                    // comparten nombre de efecto con el miniboss activo.
-                    const defeatedEffectName = effectsList[0]?.name;
-
-                    // Logros de miniboss: se lanzan al derrotar al miniboss en
-                    // cuestión, en el mismo momento que la limpieza de estado.
-                    const minibossAchievementByEffect = {
-                        sticky: 'miniboss_slime',
-                        spider_web: 'miniboss_arana',
-                        chaos_force: 'miniboss_chaman',
-                        last_pillage: 'miniboss_ladrona',
-                        supplies: 'miniboss_hada',
-                        hairballs: 'miniboss_guantes',
-                        mimicry: 'miniboss_mimico',
-                    };
-                    // La bola de pelo tiene logro propio aunque jamás sea el miniboss activo.
-                    if (isMinibossDefeated && card?.codigo === 'hairball') {
-                        handleNewAchievement('miniboss_bola');
+                    // activo (lógica en el puro). La bola de pelo tiene logro propio
+                    // aunque jamás sea el miniboss activo.
+                    if (defeat.achievement) {
+                        handleNewAchievement(defeat.achievement);
                     }
-
-                    if (isMinibossDefeated && card?.codigo !== 'hairball'
-                        && defeatedEffectName === activeMinibossEffect.current
-                        && !(isSpiderPart && spiderPartsLeft.current > 0)) {
-                        if (defeatedEffectName === 'supplies') {
-                            logsRef.current.push(
-                                `${logsRef.current.length + 1} - ¡Has derrotado al Rey hada!`
-                            );
-                        }
-                        const minibossAchievement = minibossAchievementByEffect[defeatedEffectName];
-                        if (minibossAchievement) {
-                            handleNewAchievement(minibossAchievement);
-                        }
+                    if (defeat.shouldCleanMiniboss) {
                         handleCleanMinibosses();
                     }
 
@@ -1919,7 +1777,7 @@ const GamePageInner = () => {
                     // dure el golpe final (handleCleanMinibosses pone webTurns a 0).
                     // Decisión: un impacto nuevo REINICIA el contador a 3 turnos
                     // (3 manos), no se acumula con la telaraña anterior.
-                    if (isSpiderPart) {
+                    if (defeat.isSpiderPart) {
                         webTurns.current = 3;
                     }
                 }
@@ -1935,7 +1793,7 @@ const GamePageInner = () => {
                     totalCardsUsed.current += 1;
                 } else {
                     logsRef.current.push(
-                        `${logsRef.current.length + 1} - No puedes enfrentarte al miniboss de esta forma.`
+                        `${logsRef.current.length + 1} - ${t('game:logs.minibossInvalid')}`
                     );
                 }
 
@@ -1973,14 +1831,21 @@ const GamePageInner = () => {
                     userExtraDmg.current = 0;
                     rechargeVampireAbility();
                     dmgReduction.current = 0;
+                    trackMissionEvent({
+                        kills: 1,
+                        streak: actualStreak + 1,
+                        goldTotal: totalEarnedGold.current,
+                        round: rounds,
+                        miniboss: false,
+                    });
                 }
                 if (scavenger && validMove) {
                     if (Math.floor(Math.random() * 100) < 10) {
                         if (Math.floor(Math.random() * 100) >= 50) {
                             userExtraDmg.current += 1;
-                            logsRef.current.push(`${logsRef.current.length + 1} - Carroñero te da 1 de daño extra en la siguiente acción.`);
+                            logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.scavengerDmg')}`);
                         } else if (!antiheal.current) {
-                            logsRef.current.push(`${logsRef.current.length + 1} - Carroñero te ha curado 1 de vida.`);
+                            logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.scavengerHeal')}`);
                             healedLife.current += 1;
                             setHealth(prev => Math.min(maxHealth, prev + 1))
                             healAnimation(1)
@@ -1997,7 +1862,7 @@ const GamePageInner = () => {
                 canScape.current = false;
                 totalCardsUsed.current += 1;
             } else {
-                logsRef.current.push(`${logsRef.current.length + 1} - Movimiento no válido.`);
+                logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.invalidMove')}`);
             }
         }, [handleHeal, handleWeapon, handleCombat, grandma, character]);
         // =====================================================
@@ -2035,8 +1900,22 @@ const GamePageInner = () => {
                 handleNewAchievement('habilidad_apostador')
             },
             herrero: () => { blacksmith().catch((smithError) => console.error("Error al forjar el arma:", smithError)); setAvailableAbility(false); handleNewAchievement('habilidad_herrero') },
-            vampiro: () => { setHealth(prev => prev - Math.floor(prev / 4)); userExtraDmg.current += 5; handleNewAchievement('habilidad_vampiro'); vampireAbilityUsed.current = true; setAvailableAbility(false); },
+            vampiro: () => { setHealth(prev => prev - calcVampireAbility(prev).healthCost); userExtraDmg.current += calcVampireAbility(health).dmgBonus; handleNewAchievement('habilidad_vampiro'); vampireAbilityUsed.current = true; setAvailableAbility(false); },
             domador: () => { setIsTaming(true); setAvailableAbility(false); handleNewAchievement('habilidad_domador') },
+            cazador: () => {
+                // Recompensa pura en game/characters.js; aquí solo se aplica.
+                const result = applyBounty(room);
+                if (result.bountied.length > 0) {
+                    result.bountied.forEach((bountied) => {
+                        logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.bounty', { valor: bountied.valor, palo: bountied.palo }))
+                    });
+                    setRoom(result.room);
+                } else {
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.bountyNone'))
+                }
+                handleNewAchievement('habilidad_cazarrecompensas')
+                setAvailableAbility(false);
+            },
         };
 
         const handleUseAbility = () => {
@@ -2065,9 +1944,10 @@ const GamePageInner = () => {
             // Mismo guard que el onClick: no procesar si la partida está pausada
             // o en transición (evita jugadas duplicadas por drag + click).
             if (!canBeClicked || !gameOn) return false;
+            // Zona de soltado efectiva según modo (portrait compacta).
             const isOverZone =
-                finalX > WEAPON_ZONE.x && finalX < WEAPON_ZONE.x + WEAPON_ZONE.width &&
-                finalY > WEAPON_ZONE.y && finalY < WEAPON_ZONE.y + WEAPON_ZONE.height;
+                finalX > weaponZone.x && finalX < weaponZone.x + weaponZone.width &&
+                finalY > weaponZone.y && finalY < weaponZone.y + weaponZone.height;
             if (isOverZone) {
                 processCardAction(card);
                 return true;
@@ -2096,7 +1976,7 @@ const GamePageInner = () => {
 
         const handleDeleteHalf = () => {
             const half = Math.floor(matchDeck.length / 2);
-            const shuffledDeck = lodash.shuffle(matchDeck);
+            const shuffledDeck = shuffle(matchDeck);
             const newDeck = shuffledDeck.slice(0, half);
             setNewMatchDeck(newDeck);
             setDungeon(newDeck);
@@ -2112,142 +1992,143 @@ const GamePageInner = () => {
             userPermanentExtraDmg.current += 2;
         }
 
-        const applyEffect = (effect) => {
-            switch (effect?.name) {
-                case "chest_rewards":
-                    const weaponValue = lodash.shuffle(Array.isArray(effect?.value) ? effect.value : [])[0];
-                    if (weaponValue) {
-                        setModifierWeapon(weaponValue);
-                    }
-                    break;
-                case "pentakill_target_number":
-                    // Lógica para registrar cuántas muertes se necesitan (ej: 3)
-                    if (pentakillTargetNumber < effect?.value) {
-                        setPentakillTargetNumber(effect?.value)
-                    }
-                    break;
+        // Adaptador Fase 1: el cálculo puro vive en game/modifiers.js;
+        // aquí solo se vuelca al estado/refs y se ejecutan los eventos
+        // con las funciones existentes (sin cambios de comportamiento).
+        const snapshotModifiers = () => ({
+            pentakillTargetNumber,
+            pentakillDmg,
+            healthSteal: healthSteal.current,
+            clubsExtraTakedDmg: clubsExtraTakedDmg.current,
+            spadesExtraTakedDmg: spadesExtraTakedDmg.current,
+            enemyDmgMultiplier: enemyDmgMultiplier.current,
+            enemyExtraDmg: enemyExtraDmg.current,
+            maxScapes,
+            actualScapes: actualScapes.current,
+            maxHealth,
+            health,
+            ricochet,
+            goldMultiplier: goldMultiplier.current,
+            grandma,
+            mma: mma.current,
+            criticalPercentage: criticalPercentage.current,
+            tacticalChange: tacticalChange.current,
+            expert: expert.current,
+            extraHealthExpert: extraHealthExpert.current,
+            scavenger,
+            vitamine,
+            gluttony,
+            interest,
+            thanatophobia,
+            thanatophobiaActivated,
+            lifeward,
+            refund: refund.current,
+            membership: membership.current,
+            catEye: catEye.current,
+            amego: amego.current,
+            regeneratorGoalTurns: regeneratorGoalTurns.current,
+            regeneratorHealth: regeneratorHealth.current,
+            regeneratorTurns: regeneratorTurns.current,
+            adrenalin: adrenalin.current,
+            adrenalinActivated: adrenalinActivated.current,
+            midas: midas.current,
+        });
 
-                case "pentakill_dmg":
-                    // Lógica para aplicar el daño extra
-                    if (pentakillDmg < effect?.value) {
-                        setPentakillDmg(effect?.value)
-                    }
-                    break;
-
-                case "health_steal":
-                    // Lógica para el drenaje
-                    healthSteal.current = true;
-                    break;
-                case "user_clubs_dmg":
-                    clubsExtraTakedDmg.current += effect.value
-                    break;
-                case "user_spades_dmg":
-                    spadesExtraTakedDmg.current += effect.value
-                    break;
-                case "enemy_dmg_multiplier":
-                    enemyDmgMultiplier.current = enemyDmgMultiplier.current * effect.value
-                    break;
-                case "enemy_extra_dmg":
-                    enemyExtraDmg.current = enemyExtraDmg.current + effect.value
-                    break
-                case "max_scapes":
-                    setMaxScapes(prev => prev + effect.value)
-                    actualScapes.current += effect.value
-                    break;
-                case "max_hp":
-                    setMaxHealth(prev => prev + effect.value)
-                    setHealth(prev => prev + effect.value)
-                    break;
-                case "ricochet":
-                    setRicochet(true);
-                    break;
-                case 'gold_multiplier':
-                    goldMultiplier.current = Math.max(goldMultiplier.current, effect.value)
-                    break;
-                case 'grandma':
-                    setGrandma(true);
-                    break;
-                case 'mma':
-                    if (mma.current < effect.value) {
-                        mma.current = effect.value;
-                    }
-                    break;
-                case 'critical_percentage':
-                    if (criticalPercentage.current < effect.value) {
-                        criticalPercentage.current = effect.value;
-                    }
-                    break;
-                case 'tactical_change':
-                    if (tacticalChange.current < effect.value) {
-                        tacticalChange.current = effect.value;
-                    }
-                    break
-                case 'expert':
-                    expert.current = true;
-                    extraHealthExpert.current = Math.max(0, Math.min(10, Math.floor(enemysDefeated / 20)));
-                    setMaxHealth(prev => prev + extraHealthExpert.current);
-                    break;
-                case 'scavenger':
-                    setScavenger(true)
-                    break;
-                case 'vitamine':
-                    setVitamine(true)
-                    break;
-                case 'gluttony':
-                    setGluttony(true)
-                    break;
-                case 'interest':
-                    setInterest(prev => Math.max(prev, effect.value));
-                    break;
-                case 'thanatophobia':
-                    setThanatophobia(true);
-                    setThanatophobiaActivated(false);
-                    break;
-                case 'lifeward':
-                    setLifeward(true);
-                    break;
-                case 'refund':
-                    refund.current = true;
-                    break;
-                case 'delete':
-                    handleDeleteSuit(effect.value);
-                    break;
-                case 'membership':
-                    membership.current = true;
-                    break;
-                case 'clean':
-                    handleDeleteHalf();
-                    break;
-                case 'cat_eye':
-                    catEye.current = true;
-                    break;
-                case 'covenant':
-                    handleCovenant();
-                    break;
-                case 'amego':
-                    amego.current = true;
-                    break;
-                case 'regenerator':
-                    if (effect.value === 1 && regeneratorHealth.current == 0) {
-                        regeneratorGoalTurns.current = 5;
-                    } else if (effect.value === 2 && regeneratorGoalTurns.current > 3) {
-                        regeneratorGoalTurns.current = 3;
-                    } else if (effect.value === 3) {
-                        regeneratorGoalTurns.current = 1;
-                    }
-                    regeneratorHealth.current = 1;
-                    regeneratorTurns.current = 0;
-                    break;
-                case 'adrenalin':
-                    adrenalin.current = true;
-                    adrenalinActivated.current = false;
-                    break;
-                case 'midas':
-                    midas.current = true;
-                    break;
-                default:
-                    return false;
+        const commitModifiers = (next) => {
+            if (next.pentakillTargetNumber !== pentakillTargetNumber) {
+                setPentakillTargetNumber(next.pentakillTargetNumber);
             }
+            if (next.pentakillDmg !== pentakillDmg) {
+                setPentakillDmg(next.pentakillDmg);
+            }
+            healthSteal.current = next.healthSteal;
+            clubsExtraTakedDmg.current = next.clubsExtraTakedDmg;
+            spadesExtraTakedDmg.current = next.spadesExtraTakedDmg;
+            enemyDmgMultiplier.current = next.enemyDmgMultiplier;
+            enemyExtraDmg.current = next.enemyExtraDmg;
+            if (next.maxScapes !== maxScapes) {
+                setMaxScapes(next.maxScapes);
+            }
+            actualScapes.current = next.actualScapes;
+            if (next.maxHealth !== maxHealth) {
+                setMaxHealth(next.maxHealth);
+            }
+            if (next.health !== health) {
+                setHealth(next.health);
+            }
+            if (next.ricochet !== ricochet) {
+                setRicochet(next.ricochet);
+            }
+            goldMultiplier.current = next.goldMultiplier;
+            if (next.grandma !== grandma) {
+                setGrandma(next.grandma);
+            }
+            mma.current = next.mma;
+            criticalPercentage.current = next.criticalPercentage;
+            tacticalChange.current = next.tacticalChange;
+            expert.current = next.expert;
+            extraHealthExpert.current = next.extraHealthExpert;
+            if (next.scavenger !== scavenger) {
+                setScavenger(next.scavenger);
+            }
+            if (next.vitamine !== vitamine) {
+                setVitamine(next.vitamine);
+            }
+            if (next.gluttony !== gluttony) {
+                setGluttony(next.gluttony);
+            }
+            if (next.interest !== interest) {
+                setInterest(next.interest);
+            }
+            if (next.thanatophobia !== thanatophobia) {
+                setThanatophobia(next.thanatophobia);
+            }
+            if (next.thanatophobiaActivated !== thanatophobiaActivated) {
+                setThanatophobiaActivated(next.thanatophobiaActivated);
+            }
+            if (next.lifeward !== lifeward) {
+                setLifeward(next.lifeward);
+            }
+            refund.current = next.refund;
+            membership.current = next.membership;
+            catEye.current = next.catEye;
+            amego.current = next.amego;
+            regeneratorGoalTurns.current = next.regeneratorGoalTurns;
+            regeneratorHealth.current = next.regeneratorHealth;
+            regeneratorTurns.current = next.regeneratorTurns;
+            adrenalin.current = next.adrenalin;
+            adrenalinActivated.current = next.adrenalinActivated;
+            midas.current = next.midas;
+        };
+
+        const applyEffect = (effect) => {
+            const { state: next, handled, events } = applyModifierToState(snapshotModifiers(), effect, { enemysDefeated });
+            if (!handled) {
+                return false;
+            }
+            commitModifiers(next);
+            events.forEach((event) => {
+                switch (event.type) {
+                    case 'chestRewards': {
+                        const weaponValue = shuffle(Array.isArray(event.values) ? event.values : [])[0];
+                        if (weaponValue) {
+                            setModifierWeapon(weaponValue);
+                        }
+                        break;
+                    }
+                    case 'deleteSuit':
+                        handleDeleteSuit(event.suit);
+                        break;
+                    case 'cleanHalf':
+                        handleDeleteHalf();
+                        break;
+                    case 'covenant':
+                        handleCovenant();
+                        break;
+                    default:
+                        break;
+                }
+            });
             return true;
         }
         // =====================================================
@@ -2288,16 +2169,6 @@ const GamePageInner = () => {
         }, [health]);
 
         useEffect(() => {
-            if (health >= maxHealth) {
-                setHealthIcon(FullHealthIcon);
-            } else if (health <= maxHealth / 2 && health > 0) {
-                setHealthIcon(MidHealthIcon);
-            } else if (health === 0) {
-                setHealthIcon(NoHealthIcon);
-            }
-        }, [health, maxHealth]);
-
-        useEffect(() => {
             if (canBeClicked === false) {
                 const id = scheduleTimeout(() => {
                     setCanBeClicked(true);
@@ -2307,11 +2178,18 @@ const GamePageInner = () => {
         }, [canBeClicked]);
 
         useEffect(() => {
-            if (gameLoading !== false || hasStartedNewGameRef.current) return;
+            // Fix recarga /jugar: no arrancar con baseDeck vacío (el load del
+            // provider aún no terminó). Al completarse, el effect se re-ejecuta
+            // (nueva identidad de startNewGame + baseDeck.length) y arranca bien.
+            if (!shouldStartNewGame({
+                gameLoading,
+                alreadyStarted: hasStartedNewGameRef.current,
+                baseDeckSize: baseDeck?.length ?? 0,
+            })) return;
 
             hasStartedNewGameRef.current = true;
             Promise.resolve(startNewGame()).catch((startError) => console.error("Error al iniciar la partida:", startError));
-        }, [gameLoading, startNewGame]);
+        }, [gameLoading, startNewGame, baseDeck?.length]);
 
         useEffect(() => {
             if (maxHealth >= 60 && character?.habilidad_personaje?.codigo === 'paladin') {
@@ -2374,7 +2252,7 @@ const GamePageInner = () => {
         // sala aquí: destruía cartas solo-dungeon y perdía el estado de la mano.
         useEffect(() => {
             if (shopWasOpenRef.current && !shopAvailable) {
-                setDungeon(prev => (prev.length > 0 ? prev : lodash.shuffle(matchDeckRef.current)));
+                setDungeon(prev => (prev.length > 0 ? prev : shuffle(matchDeckRef.current)));
             }
             shopWasOpenRef.current = shopAvailable;
         }, [shopAvailable]);
@@ -2382,26 +2260,18 @@ const GamePageInner = () => {
         // Timer
         useEffect(() => {
             if (gameOn) {
-                stopTimer();
                 // Nueva partida activa: se vuelve a permitir el guardado
-                gameSavedRef.current = false;
-                intervalRef.current = setInterval(() => {
-                    timeRef.current += 1;
-                    const mins = Math.floor(timeRef.current / 60);
-                    const secs = timeRef.current % 60;
-                    if (formatedTimeRef.current) {
-                        formatedTimeRef.current.textContent = `Tiempo: ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-                    }
-                }, 1000);
-            } else if (user && rounds > 0 && !gameSavedRef.current) {
+                resetSaveFlag();
+                startTimer();
+            } else if (user && rounds > 0) {
                 stopTimer();
-                // La bandera se marca ANTES de lanzar la petición para evitar
-                // guardados duplicados; los errores se capturan explícitamente.
-                gameSavedRef.current = true;
-                const savePromise = continuedGame
-                    ? updateActualGame(user.id, timeRef.current, true, rounds, totalEarnedGold.current, healedLife.current, enemysDefeated)
-                    : endGame(user.id, timeRef.current, gameWin, rounds, totalEarnedGold.current, healedLife.current, enemysDefeated);
-                Promise.resolve(savePromise).catch((saveError) => console.error("Error al guardar la partida:", saveError));
+                saveAuto({
+                    time: timeRef.current,
+                    gold: totalEarnedGold.current,
+                    healed: healedLife.current,
+                    defeated: enemysDefeated,
+                    continuedGame,
+                });
             }
 
             return () => stopTimer();
@@ -2505,32 +2375,9 @@ const GamePageInner = () => {
             }
         }, [user, isLoading, navigate]);
 
-        // Layout / resize
-        useEffect(() => {
-            const handleResize = () => {
-                setLayout(calculateLayout());
-            };
-            window.addEventListener('resize', handleResize);
-            return () => {
-                window.removeEventListener('resize', handleResize);
-                // Se guarda solo si la partida realmente empezó (rounds > 0)
-                if (!gameSavedRef.current && userRef.current?.id && characterRef.current && roundsRef.current > 0) {
-                    gameSavedRef.current = true;
-                    Promise.resolve(
-                        endGame(
-                            userRef.current.id,
-                            timeRef.current,
-                            gameWinRef.current,
-                            roundsRef.current,
-                            totalEarnedGold.current,
-                            healedLife.current,
-                            enemysDefeatedRef.current
-                        )
-                    ).catch((saveError) => console.error("Error al guardar la partida al salir:", saveError));
-                }
-                stopTimer();
-            };
-        }, []);
+        // Medición real del contenedor del tablero: ver observeBoard
+        // (callback ref). El canvas Konva usa tamaño fijo y se dimensiona
+        // al wrapper visible.
 
         useEffect(() => {
             if (thanatophobia && room.length === 4) {
@@ -2581,17 +2428,15 @@ const GamePageInner = () => {
             const gestionarSalidaNavbar = async (e) => {
                 const rutaDestino = e.detail.destino;
                 try {
-                    if (!gameSavedRef.current && userRef.current?.id) {
-                        gameSavedRef.current = true;
-                        await endGame(
-                            userRef.current.id,
-                            timeRef.current,
-                            false,
-                            roundsRef.current,
-                            totalEarnedGold.current,
-                            healedLife.current,
-                            enemysDefeatedRef.current
-                        );
+                    // Sin personaje no hay partida que contar como derrota.
+                    if (hasCharacter()) {
+                        await saveExit({
+                            time: timeRef.current,
+                            gold: totalEarnedGold.current,
+                            healed: healedLife.current,
+                            victory: false,
+                            reason: 'navbar',
+                        });
                     }
                 } catch (error) {
                     console.error("Error al guardar la partida desde el Navbar:", error);
@@ -2604,12 +2449,14 @@ const GamePageInner = () => {
             return () => {
                 window.removeEventListener('interrumpirPartida', gestionarSalidaNavbar);
             };
-        }, [navigate, endGame]);
+        }, [navigate, saveExit, hasCharacter]);
 
-        // Popstate
+        // Popstate: el modal de derrota solo salta con personaje elegido.
+        // Sin personaje, el atrás del navegador fluye con normalidad.
         useEffect(() => {
             window.history.pushState(null, null, window.location.pathname);
             const handlePopState = async () => {
+                if (!hasCharacter()) return;
                 setIsModalOpen(true);
             };
 
@@ -2617,7 +2464,45 @@ const GamePageInner = () => {
             return () => {
                 window.removeEventListener('popstate', handlePopState);
             };
-        }, []);
+        }, [hasCharacter]);
+
+        // Recarga/cierre de pestaña: el modal propio no puede abrirse en
+        // unload (restricción del navegador), así que se usa el diálogo
+        // nativo. Solo con personaje elegido.
+        useEffect(() => {
+            const handleBeforeUnload = (e) => {
+                if (!hasCharacter()) return;
+                e.preventDefault();
+            };
+
+            window.addEventListener('beforeunload', handleBeforeUnload);
+            return () => {
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            };
+        }, [hasCharacter]);
+
+        // Unload confirmado (recarga/cierre): cuenta como derrota vía
+        // keepalive (axios no sobrevive al unload). Solo con partida en
+        // curso (gameOn): si ya terminó, el guardado normal la cubrió.
+        // No dispara en navegación interna SPA (no hay unload).
+        useEffect(() => {
+            const handlePageHide = () => {
+                if (!gameOn) return;
+                if (!hasCharacter()) return;
+                saveLossOnUnload({
+                    tiempo: timeRef.current,
+                    rondas: rounds,
+                    oro_obtenido: totalEarnedGold.current,
+                    vida_curada: healedLife.current,
+                    enemigos_enfrentados: enemysDefeated,
+                });
+            };
+
+            window.addEventListener('pagehide', handlePageHide);
+            return () => {
+                window.removeEventListener('pagehide', handlePageHide);
+            };
+        }, [gameOn, rounds, enemysDefeated, hasCharacter, saveLossOnUnload]);
 
         useEffect(() => {
             return () => {
@@ -2625,6 +2510,16 @@ const GamePageInner = () => {
                 // tienen efecto en un componente desmontado. Se cancelan timers
                 // pendientes y se restaura el cursor.
                 clearScheduledTimeouts();
+                // Guardado al salir (antes en el cleanup del resize, que solo
+                // corría al desmontar: deps []). Solo si la partida empezó.
+                if (hasActiveGame()) {
+                    saveExit({
+                        time: timeRef.current,
+                        gold: totalEarnedGold.current,
+                        healed: healedLife.current,
+                        reason: 'unmount',
+                    });
+                }
                 stopTimer();
                 document.body.style.cursor = '';
                 setActiveModifiers([]);
@@ -2710,8 +2605,8 @@ const GamePageInner = () => {
                         isOpen={isModalOpen}
                         onClose={() => handleCloseModal()}
                         onConfirm={handleConfirmAction}
-                        title="Advertencia"
-                        message="Si sales, la partida contará como derrota."
+                        title={t('exitTitle')}
+                        message={t('exitMessage')}
                     />
                 </>
             );
@@ -2736,352 +2631,137 @@ const GamePageInner = () => {
             }
             return total;
         }
+
+        // Icono por palo (mismo mapeo que los ternarios inline del Stage).
+        const getSuitIcon = (palo) => palo == "Diamante" ? DiamonIcon : palo == "Trebol" ? ClubIcon : palo == "Corazon" ? HeartIcon : palo == 'Pica' ? SpadeIcon : MinibossIcon;
+
+        // Valores e iconos del panel de efectos (se leen en cada render, igual que antes).
+        const effectValues = {
+            extraDmg: extraDmgEffects(),
+            enemyExtraDmg: enemyExtraDmg.current,
+            spadesExtra: spadesExtraTakedDmg.current,
+            clubsExtra: clubsExtraTakedDmg.current,
+            poisonTurns: poison.current,
+            sealTurns: sealTurns.current,
+            souleaterTurns: souleaterTurns.current,
+            mma: mma.current,
+            antihealTurns: antihealTurns.current,
+            extraGold: calcExtraGold(),
+            invincibilityTurns: invincibilityTurns.current,
+            progresiveTurns: progresiveHealTurns.current,
+            progresiveValue: progresiveHeal.current,
+            dmgReductionTurns: dmgReduction.current,
+        };
+        const effectIcons = {
+            buff: BuffIcon,
+            debuff: DebuffIcon,
+            spade: SpadeIcon,
+            club: ClubIcon,
+            poison: PoisonIcon,
+            seal: SealIcon,
+            souleater: SouleaterIcon,
+            mma1: MMA1Icon,
+            mma2: MMA2Icon,
+            mma3: MMA3Icon,
+            antiheal: AntihealIcon,
+            extraGold: ExtraGoldIcon,
+            invincibility: InvincibilityIcon,
+            progresiveHeal: ProgresiveHealIcon,
+            dmgReduction: DmgReductionIcon,
+        };
         return (
             <Fragment>
                 <div className="game">
                     {
                         !gameOn ?
-                            <div className="gameOver-menu">
-                                <h1 className={gameWin ? "victory" : "lose"}>{gameWin ? "VICTORIA" : "DERROTA"}</h1>
-
-                                {
-                                    gameWin ?
-                                        <button onClick={() => { continueFunction() }}>
-                                            CONTINUAR
-                                        </button>
-                                        : <></>
-                                }
-
-                                <button onClick={(event) => {
-                                    setRestart(true)
-                                }}>
-                                    {gameWin ? 'JUGAR OTRA' : 'REINTENTAR'}
-                                </button>
-
-                                <button onClick={(event) => {
-                                    setChangeCharacter(true)
-                                    setRestart(true)
-                                }}>
-                                    CAMBIAR PERSONAJE
-                                </button>
-
-                                <button onClick={(event) => { startButtonSound(true); navigate('/') }}>INICIO</button>
-                                <button onClick={(event) => { startButtonSound(true); navigate(`/perfil/${user ? user.nick : ''}`) }}>PERFIL</button>
-                                <div className="final-match-info">
-                                    <p><span>{formatedTimeRef?.current?.textContent ?? ""}</span></p>
-                                    <p>Rondas: <span>{rounds}</span></p>
-                                    <p>Cartas restantes en esta ronda: <span>{dungeon.length + room.length}</span></p>
-                                    <p>Total de cartas jugadas: <span>{totalCardsUsed.current}</span></p>
-                                    <p>Oro obtenido esta partida: <span>{totalEarnedGold.current}</span></p>
-                                    <p>Total enemigos derrotados: <span style={{ color: 'var(--main-red)' }}>{enemysDefeated}</span></p>
-                                </div>
-                            </div> :
+                            <GameOverMenu
+                                gameWin={gameWin}
+                                timeText={formatedTimeRef?.current?.textContent ?? ""}
+                                rounds={rounds}
+                                remainingCards={dungeon.length + room.length}
+                                cardsUsed={totalCardsUsed.current}
+                                earnedGold={totalEarnedGold.current}
+                                enemysDefeated={enemysDefeated}
+                                onContinue={() => { continueFunction() }}
+                                onRestart={() => { setRestart(true) }}
+                                onChangeCharacter={() => { setChangeCharacter(true); setRestart(true) }}
+                                onHome={() => { startButtonSound(true); navigate('/') }}
+                                onProfile={() => { startButtonSound(true); navigate(`/perfil/${user ? user.nick : ''}`) }}
+                            /> :
                             <></>
                     }
                     <div className="game-container">
 
                         {/* INTERFAZ IZQUIERDA */}
-                        <div className="game-hud">
-                            <div className="game-hud-text">
-                                <h1 className="player-health"><img src={healthIcon} alt="" />{health}/{maxHealth}{healthAnimation !== null ? <div className="animation-container"><strong className="animation">{healthAnimationValue}</strong><img className="animation" alt="" src={healthAnimation} /></div> : <></>}</h1>
-                                <h1 className="player-gold"><img src={GoldIcon} alt="" />{gold}{goldAnimation !== null ? <div className="animation-container"><strong className="animation">{goldAnimationValue}</strong><img className="animation" alt="" src={goldAnimation} /></div> : <></>}</h1>
-                                {!modifiersLoading && pentakillTargetNumber !== 0 ? <h1>Racha <strong>{actualStreak}</strong>/<strong>{pentakillTargetNumber}</strong></h1> : <></>}
-                                {gameOn && gameWin ? <h1>RONDA {rounds}/Sin límite</h1> : <h1>RONDA {rounds}/{maxRounds}</h1>}
-                                <h2 ref={formatedTimeRef}>Tiempo: 00:00</h2>
-                                <p>{dungeon.length + (lastCardBoss !== undefined && !room.some(c => c?.key === lastCardBoss?.key) ? 1 : 0)} cartas restantes {minibossActive ? <img src={MinibossIcon} className='minibossIcon' title="Miniboss activo" alt="Icono miniboss" /> : ''}</p>
-                                {isGambler ? lastGamblerEffect !== null ? <p className="gambler-text">Última apuesta: <br /> <span>{lastGamblerEffect}</span></p> : <p>Aún no has apostado.</p> : <></>}
-                            </div>
-                            <div className="game-character">
-                                <img className={`character-avatar ${isWarrior && health <= maxHealth / 2 ? 'warrior' : ''} ${isTaming ? 'tamer' : ''} ${vampireAbilityUsed.current ? 'vampire' : ''}`} style={{ borderColor: user?.color }} src={character?.imagen} alt={character?.nombre} title={character?.nombre} />
-                                <img className={availableAbility ? "character-ability available" : "character-ability"} src={character?.habilidad_personaje?.icono} style={null} alt="Habilidad" />
-                            </div>
-                            <div className="extra">
-                                <div className="game-modifiers">
-                                    {
-                                        modifiers.length > 0 ?
-                                            modifiers.map((modifierInfo, modifierIndex) => (
-                                                <Modifier key={`${modifierInfo.id}-${modifierIndex}`} modifierInfo={modifierInfo} />
-                                            ))
-                                            : <h1>Sin modificadores</h1>
-                                    }
-                                </div>
-                                <div className="game-buttons">
-                                    <button disabled={ (dungeon.length === 0) || !(webTurns.current === 0) || !canScape.current || !gameOn} onClick={() => {
-                                        scape()
-                                    }}>HUIR</button>
-                                    <button disabled={!availableAbility || !gameOn} onClick={() => {
-                                        handleUseAbility()
-                                    }}>HABILIDAD</button>
-                                </div>
-                            </div>
-                        </div>
+                        <GameHud
+                            health={health}
+                            maxHealth={maxHealth}
+                            healthIcon={healthIcon}
+                            healthAnimation={healthAnimation}
+                            healthAnimationValue={healthAnimationValue}
+                            gold={gold}
+                            goldIcon={GoldIcon}
+                            goldAnimation={goldAnimation}
+                            goldAnimationValue={goldAnimationValue}
+                            modifiersLoading={modifiersLoading}
+                            pentakillTargetNumber={pentakillTargetNumber}
+                            actualStreak={actualStreak}
+                            gameOn={gameOn}
+                            gameWin={gameWin}
+                            rounds={rounds}
+                            maxRounds={maxRounds}
+                            formatedTimeRef={formatedTimeRef}
+                            remainingCards={dungeon.length + (lastCardBoss !== undefined && !room.some(c => c?.key === lastCardBoss?.key) ? 1 : 0)}
+                            minibossIcon={MinibossIcon}
+                            minibossActive={minibossActive}
+                            isGambler={isGambler}
+                            lastGamblerEffect={lastGamblerEffect}
+                            character={character}
+                            userColor={user?.color}
+                            isWarrior={isWarrior}
+                            isTaming={isTaming}
+                            vampireUsed={vampireAbilityUsed.current}
+                            availableAbility={availableAbility}
+                            modifiers={modifiers}
+                            canFlee={(dungeon.length !== 0) && (webTurns.current === 0) && canScape.current && gameOn}
+                            canUseAbility={availableAbility && gameOn}
+                            onFlee={() => { scape() }}
+                            onAbility={() => { handleUseAbility() }}
+                        />
 
                         {/* VENTANA DE JUEGO */}
-                        <Stage className="game-window" width={layout.width} height={layout.height * 0.8} scaleX={layout.scale} scaleY={layout.scale} imageSmoothingEnabled={false} x={0}>
-                            {/* CAPA ESTÁTICA */}
-                            <Layer>
-                                <Group x={DUNGEON_ZONE.x} y={WEAPON_ZONE.y}>
-                                    <Rect width={WEAPON_ZONE.width / 3} height={WEAPON_ZONE.height} fill="#9c94476e" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                    <Text text="Efectos" fontFamily="Alagard" fontSize={16} fill="white" y={WEAPON_ZONE.height * 0.05} x={(WEAPON_ZONE.width / 3) * 0.3} />
-                                    <PlayerEffects
-                                        x={5}
-                                        y={30}
-                                        size={32}
-                                        nombre="Daño extra"
-                                        turnos={false}
-                                        valor={extraDmgEffects()}
-                                        icono={BuffIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={47.5}
-                                        y={30}
-                                        size={32}
-                                        nombre="Daño extra de enemigos"
-                                        turnos={false}
-                                        valor={enemyExtraDmg.current}
-                                        icono={DebuffIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={90}
-                                        y={30}
-                                        size={32}
-                                        nombre="Daño extra a picas"
-                                        turnos={false}
-                                        valor={spadesExtraTakedDmg.current}
-                                        icono={SpadeIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={5}
-                                        y={70}
-                                        size={32}
-                                        nombre="Daño extra a tréboles"
-                                        turnos={false}
-                                        valor={clubsExtraTakedDmg.current}
-                                        icono={ClubIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={47.5}
-                                        y={70}
-                                        size={32}
-                                        nombre="Veneno"
-                                        turnos={poison.current}
-                                        valor={false}
-                                        icono={PoisonIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={90}
-                                        y={70}
-                                        size={32}
-                                        nombre="Sello Arcano"
-                                        turnos={sealTurns.current}
-                                        valor={false}
-                                        icono={SealIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={5}
-                                        y={110}
-                                        size={32}
-                                        nombre="Robaalmas"
-                                        turnos={souleaterTurns.current}
-                                        valor={false}
-                                        icono={SouleaterIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={47.5}
-                                        y={110}
-                                        size={32}
-                                        nombre="Daño desarmado"
-                                        turnos={false}
-                                        valor={mma.current}
-                                        icono={mma.current === 3 ? MMA3Icon : mma.current === 2 ? MMA2Icon : MMA1Icon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={90}
-                                        y={110}
-                                        size={32}
-                                        nombre="Anticura"
-                                        turnos={antihealTurns.current}
-                                        valor={false}
-                                        icono={AntihealIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={5}
-                                        y={150}
-                                        size={32}
-                                        nombre="Oro extra"
-                                        turnos={false}
-                                        valor={calcExtraGold()}
-                                        icono={ExtraGoldIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={47.5}
-                                        y={150}
-                                        size={32}
-                                        nombre="Invencible"
-                                        turnos={invincibilityTurns.current}
-                                        valor={false}
-                                        icono={InvincibilityIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={90}
-                                        y={150}
-                                        size={32}
-                                        nombre="Curación progresiva"
-                                        turnos={progresiveHealTurns.current}
-                                        valor={progresiveHeal.current}
-                                        icono={ProgresiveHealIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                    <PlayerEffects
-                                        x={5}
-                                        y={190}
-                                        size={32}
-                                        nombre="Reducción de daño"
-                                        turnos={dmgReduction.current}
-                                        valor={false}
-                                        icono={DmgReductionIcon}
-                                        onHover={setTooltip}
-                                        onLeave={() => setTooltip(null)}
-                                    />
-                                </Group>
-
-                                {/* ZONA DEL MAZO */}
-                                <Group x={DUNGEON_ZONE.x} y={DUNGEON_ZONE.y}>
-                                    <Rect width={DUNGEON_ZONE.width} height={DUNGEON_ZONE.height} fill="#0000006c" stroke="white" strokeWidth={2} cornerRadius={8} onMouseEnter={(e) => { setOverDungeonZone(true) }} onMouseLeave={(e) => { setOverDungeonZone(false) }} />
-                                    <Text text="DUNGEON" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={20} x={35} />
-
-                                    {dungeon.toReversed().slice(0, isWizard ? 8 : 1).toReversed().map((card, i) => {
-                                        let x, y;
-
-                                        if (isWizard) {
-                                            if (i < 4) {
-                                                x = 5;
-                                                y = 5 + (overDungeonZone ? i * 100 : 0);
-                                            } else {
-                                                const rowIndex = i - 4;
-                                                x = overDungeonZone ? 50 : 5;
-                                                y = (overDungeonZone ? 10 : 5) + (overDungeonZone ? rowIndex * 100 : 0);
-                                            }
-                                        } else {
-                                            x = 7;
-                                            y = 5;
-                                        }
-                                        return <Card
-                                            key={card?.key}
-                                            cardInfo={card}
-                                            x={x}
-                                            y={y}
-                                            onDragEnd={() => { }}
-                                            onClick={setOverDungeonZone}
-                                            canBeClicked={canBeClicked}
-                                            isDraggable={false}
-                                            isWizard={isWizard}
-                                            haveCatEye={catEye.current}
-                                            onDeck={true}
-                                            setOverDungeonZone={setOverDungeonZone}
-                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : card?.palo == 'Pica' ? SpadeIcon : MinibossIcon}
-                                            defaultImage={defaultImage}
-                                        />
-                                    })}
-                                </Group>
-
-                                {/* PILA DE DESCARTES */}
-                                <Group x={DISCARD_ZONE.x} y={DISCARD_ZONE.y}>
-                                    <Rect width={DISCARD_ZONE.width} height={DISCARD_ZONE.height} fill="#9c4747c9" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                    <Text text="DESCARTES" rotation={55} fontFamily="Alagard" fontSize={30} fill="white" y={WEAPON_ZONE.height * 0.05} x={WEAPON_ZONE.width * 0.08} />
-                                    {discardPile.toReversed().slice(0, 1).map((card, i) => (
-                                        <Card
-                                            key={card?.key}
-                                            cardInfo={card}
-                                            x={5}
-                                            y={5}
-                                            onDragEnd={() => { }}
-                                            onClick={() => { }}
-                                            isDraggable={false}
-                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : card?.palo == 'Pica' ? SpadeIcon : MinibossIcon}
-                                            defaultImage={defaultImage}
-                                        />
-                                    ))}
-                                </Group>
-                                {/* ZONA DE EQUIPO */}
-                                <Group x={WEAPON_ZONE.x} y={WEAPON_ZONE.y}>
-                                    <Rect width={WEAPON_ZONE.width} height={WEAPON_ZONE.height} fill="#6a9c476e" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                    <Text text="ZONA DE EQUIPO" fontFamily="Alagard" fontSize={40} fill="white" y={WEAPON_ZONE.height * 0.4} x={WEAPON_ZONE.width * 0.12} />
-                                    {weapon && <Card
-                                        ref={el => cardRefs.current[weapon.key] = el}
-                                        key={weapon?.key}
-                                        cardInfo={weapon}
-                                        x={10}
-                                        y={10}
-                                        onDragEnd={() => { }}
-                                        onClick={() => { }}
-                                        isDraggable={false}
-                                        cardSuit={weapon?.palo == "Diamante" ? DiamonIcon : weapon?.palo == "Trebol" ? ClubIcon : weapon?.palo == "Corazon" ? HeartIcon : weapon?.palo == 'Pica' ? SpadeIcon : MinibossIcon}
-                                        defaultImage={defaultImage}
-                                    />}
-                                    {slainMonsters.map((card, i) => (
-                                        <Card
-                                            ref={el => cardRefs.current[card?.key] = el}
-                                            key={card?.key}
-                                            cardInfo={card}
-                                            x={150 + (i * 20)}
-                                            y={10 + (i * 10)}
-                                            onDragEnd={() => { }}
-                                            onClick={() => { }}
-                                            isDraggable={false}
-                                            cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : card?.palo == 'Pica' ? SpadeIcon : MinibossIcon}
-                                            defaultImage={defaultImage}
-                                        />
-                                    ))}
-                                </Group>
-                            </Layer>
-
-
-                            {/* PARTES JUGABLES (No estáticas) */}
-                            <Layer ref={layerRef}>
-                                {room.map((card, index) => (
-                                    <Card
-                                        ref={el => cardRefs.current[card?.key] = el}
-                                        key={card?.key}
-                                        cardInfo={card}
-                                        x={card?.x + (index * (140))}
-                                        y={card?.y + 10}
-                                        onDragEnd={handleDragEnd}
-                                        onClick={gameOn ? processCardAction : () => { }}
-                                        canBeClicked={canBeClicked}
-                                        isDraggable={gameOn}
-                                        cardSuit={card?.palo == "Diamante" ? DiamonIcon : card?.palo == "Trebol" ? ClubIcon : card?.palo == "Corazon" ? HeartIcon : card?.palo == 'Pica' ? SpadeIcon : MinibossIcon}
-                                        defaultImage={defaultImage}
-                                    />
-                                ))}
-                            </Layer>
-                            <Layer>
-                                <TooltipLayer tooltip={tooltip} onTap={() => setTooltip(null)} />
-                            </Layer>
-                        </Stage>
+                        <div className="board-wrap" ref={observeBoard}>
+                        <GameBoard
+                            layout={layout}
+                            layoutMode={layoutMode}
+                            dungeonZone={dungeonZone}
+                            discardZone={discardZone}
+                            weaponZone={weaponZone}
+                            effectValues={effectValues}
+                            effectIcons={effectIcons}
+                            dungeon={dungeon}
+                            discardPile={discardPile}
+                            room={room}
+                            weapon={weapon}
+                            slainMonsters={slainMonsters}
+                            isWizard={isWizard}
+                            overDungeonZone={overDungeonZone}
+                            canBeClicked={canBeClicked}
+                            catEye={catEye.current}
+                            gameOn={gameOn}
+                            tooltip={tooltip}
+                            cardRefs={cardRefs}
+                            layerRef={layerRef}
+                            defaultImage={defaultImage}
+                            getSuitIcon={getSuitIcon}
+                            onHoverEffect={setTooltip}
+                            onLeaveEffect={() => setTooltip(null)}
+                            setOverDungeonZone={setOverDungeonZone}
+                            onDragEnd={handleDragEnd}
+                            onPlay={processCardAction}
+                            onClearTooltip={() => setTooltip(null)}
+                        />
+                        </div>
                         {
                             showLogs ?
 
@@ -3125,10 +2805,14 @@ const GamePageInner = () => {
                             REPORTAR ERROR
                         </button>
                         <button onClick={() => {
-                            if (!user?.id) return;
-                            Promise.resolve(
-                                endGame(user.id, timeRef.current, gameWin, rounds, totalEarnedGold.current, healedLife.current, enemysDefeated)
-                            ).catch((saveError) => console.error("Error al guardar la partida:", saveError));
+                            saveManual({
+                                time: timeRef.current,
+                                gold: totalEarnedGold.current,
+                                healed: healedLife.current,
+                                victory: gameWin,
+                                userId: user?.id,
+                                rounds,
+                            });
                         }}>
                             GUARDAR PARTIDA
                         </button>
@@ -3150,10 +2834,10 @@ const GamePageInner = () => {
 
                         <div className="final-match-info">
                             <p><span>{formatedTimeRef?.current?.textContent ?? ""}</span></p>
-                            <p>Rondas: <span>{rounds}</span></p>
-                            <p>Cartas restantes en esta ronda: <span>{dungeon.length + room.length}</span></p>
-                            <p>Total de cartas jugadas: <span>{totalCardsUsed.current}</span></p>
-                            <p>Oro obtenido esta partida: <span>{totalEarnedGold.current}</span></p>
+                            <p>{t('matchStats.rounds')} <span>{rounds}</span></p>
+                            <p>{t('matchStats.remainingCards')} <span>{dungeon.length + room.length}</span></p>
+                            <p>{t('matchStats.cardsUsed')} <span>{totalCardsUsed.current}</span></p>
+                            <p>{t('matchStats.earnedGold')} <span>{totalEarnedGold.current}</span></p>
                             <p>Total enemigos derrotados: <span style={{ color: 'var(--main-red)' }}>{enemysDefeated}</span></p>
                         </div>
                     </div>

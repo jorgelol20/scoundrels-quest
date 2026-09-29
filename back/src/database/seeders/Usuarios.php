@@ -19,16 +19,20 @@ class Usuarios extends Seeder
             [
                 'email' => 'admin@scoundrels-quest.com',
                 'password' => Hash::make('HZnQ_1705'),
-                'es_admin' => true,
             ]
         );
-        ModelUsuarios::updateOrCreate(
+        // `es_admin` está fuera de $fillable: se asigna explícitamente.
+        $usuario1->es_admin = true;
+        $usuario1->save();
+
+        $usuario2 = ModelUsuarios::updateOrCreate(
             ['nick' => 'jorge'],
             [
                 'email' => 'jorgejorgemonovar@gmail.com',
                 'password' => Hash::make('HZnQ_1705'),
-                'es_admin' => true,
             ]
         );
+        $usuario2->es_admin = true;
+        $usuario2->save();
     }
 }

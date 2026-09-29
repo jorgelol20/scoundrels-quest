@@ -1,6 +1,8 @@
 import { Group, Rect, Text } from "react-konva";
+import { useTranslation } from "react-i18next";
 
 const TooltipLayer = ({ tooltip, onTap }) => {
+    const { t } = useTranslation('game');
     if (!tooltip) {
         return null;
     }
@@ -58,7 +60,7 @@ const TooltipLayer = ({ tooltip, onTap }) => {
             {
                 tooltip.turnos !== false ?
                     <Text
-                        text={`Turnos: ${tooltip.turnos}`}
+                        text={t('tooltip.turns', { count: tooltip.turnos })}
                         x={12}
                         y={40}
                         fontSize={13}
@@ -71,7 +73,7 @@ const TooltipLayer = ({ tooltip, onTap }) => {
             {
                 tooltip.valor !== false ?
                     <Text
-                        text={`Valor: ${tooltip.valor}`}
+                        text={t('tooltip.value', { value: tooltip.valor })}
                         x={12}
                         y={tooltip.turnos !== false ? 59 : 40}
                         fontSize={13}

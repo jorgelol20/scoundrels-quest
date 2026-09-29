@@ -44,7 +44,7 @@ class ReporteBugController extends Controller
     public function show(Request $request, ReporteBug $reporte_bug)
     {
         if ($request->user()->id !== $reporte_bug->usuario_id && !$request->user()->es_admin) {
-            abort(403, 'No tienes permiso para ver este reporte.');
+            abort(403, __('api.forbidden_reporte_view'));
         }
 
         return response()->json(
@@ -69,12 +69,21 @@ class ReporteBugController extends Controller
         $data['screenshot_url'] = $archivoPath;
 
         $reporte = ReporteBug::create($data);
-        Notification::route('mail', 'soporte@scoundrels-quest.com')->notify(new NuevoReporteBugNotificacion($reporte));
-        Notification::route('mail', $usuario->email)->notify(new NuevoReporteBugNotificacionUsuario($reporte));
+        // El mail nunca tumba la petición (p. ej. SMTP 550): patrón de AuthController.
+        try {
+            Notification::route('mail', 'soporte@scoundrels-quest.com')->notify(new NuevoReporteBugNotificacion($reporte));
+        } catch (\Exception $mailError) {
+            \Log::warning('No se pudo enviar el mail de nuevo reporte a soporte', ['reporte_id' => $reporte->id, 'error' => $mailError->getMessage()]);
+        }
+        try {
+            Notification::route('mail', $usuario->email)->notify(new NuevoReporteBugNotificacionUsuario($reporte));
+        } catch (\Exception $mailError) {
+            \Log::warning('No se pudo enviar el mail de nuevo reporte al usuario', ['email' => $usuario->email, 'error' => $mailError->getMessage()]);
+        }
         (new NotificacionController)->store(
             usuario_id: $usuario->id,
             tipo: 'reporte',
-            descripcion: 'Se ha creado tu reporte correctamente.',
+            descripcion: __('api.notif_reporte_created'),
             reporte_id: $reporte->id,
         );
 
@@ -92,11 +101,15 @@ class ReporteBugController extends Controller
 
         $usuario = $reporte_bug->usuario;
 
-        Notification::route('mail', $usuario->email)->notify(new CambioEstadoReporteBugNotificacionUsuario($reporte_bug));
+        try {
+            Notification::route('mail', $usuario->email)->notify(new CambioEstadoReporteBugNotificacionUsuario($reporte_bug));
+        } catch (\Exception $mailError) {
+            \Log::warning('No se pudo enviar el mail de actualización de reporte', ['reporte_id' => $reporte_bug->id, 'error' => $mailError->getMessage()]);
+        }
         (new NotificacionController())->store(
             usuario_id: $usuario->id,
             tipo: 'reporte',
-            descripcion: 'Tu reporte ha sido modificado.',
+            descripcion: __('api.notif_reporte_updated'),
             reporte_id: $reporte_bug->id,
         );
         return response()->json($reporte_bug->fresh());
@@ -107,12 +120,16 @@ class ReporteBugController extends Controller
         $reporte_bug->update($request->validated());
 
         $usuario = $reporte_bug->usuario;
-        Notification::route('mail', $usuario->email)->notify(new CambioEstadoReporteBugNotificacionUsuario($reporte_bug));
+        try {
+            Notification::route('mail', $usuario->email)->notify(new CambioEstadoReporteBugNotificacionUsuario($reporte_bug));
+        } catch (\Exception $mailError) {
+            \Log::warning('No se pudo enviar el mail de cambio de estado de reporte', ['reporte_id' => $reporte_bug->id, 'error' => $mailError->getMessage()]);
+        }
 
         (new NotificacionController)->store(
             usuario_id: $usuario->id,
             tipo: 'reporte',
-            descripcion: 'El estado de tu reporte ha cambiado.',
+            descripcion: __('api.notif_reporte_estado'),
             reporte_id: $reporte_bug->id,
         );
 
@@ -122,15 +139,37 @@ class ReporteBugController extends Controller
     public function destroy(Request $request, ReporteBug $reporte_bug)
     {
         if ($request->user()->id !== $reporte_bug->usuario_id && !$request->user()->es_admin) {
-            abort(403, 'No tienes permiso para eliminar este reporte.');
+            abort(403, __('api.forbidden_reporte_delete'));
         }
 
         if ($reporte_bug->screenshot_url) {
-            Storage::disk('public')->delete($reporte_bug->screenshot_url);
+            $this->borrarScreenshot($reporte_bug->screenshot_url);
         }
 
         $reporte_bug->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * `Storage::delete()` espera una ruta RELATIVA al disk, pero el valor
+     * guardado es una URL absoluta (`Storage::url()`). Se recorta el prefijo
+     * antes de borrar para no apuntar a una ruta inválida.
+     */
+    private function borrarScreenshot(string $url): void
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?: $url;
+
+        // Elimina el prefijo del disk público, p. ej. "/storage/".
+        $base = parse_url(Storage::url(''), PHP_URL_PATH) ?: '/storage/';
+        if (str_starts_with($path, $base)) {
+            $path = substr($path, strlen($base));
+        }
+
+        $path = ltrim($path, '/');
+
+        if ($path !== '' && ! str_contains($path, '..')) {
+            Storage::disk('public')->delete($path);
+        }
     }
 }

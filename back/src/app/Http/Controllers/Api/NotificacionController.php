@@ -67,7 +67,7 @@ class NotificacionController extends Controller
             ->where('usuario_id', auth()->id())
             ->update(['vista' => true]);
 
-        return response()->json(['message' => 'Notificación marcada como vista.']);
+        return response()->json(['message' => __('api.notificacion_vista')]);
     }
 
     public function marcarTodasVistas()
@@ -76,6 +76,6 @@ class NotificacionController extends Controller
             ->where('vista', false)
             ->update(['vista' => true]);
 
-        return response()->json(['message' => 'Todas las notificaciones marcadas como vistas.']);
+        return response()->json(['message' => __('api.notificaciones_vistas')]);
     }
 }

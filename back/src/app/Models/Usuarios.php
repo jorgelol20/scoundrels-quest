@@ -15,7 +15,16 @@ class Usuarios extends Authenticatable
 
     public $timestamps = true;
     protected $table = 'usuarios';
-    protected $fillable = ['nick', 'es_admin', 'is_tester', 'password', 'email', 'avatar', 'banner', 'color', 'ultima_vez_visto'];
+
+    /**
+     * `es_admin`, `is_tester` y `ultima_vez_visto` quedan FUERA del mass
+     * assignment de forma deliberada: son campos de privilegios/estado que
+     * solo deben cambiar por asignación explícita y comprobada.
+     *
+     * Incluirlos aquí permitía que cualquier petición que pasara por
+     * `->update($request->validated())` se auto-concediera admin.
+     */
+    protected $fillable = ['nick', 'password', 'email', 'avatar', 'banner', 'color', 'locale'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -34,9 +43,11 @@ class Usuarios extends Authenticatable
      */
     protected function casts(): array
     {
+        // Sin 'password' => 'hashed': los controladores ya aplican
+        // Hash::make explícito (store/update/social). El cast causaba
+        // doble hash y ningún login pasaba Hash::check.
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
             'es_admin' => 'boolean',
             'is_tester' => 'boolean',
             'avatar' => 'string',

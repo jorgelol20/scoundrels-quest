@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Concerns\HasTranslations;
 
 /**
  * Summary of Modificadores
@@ -11,11 +12,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Modificadores extends Model
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
-   
+    use HasFactory, HasTranslations;
+
     public $timestamps = false;
     protected $table = 'modificadores';
-    protected $fillable = ['nombre','descripcion','imagen','efectos','activo'];
+    protected $fillable = ['nombre','descripcion','imagen','efectos','activo','nivel','translations'];
 
     /**
      * Get the attributes that should be cast.
@@ -26,7 +27,8 @@ class Modificadores extends Model
     {
         return [
             'efectos' => 'array',
-            'activo' => 'boolean'
+            'activo' => 'boolean',
+            'translations' => 'array',
         ];
     }
 
