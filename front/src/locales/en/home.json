@@ -1,0 +1,12 @@
+{
+  "play": "PLAY",
+  "howToPlay": "HOW TO PLAY",
+  "settings": "SETTINGS",
+  "profile": "PROFILE",
+  "reportBug": "REPORT BUG",
+  "firefoxWarningTitle": "Warning!",
+  "firefoxWarningLine1": "On Firefox browsers you may experience performance losses during gameplay.",
+  "firefoxWarningLine2": "We strongly recommend using a browser based on",
+  "firefoxWarningLine3": "Sorry for the inconvenience.",
+  "lastMatches": "Latest matches ( Total: {{total}} )"
+}

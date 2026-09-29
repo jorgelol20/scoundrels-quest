@@ -1,0 +1,18 @@
+{
+  "rounds": "RONDAS",
+  "bestMatches": "MEJORES PARTIDAS",
+  "victories": "VICTORIAS",
+  "rankingOf": "Ranking de",
+  "types": {
+    "RONDAS": "RONDAS",
+    "VICTORIAS": "VICTORIAS",
+    "BEST_MATCH": "MEJORES PARTIDAS"
+  },
+  "total": "Total:",
+  "wins": "V:",
+  "winRate": "WR:",
+  "roundRecord": "Record Rondas:",
+  "roundsLabel": "Rondas:",
+  "enemiesDefeated": "Enemigos derrotados:",
+  "avatarOf": "Avatar de {{nick}}"
+}

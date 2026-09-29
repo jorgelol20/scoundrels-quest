@@ -1,0 +1,9 @@
+{
+  "musicVolume": "Music volume",
+  "effectsVolume": "Effects volume",
+  "showFps": "Show FPS",
+  "showLogs": "Show in-match logs",
+  "back": "Back",
+  "language": "Language",
+  "languageHelp": "Applies instantly and is saved in this browser."
+}

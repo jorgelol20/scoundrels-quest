@@ -1,0 +1,558 @@
+{
+  "terms": {
+    "title": "Terms of Use",
+    "updatedAt": "Last updated: {{date}}",
+    "s1": {
+      "title": "1. Purpose",
+      "p1a": "These Terms of Use govern access to and use of",
+      "brandName": "Scoundrel's Quest",
+      "p1b": ", an independent video game project developed as a personal project.",
+      "p2": "Access to the game and its features is free. No payment is currently required to use the service.",
+      "p3": "By accessing or using Scoundrel's Quest, the user accepts these Terms of Use and undertakes to use them in accordance with applicable law."
+    },
+    "s2": {
+      "title": "2. User account",
+      "p1": "Some Scoundrel's Quest features require a user account.",
+      "p2": "The account may be created through Scoundrel's Quest's own registration system or through the third-party authentication services available at any given time, currently Google and X.",
+      "p3": "The user must provide accurate information and keep the information necessary for the operation of their account up to date.",
+      "p4": "The user is responsible for keeping their credentials confidential and for any activity carried out through their account.",
+      "p5": "Passwords for accounts created through the site's own system are stored using hashing mechanisms and not in plain text."
+    },
+    "s3": {
+      "title": "3. Communications related to the account",
+      "p1": "The email address associated with an account may be used to send the communications necessary for the management and operation of the service.",
+      "p2": "These communications include the automatic welcome email sent when an account is created, as well as communications related to support requests and error reports.",
+      "p3": "These communications are functional in nature and do not constitute advertising or subscriptions to commercial communications."
+    },
+    "s4": {
+      "title": "4. Permitted use",
+      "p1": "The user undertakes to use Scoundrel's Quest in a lawful and responsible manner and in accordance with these terms.",
+      "p2": "The service may not be used to carry out activities that could damage, overload, interfere with or compromise the normal operation of the game, its servers, databases or related systems.",
+      "p3": "Nor is it permitted to attempt to obtain unauthorised access to accounts, servers, databases, APIs, authentication systems or any other infrastructure related to Scoundrel's Quest.",
+      "p4": "The user may not attempt to deliberately alter, manipulate or exploit errors in the game with the aim of gaining unfair advantages or harming other users."
+    },
+    "s5": {
+      "title": "5. User-generated content",
+      "p1": "Scoundrel's Quest allows users to customise certain elements of their profile with content they provide, including avatars and banners.",
+      "p2": "The user is responsible for the content they upload to the service and declares that they hold the rights, permissions or authorisations necessary to use that content.",
+      "p3": "It is not permitted to upload images, GIFs or other content that infringes copyright, trademarks, image rights, intellectual or industrial property rights, privacy rights or other third-party rights.",
+      "p4": "Nor is it permitted to upload content that is illegal, threatening, abusive, discriminatory, sexually explicit or that could harm other users or the operation of the service.",
+      "p5": "Scoundrel's Quest does not necessarily review all content provided by users in advance. Nevertheless, it may remove content or prevent access to it when it becomes aware that such content may be unlawful, infringe third-party rights or breach these terms.",
+      "contactIntro": "If you consider that an avatar, banner or other content infringes your rights or these terms, you can report it to:",
+      "email1": "soporte@scoundrels-quest.com"
+    },
+    "s6": {
+      "title": "6. Error reports and support",
+      "p1": "Scoundrel's Quest allows users to submit error reports and support requests.",
+      "p2": "The user must ensure that the information provided in these reports is relevant and sufficient to describe the problem.",
+      "p3": "Reports must not include passwords, authentication tokens, bank details or any other personal information that is not necessary to explain the problem.",
+      "p4": "Reports may be stored so that they can be managed, investigated and resolved."
+    },
+    "s7": {
+      "title": "7. Games and progress",
+      "p1": "Scoundrel's Quest may store information related to games, progress, achievements and other actions necessary to provide the features of the game.",
+      "p2": "This information is linked to the corresponding account where necessary in order to preserve the user's progress.",
+      "p3": "Although every effort is made to keep the information intact, permanent retention of games is not guaranteed in the event of technical failures, errors, maintenance, changes to the project or other circumstances."
+    },
+    "s8": {
+      "title": "8. Intellectual property",
+      "p1": "Original elements created specifically for Scoundrel's Quest, including code, illustrations, characters, designs, texts and other content of the project, belong to their respective authors or are used with the corresponding authorisation.",
+      "p2": "Access to the game does not transfer any ownership rights over those elements to the user.",
+      "p3": "Unless expressly permitted by applicable law, the original content of Scoundrel's Quest may not be reproduced, distributed, modified, published or commercially exploited without the corresponding authorisation."
+    },
+    "s9": {
+      "title": "9. Inspiration from Scoundrel",
+      "p1a": "Scoundrel's Quest is inspired by the mechanics of the game",
+      "gameName": "Scoundrel",
+      "p1b": ", created by Zach Gage and Kurt Bieg.",
+      "p2": "Scoundrel's Quest is an independent project and is not affiliated with, sponsored by, authorised or endorsed by Zach Gage or Kurt Bieg.",
+      "p3": "The characters, illustrations, designs and other artistic elements of Scoundrel's Quest have been developed specifically for this project."
+    },
+    "s10": {
+      "title": "10. Donations",
+      "p1": "Scoundrel's Quest is free and requires no payment to access the game.",
+      "p2": "The project may offer a voluntary link to Ko-fi for those who wish to make a donation and support its development.",
+      "p3": "Donations are voluntary and are not required in order to play the game.",
+      "p4": "A donation does not constitute a requirement for accessing the service."
+    },
+    "s11": {
+      "title": "11. Third-party services",
+      "p1": "Scoundrel's Quest uses or may link to certain third-party services, including authentication, infrastructure, email and donation services.",
+      "p2": "These services are independent of Scoundrel's Quest and may be subject to their own terms of use and privacy policies.",
+      "p3": "The use of third-party services may be subject to the conditions established by their respective providers."
+    },
+    "s12": {
+      "title": "12. Service availability",
+      "p1": "Given that it is a personal and free project, there is no guarantee that Scoundrel's Quest will be available on a permanent or uninterrupted basis.",
+      "p2": "The service may experience interruptions, errors, maintenance, changes or technical limitations.",
+      "p3": "The project may be modified, suspended or discontinued at any time."
+    },
+    "s13": {
+      "title": "13. Changes to the game",
+      "p1": "Scoundrel's Quest's features, content, rules, systems and characteristics may change over time.",
+      "p2": "These changes may be made to fix errors, improve the game, introduce new features or maintain the project."
+    },
+    "s14": {
+      "title": "14. Breach of these terms",
+      "p1": "In the case of abusive, fraudulent, unlawful or harmful use of the service, access to the corresponding account may be restricted, suspended or cancelled where necessary to protect the game, other users or the infrastructure.",
+      "p2": "Where reasonably possible, action will be taken in a manner proportionate to the nature of the breach."
+    },
+    "s15": {
+      "title": "15. Changes to these terms",
+      "p1": "These Terms of Use may be modified when necessary due to changes to the project, its features or the applicable regulations.",
+      "p2": "The current version will be available on this page and will show the date of its last update."
+    },
+    "s16": {
+      "title": "16. Contact",
+      "contactIntro": "For any matter relating to Scoundrel's Quest, these terms or the operation of the service, you can contact us at:",
+      "email1": "soporte@scoundrels-quest.com"
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "updatedAt": "Last updated: {{date}}",
+    "s1": {
+      "title": "1. Data controller",
+      "p1": "The data controller responsible for the processing of personal data handled through Scoundrel's Quest is:",
+      "name": "Jorge Colomer",
+      "project": "Independent project: Scoundrel's Quest",
+      "emailLabel": "Contact email:",
+      "email1": "soporte@scoundrels-quest.com",
+      "p2": "Scoundrel's Quest is a personal and independent project offered free of charge and without advertising."
+    },
+    "s2": {
+      "title": "2. What personal data do we process?",
+      "intro": "Depending on the features you use, Scoundrel's Quest may process the following categories of data:",
+      "li1": {
+        "label": "Account data:",
+        "text": "email address, username (nick) and data necessary to manage the account."
+      },
+      "li2": {
+        "label": "Authentication data:",
+        "text": "information necessary to verify access to the account and tokens used to keep the session signed in."
+      },
+      "li3": {
+        "label": "Third-party authentication data:",
+        "text": "when you use Google or X to sign in, we may receive from the provider the data it supplies in accordance with the integration's configuration, such as identifiers, email address, username or profile picture."
+      },
+      "li4": {
+        "label": "Game data:",
+        "text": "information related to games, progress, achievements and other activities carried out within the service."
+      },
+      "li5": {
+        "label": "Profile content:",
+        "text": "images, GIFs, avatar, banner or other content you choose to upload to your profile."
+      },
+      "li6": {
+        "label": "Comments and submitted content:",
+        "text": "information you voluntarily enter in comments or other features of the service."
+      },
+      "li7": {
+        "label": "Support and report data:",
+        "text": "title, description, type, severity, status and any other information you provide when reporting an error or incident."
+      },
+      "li8": {
+        "label": "Technical report data:",
+        "text": "technical information associated with the submission of a report, such as the browser type and the type of device used."
+      },
+      "li9": {
+        "label": "Technical data necessary for the service:",
+        "text": "information that may be necessary to ensure the security, operation and compatibility of the service."
+      }
+    },
+    "s3": {
+      "title": "3. Passwords",
+      "p1": "Passwords used for accounts created directly on Scoundrel's Quest are not stored in plain text. They are stored using hashing mechanisms designed to prevent their direct recovery.",
+      "p2": "Scoundrel's Quest does not request or store the password you use to access your Google or X accounts."
+    },
+    "s4": {
+      "title": "4. Purposes of processing",
+      "intro": "Personal data is processed primarily for the following purposes:",
+      "li1": "Create and manage your account.",
+      "li2": "Allow users to sign in and sign out.",
+      "li3": "Manage authentication through Google and X.",
+      "li4": "Maintain the session and provide the features of the service.",
+      "li5": "Save and provide your progress, games and achievements.",
+      "li6": "Display and manage the customisation elements of your profile.",
+      "li7": "Manage comments and other interactions within the game.",
+      "li8": "Receive, analyse and resolve errors or incidents.",
+      "li9": "Improve the stability, compatibility and performance of the service.",
+      "li10": "Maintain the security of the service and prevent improper use.",
+      "li11": "Send the necessary communications relating to the account or to support requests."
+    },
+    "s5": {
+      "title": "5. Email communications",
+      "p1": "The email address associated with your account may be used for communications related to the operation of the service.",
+      "p2": "These communications may currently include, among others:",
+      "li1": "The welcome email after registering a new account.",
+      "li2": "Confirmations related to the error reports submitted.",
+      "li3": "Communications necessary to manage support requests.",
+      "p3": "These communications are functional in nature and do not constitute advertising or marketing communications."
+    },
+    "s6": {
+      "title": "6. Legal basis",
+      "p1": "The applicable legal basis will depend on the specific purpose of the processing.",
+      "p2": "In particular, certain processing activities are necessary to provide the features you request when using Scoundrel's Quest, such as creating an account, authentication, session maintenance or game management.",
+      "p3": "Other processing activities may be based on compliance with legal obligations, on the legitimate interest of the controller where applicable, or on the user's consent where this is required."
+    },
+    "s7": {
+      "title": "7. Signing in with Google",
+      "p1": "Scoundrel's Quest allows you to sign in using a Google account through the corresponding integration.",
+      "p2": "When you use this option, Google may provide Scoundrel's Quest with certain data associated with your account, in accordance with the permissions granted and the information available through the integration, such as your email address, identifier, username or profile picture.",
+      "p3": "Scoundrel's Quest neither receives nor stores the password you use to access Google."
+    },
+    "s8": {
+      "title": "8. Signing in with X",
+      "p1": "Scoundrel's Quest also allows you to sign in using an X account through the corresponding integration.",
+      "p2": "Depending on the information provided by X and on the permissions available, data such as a user identifier, username, email address or profile picture may be received.",
+      "p3": "Scoundrel's Quest neither receives nor stores the password you use to access X.",
+      "p4": "If the provider does not supply an email address, the account may be managed using other identifiers available to the integration."
+    },
+    "s9": {
+      "title": "9. Game data and progress",
+      "p1": "In order to provide the features of Scoundrel's Quest, we may store information related to games and to the activity carried out within the game.",
+      "p2": "This may include progress, games, results, achievements, comments and any other information necessary to provide the corresponding features."
+    },
+    "s10": {
+      "title": "10. Avatars, banners and user-uploaded content",
+      "p1": "Scoundrel's Quest allows users to customise certain elements of their profile, including avatars and banners.",
+      "p2": "The images, GIFs and any other content you upload may be stored and displayed as part of your profile.",
+      "p3": "The user is responsible for the content they upload and must hold the rights, permissions or authorisations necessary to use it.",
+      "p4": "Content that infringes copyright, trademarks, image rights, intellectual or industrial property rights, privacy rights or other third-party rights must not be uploaded.",
+      "p5": "If we receive a communication about content that is allegedly unlawful or that infringes third-party rights, we may review it and, where appropriate, remove it or prevent access to it."
+    },
+    "s11": {
+      "title": "11. Comments and user-submitted content",
+      "p1": "When you take part in features that allow you to post comments or other content, the information you enter may be stored and linked to your account.",
+      "p2": "You must not enter other people's personal data in these features when it is not necessary or when you are not authorised to do so."
+    },
+    "s12": {
+      "title": "12. Error reports and incidents",
+      "p1": "Scoundrel's Quest has a system for reporting errors, technical problems and incidents.",
+      "intro": "When you submit a report we may store information such as:",
+      "li1": "The title of the report.",
+      "li2": "The description provided.",
+      "li3": "The type of incident.",
+      "li4": "The severity.",
+      "li5": "The status of the report.",
+      "li6": "The date and time of creation.",
+      "li7": "The user associated with the report, where applicable.",
+      "li8": "Technical information associated with the submission, such as the browser and device type used.",
+      "outro": "This information is used to investigate problems, diagnose errors, resolve incidents and improve the operation and compatibility of Scoundrel's Quest."
+    },
+    "s13": {
+      "title": "13. Discord integration",
+      "p1": "To facilitate the internal management of error reports, Scoundrel's Quest uses an automated integration with Discord.",
+      "p2": "When a report is generated, certain information may be sent via a webhook to a private channel used to manage incidents.",
+      "intro": "The information sent to Discord may include:",
+      "li1": "The title of the report.",
+      "li2": "The description of the report.",
+      "li3": "The type of incident.",
+      "li4": "The severity.",
+      "li5": "The status.",
+      "li6": "The date and time of creation.",
+      "li7": "An internal link to the report within Scoundrel's Quest.",
+      "p3": "The technical information on the browser and device recorded by Scoundrel's Quest is not specifically sent to Discord through this integration.",
+      "p4": "Nevertheless, if the user themselves voluntarily includes personal data or technical information in the title or description of the report, such information could form part of the content sent to Discord.",
+      "p5": "The processing carried out by Discord is subject to its own terms and privacy policy."
+    },
+    "s14": {
+      "title": "14. Infrastructure and hosting",
+      "p1": "Account data and other information necessary to provide the service are stored in a MySQL database hosted on a private server (VPS) contracted with IONOS.",
+      "p2": "IONOS provides the infrastructure used to host the service. Where applicable, the corresponding contractual measures for the processing of personal data by the provider will be adopted."
+    },
+    "s15": {
+      "title": "15. Email service",
+      "p1": "Scoundrel's Quest uses an IONOS SMTP service to send certain functional emails, including welcome messages, report confirmations and communications related to support.",
+      "p2": "Sending these messages requires processing the recipient's email address and the information necessary to generate the corresponding message."
+    },
+    "s16": {
+      "title": "16. Cloudflare",
+      "p1": "Scoundrel's Quest's domain uses Cloudflare services mainly for DNS management and as a proxy service between users and the project's infrastructure.",
+      "p2": "Depending on the configuration and the security mechanisms used, Cloudflare may process certain technical data necessary to provide these services and to protect the infrastructure against abuse or malicious traffic.",
+      "p3": "Scoundrel's Quest does not use Google Analytics or any other advertising analytics systems to track users."
+    },
+    "s17": {
+      "title": "17. Google Search Console",
+      "p1": "Scoundrel's Quest uses Google Search Console to monitor matters related to the indexing and presence of the site in Google search.",
+      "p2": "The use of Search Console does not in itself imply the installation of Google Analytics or of analytics cookies on visitors' devices."
+    },
+    "s18": {
+      "title": "18. Google Analytics and advertising",
+      "p1": "Scoundrel's Quest does not currently use Google Analytics.",
+      "p2": "The project also does not use targeted advertising, advertising networks or systems intended to build advertising profiles of users."
+    },
+    "s19": {
+      "title": "19. Cookies and similar technologies",
+      "p1": "Scoundrel's Quest uses only the cookies and similar technologies necessary to provide certain features of the service, such as maintaining the session, managing authentication or remembering certain preferences.",
+      "p2": "These technologies are not currently used to serve targeted advertising or to build commercial profiles of users.",
+      "p3a": "For more detailed information about cookies, you can consult our",
+      "linkLabel": "Cookie Policy",
+      "p3b": "."
+    },
+    "s20": {
+      "title": "20. Data retention",
+      "p1": "Personal data will be retained for as long as necessary to fulfil the purposes for which it was collected and for as long as a relationship with the service exists, unless a legal obligation requires further retention.",
+      "p2": "Certain technical data or logs may be retained for a reasonable period where necessary to ensure the security of the service, to investigate incidents or to resolve technical problems.",
+      "p3": "Error reports may be retained for as long as they are needed to manage and maintain a history of the project's technical incidents."
+    },
+    "s21": {
+      "title": "21. Security",
+      "p1": "Scoundrel's Quest applies reasonable technical and organisational measures intended to protect personal data against unauthorised access, loss, alteration or improper disclosure.",
+      "p2": "These measures include, among others, the use of hashed passwords and token-based authentication mechanisms for sessions.",
+      "p3": "Nevertheless, no system connected to the internet can guarantee absolute security."
+    },
+    "s22": {
+      "title": "22. Recipients of the data",
+      "p1": "Personal data may be processed by the providers necessary for the operation of Scoundrel's Quest, within the purposes described in this policy.",
+      "intro": "These providers currently include:",
+      "li1": {
+        "label": "IONOS",
+        "text": ", for server infrastructure and email services."
+      },
+      "li2": {
+        "label": "Cloudflare",
+        "text": ", for DNS and proxy services and for functions associated with protecting the infrastructure."
+      },
+      "li3": {
+        "label": "Discord",
+        "text": ", for the internal management of error reports through the automated integration described above."
+      },
+      "li4": {
+        "label": "Google and X",
+        "text": ", when the user chooses to use their respective sign-in systems."
+      },
+      "outro": "We do not sell users' personal data to third parties."
+    },
+    "s23": {
+      "title": "23. International transfers",
+      "p1": "Some of the technology providers used by Scoundrel's Quest may operate or process information from countries located outside the European Economic Area.",
+      "p2": "Where an international transfer of data takes place, it must be carried out in accordance with the mechanisms and safeguards established by applicable law.",
+      "p3": "In particular, the third-party services used for authentication, infrastructure or report management may be subject to their own conditions regarding location and data transfers."
+    },
+    "s24": {
+      "title": "24. User rights",
+      "p1": "Where data protection legislation applies, you may exercise the rights that correspond to you in relation to your personal data.",
+      "intro": "These include:",
+      "li1": "Right of access.",
+      "li2": "Right of rectification.",
+      "li3": "Right to erasure.",
+      "li4": "Right to request the restriction of processing.",
+      "li5": "Right to object to certain processing.",
+      "li6": "Right to data portability where applicable.",
+      "contactIntro": "To exercise your rights you can contact us at:",
+      "email1": "soporte@scoundrels-quest.com",
+      "verify": "In order to handle certain requests, we may need to reasonably verify the identity of the requester."
+    },
+    "s25": {
+      "title": "25. Complaints to a supervisory authority",
+      "p1": "If you consider that the processing of your personal data infringes applicable law and you have not obtained a satisfactory response, you can lodge a complaint with the competent data protection authority.",
+      "p2a": "In Spain, the supervisory authority is the",
+      "authority": "Agencia Española de Protección de Datos (AEPD)",
+      "p2b": "."
+    },
+    "s26": {
+      "title": "26. Data of minors",
+      "p1": "Scoundrel's Quest does not deliberately request additional personal data from minors that is not necessary to provide the features of the service.",
+      "p2a": "If someone considers that the personal data of a minor has been handled improperly, they can contact us at",
+      "email1": "soporte@scoundrels-quest.com",
+      "p2b": "so that we can review the situation."
+    },
+    "s27": {
+      "title": "27. Donations via Ko-fi",
+      "p1": "Scoundrel's Quest offers the possibility of making voluntary donations via Ko-fi.",
+      "p2": "The processing of data related to a donation, including the data necessary to make the payment, is carried out through Ko-fi and through the corresponding payment providers.",
+      "p3": "Scoundrel's Quest does not need to store the full details of your bank card in order to offer this feature."
+    },
+    "s28": {
+      "title": "28. Links to third-party services",
+      "p1": "The site may contain links to external websites or services.",
+      "p2": "When you access these services, the processing of your data will be subject to the policies and terms of the third party concerned."
+    },
+    "s29": {
+      "title": "29. Public source code",
+      "p1": "The source code used to develop Scoundrel's Quest is publicly available on GitHub as part of the open and transparent nature of the project.",
+      "p2": "You can consult the public repository at:",
+      "repoLabel": "github.com/jorgelol20/scoundrels-quest",
+      "p3": "Publishing the source code does not mean that users' personal data is public, nor that accounts, passwords, authentication tokens, databases or any other private user information form part of the public repository.",
+      "p4": "Credentials, passwords, private keys, tokens and any other secrets necessary for the operation of the service are kept outside the public source code."
+    },
+    "s30": {
+      "title": "30. No sale of personal data",
+      "p1": "Scoundrel's Quest does not sell, rent out or trade in the personal data of its users.",
+      "p2": "The data is used to provide, maintain, protect and improve the service, as well as to manage the features you request."
+    },
+    "s31": {
+      "title": "31. Changes to this policy",
+      "p1": "This Privacy Policy may be updated when necessary to reflect changes to Scoundrel's Quest, to the services used or to the applicable legal obligations.",
+      "p2": "When relevant changes occur, the date shown at the top of this page will be updated."
+    },
+    "s32": {
+      "title": "32. Contact",
+      "contactIntro": "If you have any questions relating to this Privacy Policy, to the processing of your personal data or to the operation of Scoundrel's Quest, you can contact us at:",
+      "email1": "soporte@scoundrels-quest.com"
+    }
+  },
+  "cookies": {
+    "title": "Cookie Policy",
+    "updatedAt": "Last updated: {{date}}",
+    "s1": {
+      "title": "1. What are cookies?",
+      "p1": "Cookies are small files or identifiers that may be stored on a user's device when they visit a website.",
+      "p2": "They may be used for different purposes, such as maintaining a session, storing preferences, applying security measures, carrying out statistical analysis or displaying advertising."
+    },
+    "s2": {
+      "title": "2. Cookies used by Scoundrel's Quest",
+      "p1": "Scoundrel's Quest uses only the cookies and similar technologies necessary to provide certain features of the service.",
+      "intro": "These technologies may be used, among other things, to:",
+      "li1": "Keep the user's session signed in.",
+      "li2": "Manage authentication and access to the account.",
+      "li3": "Remember certain preferences or settings necessary for the operation of the service.",
+      "li4": "Apply security and protection measures against malicious use."
+    },
+    "s3": {
+      "title": "3. Session and authentication cookies",
+      "p1": "The technologies needed to maintain an authenticated session may use identifiers associated with the user's session.",
+      "p2": "These technologies make it possible to recognise that the user has signed in and to maintain access to the corresponding features during the session.",
+      "p3": "Disabling these technologies may prevent or make difficult the sign-in process and certain features of the game."
+    },
+    "s4": {
+      "title": "4. Preferences and settings",
+      "p1": "Scoundrel's Quest may use local storage, cookies or other similar technologies to remember certain preferences needed for the operation of the site.",
+      "p2": "These technologies are not currently used to create advertising profiles of the user."
+    },
+    "s5": {
+      "title": "5. Cloudflare",
+      "p1": "Scoundrel's Quest uses Cloudflare as its DNS and proxy provider for certain connections to the service.",
+      "p2": "Depending on the configuration and the security features used, Cloudflare may use cookies or similar technologies related to security, abuse detection and traffic management.",
+      "p3": "Scoundrel's Quest does not use these technologies to serve targeted advertising or to carry out behavioural analytics within the game."
+    },
+    "s6": {
+      "title": "6. Google Analytics",
+      "p1": "Scoundrel's Quest does not currently use Google Analytics.",
+      "p2": "Therefore, Google Analytics cookies are not used to analyse player behaviour within the game."
+    },
+    "s7": {
+      "title": "7. Google Search Console",
+      "p1": "Scoundrel's Quest uses Google Search Console for tasks related to administering and monitoring the presence of the site in search results.",
+      "p2": "Search Console is not used as a behavioural analytics tool within the game."
+    },
+    "s8": {
+      "title": "8. Advertising cookies",
+      "p1": "Scoundrel's Quest does not currently use advertising or advertising cookies intended to display personalised ads or to create advertising profiles of users."
+    },
+    "s9": {
+      "title": "9. Consent",
+      "p1": "Cookies and technologies strictly necessary to provide features requested by the user may be exempt from the obligation to obtain consent, in accordance with applicable law.",
+      "p2": "If in the future cookies or technologies that were not strictly necessary for the operation of the service were introduced, this policy would be reviewed and, where necessary, the corresponding consent would be requested before they were used."
+    },
+    "s10": {
+      "title": "10. Cookie management",
+      "p1": "The user can manage, block or delete cookies through the settings options available in their browser.",
+      "p2": "Disabling certain cookies or technical technologies may cause some Scoundrel's Quest features not to work correctly, especially those related to signing in and to the user's session."
+    },
+    "s11": {
+      "title": "11. Changes to this policy",
+      "p1": "This Cookie Policy may be updated when the features of the site, the technologies used or the applicable regulations change.",
+      "p2": "The current version will be available on this page and will show the date of its last update."
+    },
+    "s12": {
+      "title": "12. Contact",
+      "contactIntro": "For any matter relating to cookies you can contact us at:",
+      "email1": "soporte@scoundrels-quest.com"
+    }
+  },
+  "legal": {
+    "title": "Legal information",
+    "updatedAt": "Last updated: {{date}}",
+    "s1": {
+      "title": "1. Project identification",
+      "brandName": "Scoundrel's Quest",
+      "p1b": "is an independent video game project developed as a personal project.",
+      "li1": {
+        "label": "Project controller:",
+        "text": "Jorge Colomer"
+      },
+      "li2": {
+        "label": "Contact email:",
+        "email1": "soporte@scoundrels-quest.com"
+      },
+      "li3": {
+        "label": "Domain:",
+        "text": "scoundrels-quest.com"
+      },
+      "p2": "The project is offered free of charge and currently contains no advertising."
+    },
+    "s2": {
+      "title": "2. Nature of the project",
+      "p1": "Scoundrel's Quest is a personal project developed for entertainment, learning and software development purposes.",
+      "p2": "There is currently no charge for access to the game and no payment is required to use its features."
+    },
+    "s3": {
+      "title": "3. Intellectual property",
+      "p1": "The code, illustrations, characters, designs, texts and any other original elements created specifically for Scoundrel's Quest belong to their respective authors or are used with the corresponding authorisation.",
+      "p2": "Unless applicable law allows otherwise, the reproduction, distribution, modification or exploitation of the original content is not permitted without the corresponding authorisation."
+    },
+    "s4": {
+      "title": "4. Inspiration from Scoundrel",
+      "p1a": "Scoundrel's Quest is inspired by the mechanics of the game",
+      "gameName": "Scoundrel",
+      "p1b": ", created by Zach Gage and Kurt Bieg.",
+      "p2": "Scoundrel's Quest is an independent work and is not affiliated with, sponsored by, authorised or endorsed by Zach Gage or Kurt Bieg.",
+      "p3": "The illustrations, characters, designs and other artistic elements of Scoundrel's Quest have been created specifically for this project."
+    },
+    "s5": {
+      "title": "5. Free service",
+      "p1": "Access to Scoundrel's Quest is free.",
+      "p2": "The project may offer an external link to Ko-fi to make voluntary donations in support of its development.",
+      "p3": "A donation is not necessary to play the game, nor does it constitute a mandatory payment for access to the service."
+    },
+    "s6": {
+      "title": "6. Email communications",
+      "p1": "Scoundrel's Quest may automatically send certain emails related to the operation of the service.",
+      "p2": "These include the welcome email sent when an account is created, as well as emails related to support requests and error reports.",
+      "p3": "These communications have a functional purpose and do not constitute advertising or promotional commercial communications."
+    },
+    "s7": {
+      "title": "7. Availability",
+      "p1": "Scoundrel's Quest is provided as it is available at any given time.",
+      "p2": "Given that it is a personal and free project, interruptions, errors, modifications or maintenance periods may occur.",
+      "p3": "The project may change, be suspended or become unavailable in the future."
+    },
+    "s8": {
+      "title": "8. Third-party services",
+      "intro": "Scoundrel's Quest uses certain third-party services that are necessary for its operation or that are available as external features.",
+      "li1": "Google, for authentication through Google.",
+      "li2": "X, for authentication through X.",
+      "li3": "IONOS, for server and email infrastructure.",
+      "li4": "Cloudflare, for services related to DNS and proxy.",
+      "li5": "Ko-fi, as an external platform for voluntary donations.",
+      "outro": "These services have their own terms of use and privacy policies."
+    },
+    "s9": {
+      "title": "9. Data protection",
+      "p1a": "The processing of users' personal data is described in the",
+      "linkLabel": "Privacy Policy",
+      "p1b": "."
+    },
+    "s10": {
+      "title": "10. Cookies",
+      "p1a": "Information about the cookies and similar technologies used by Scoundrel's Quest is available in the",
+      "linkLabel": "Cookie Policy",
+      "p1b": "."
+    },
+    "s11": {
+      "title": "11. User content",
+      "p1": "Users may provide certain content to customise their profiles, such as avatars and banners.",
+      "p2": "The user is responsible for holding the rights necessary to use the content they upload and must respect third-party rights.",
+      "p3a": "For more information, see the",
+      "linkLabel": "Terms of Use",
+      "p3b": "."
+    },
+    "s12": {
+      "title": "12. Contact",
+      "contactIntro": "For any query related to the project:",
+      "email1": "soporte@scoundrels-quest.com"
+    }
+  }
+}

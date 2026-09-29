@@ -36,10 +36,10 @@ class ComentarioReporteBugNotificacionUsuario extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Actualización de tu reporte.")
-            ->greeting("Alguien ha comentado en tu reporte")
-            ->line("Un administrador ha dejado un comentario en tu reporte.")
-            ->action("Ver la página del reporte", config('app.frontend_url') . "/reportes-bug/{$this->comentario->reporte->id}");
+            ->subject(__('mail.comentario_subject'))
+            ->greeting(__('mail.comentario_greeting'))
+            ->line(__('mail.comentario_line'))
+            ->action(__('mail.comentario_action'), config('app.frontend_url') . "/reportes-bug/{$this->comentario->reporte->id}");
     }
 
     /**

@@ -1,6 +1,5 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import React from 'react'
 import './index.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import SoundProvider from './context/SettingsProvider.jsx'
@@ -9,6 +8,7 @@ import MatchProvider from './context/MatchProvider.jsx'
 import BugReportProvider from './context/BugReportProvider.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import NotificationProvider from './context/NotificationsProdiver.jsx'
+import './i18n/index.js';
 
 const queryClient = new QueryClient();
 

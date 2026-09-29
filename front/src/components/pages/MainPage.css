@@ -79,7 +79,7 @@ article {
     height: 45cqh;
     border-radius: 5px;
 
-    h1 {
+    h2 {
         color: var(--main-gold);
         margin-bottom: 0%;
         font-size: 2cqw;
@@ -101,7 +101,87 @@ article {
 .matches-history{
     padding-bottom: 5%;
 }
+/* H1 solo para SEO/lectores de pantalla: el título ya sale en la imagen del banner */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.seo-content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    max-width: 80ch;
+    margin: 0 auto 5%;
+    padding: 1.5em 2em 2em;
+    color: var(--main-white);
+    background-color: var(--main-color);
+    border: 5px groove var(--second-color-dark);
+    border-radius: 5px;
+    font-size: 0.9em;
+    line-height: 1.55;
+}
+.seo-content h2 {
+    color: var(--main-gold);
+    margin: 0 0 0.4em;
+    font-size: 1.6em;
+}
+.seo-content h3 {
+    color: var(--main-gold);
+    margin: 1.2em 0 0.4em;
+    font-size: 1.2em;
+}
+.seo-content p {
+    margin: 0.4em 0;
+}
+.seo-content ul {
+    text-align: left;
+    margin: 0.4em 0;
+    padding-left: 1.5em;
+}
+.seo-content li {
+    margin: 0.35em 0;
+}
+.seo-content li::marker {
+    color: var(--main-gold);
+}
+.seo-content details {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0.4em 0;
+    border: 2px groove var(--second-color-dark);
+    border-radius: 5px;
+    padding: 0.6em 1em;
+    text-align: left;
+    background-color: var(--second-color-dark);
+    transition: background-color 0.3s ease;
+}
+.seo-content details:hover {
+    background-color: var(--second-color);
+}
+.seo-content summary {
+    cursor: pointer;
+    color: var(--main-gold);
+}
+.seo-content details[open] summary {
+    margin-bottom: 0.4em;
+}
+.seo-content details p {
+    margin: 0;
+    opacity: 0.9;
+}
 @media (max-width: 900px) {
+    .seo-content {
+        margin: 0 1em 8%;
+        padding: 1.2em 1em 1.5em;
+    }
     article {
         margin-top: 10cqw;
         .banner-menu{

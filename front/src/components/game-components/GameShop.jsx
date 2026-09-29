@@ -1,24 +1,28 @@
 import React, { Fragment, useContext, useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import './GameShop.css';
 import { matchContext } from "../../context/MatchProvider.jsx";
 import GoldIcon from '/images/gold.webp';
 import { useUser } from "../../hooks/useUser.js";
-import Card from "../Card.jsx";
 import Modifier from "../Modifier.jsx";
-import { Stage, Layer, Group, Label, Tag, Text, Rect } from 'react-konva';
+import ShopItemCard from "./ShopItemCard.jsx";
 import ShopMan from '/images/ShopMan.webp'
-import Dialogs from '../../assets/database/dialogs.json'
-import lodash from 'lodash';
+import shuffle from 'lodash/shuffle';
 import HeartIcon from '/images/suit_heart.webp';
 import DiamonIcon from '/images/suit_diamond.webp';
+import missionsCatalog from "../../assets/database/missions.json";
+import { pickMissionOffers, isMissionCompleted } from "../../game/missions.js";
 
 const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationValue, setShopAvailable, health, maxHealth, formatedTimeRef, healthIcon, character, round, refund, boughtCards, setNewBought, membership, amego }) => {
     const { user } = useUser();
-    const { addCardToMatchDeck, addModifierToMatch, getRandomsModifier, getWeapon, getHealItem, activeModifiers: modifiers, } = useContext(matchContext);
+    const { t } = useTranslation('game');
+    const { addCardToMatchDeck, addModifierToMatch, getRandomsModifier, getWeapon, getHealItem, activeModifiers: modifiers, activeMissions, acceptMission, claimMission, addEnemysToMatchDeck } = useContext(matchContext);
 
-    const dialogs = Dialogs;
+    // Diálogos del tendero (game:shop.dialogs); se elige uno al azar cada vez.
+    // Es estado histórico: no cambia si se cambia el idioma a mitad de tienda.
+    const pickDialog = () => shuffle(t('shop.dialogs', { returnObjects: true }))[0];
 
-    const [dialog, setDialog] = useState(lodash.shuffle(dialogs)[0])
+    const [dialog, setDialog] = useState(pickDialog)
 
     // Estado para almacenar los ítems de la tienda
     const [shopItems, setShopItems] = useState([]);
@@ -59,10 +63,10 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
     };
 
     const calcFinalPrice = (item) => {
-        if(item.isAmego){
+        if (item.isAmego) {
             return Math.floor(item.price / 2);
         }
-        if(item.data.valor === 2 && membershipAvailable){
+        if (item.data.valor === 2 && membershipAvailable) {
             return 0;
         }
         return item.price;
@@ -83,6 +87,24 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
         }
 
         let itemIndex = 0;
+
+
+        // Misiones del cazador: aceptadas vigentes (ocupan slot hasta
+        // completarse y reclamarse) + 3 ofertas frescas del catálogo.
+        const isCazador = character?.habilidad_personaje?.codigo === 'cazador';
+        if (isCazador) {
+            const takenIds = activeMissions.map((m) => m.id);
+            activeMissions
+                .filter((m) => !m.claimed)
+                .forEach((m) => {
+                    const def = missionsCatalog.find((c) => c.id === m.id);
+                    if (!def) return;
+                    items.push({ id: `mis-${def.id}`, type: 'mission', data: { ...def, accepted: true, progress: m.progress }, price: 0, isBought: false });
+                });
+            pickMissionOffers(missionsCatalog, takenIds, 3, shuffle).forEach((m) => {
+                items.push({ id: `mis-offer-${m.id}`, type: 'mission', data: { ...m, offer: true }, price: 0, isBought: false });
+            });
+        }
 
         // Agregar modificadores si existen
         mods.forEach((mod, index) => {
@@ -127,37 +149,39 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
             }
         }
 
+
+
         setShopItems(items);
         setMembershipAvailable(membership);
     }, [round]);
 
-    const [scale, setScale] = useState(window.innerWidth / 1920)
-    const [scaleMultiplier, setScaleMultiplier] = useState(1.2)
-
-
-    useEffect(() => {
-        const handleResize = () => {
-            setScale(window.innerWidth / 1920)
-            if (window.innerWidth <= 1080) {
-                setScaleMultiplier(2)
-            } else {
-                setScaleMultiplier(1)
+    // Misión: aceptar oferta (gratis, puede añadir enemigos) o reclamar
+    // completada (suma el oro y libera el slot).
+    const handleMissionAction = (index) => {
+        const item = shopItems[index];
+        if (!item || item.type !== 'mission') return;
+        if (item.data.offer) {
+            const entry = acceptMission(item.data.id);
+            if (!entry) return;
+            if (item.data.enemigos_extra > 0) {
+                addEnemysToMatchDeck(item.data.enemigos_extra, round);
             }
-        };
-        window.addEventListener('resize', handleResize);
-        if (window.innerWidth <= 1080) {
-            setScaleMultiplier(2)
-        } else {
-            setScaleMultiplier(1)
+            setShopItems(prev => prev.map((it, i) => i === index
+                ? { ...it, data: { ...item.data, offer: false, accepted: true, progress: entry.progress } }
+                : it));
+        } else if (item.data.accepted) {
+            const reward = claimMission(item.data.id);
+            if (reward > 0) {
+                coinAnimation(reward);
+                setGold(prevGold => prevGold + reward);
+                setShopItems(prev => prev.filter((_, i) => i !== index));
+            }
         }
-        return () => {
-            window.removeEventListener('resize', handleResize)
-        };
-    }, []);
+    };
 
     // Función para manejar la compra
     const handleBuyItem = (index) => {
-        setDialog(lodash.shuffle(dialogs)[0])
+        setDialog(pickDialog())
         const item = shopItems[index];
 
         // Validar si ya se compró o no hay oro suficiente
@@ -209,13 +233,13 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
                     <div className="game-hud-text">
                         <h1 className="player-health"><img src={healthIcon} alt="" />{health}/{maxHealth}</h1>
                         <h1 className="player-gold"><img src={GoldIcon} alt="" />{gold}{goldAnimation !== null ? <div className="animation-container"><strong className="animation">{goldAnimationValue}</strong><img className="animation" alt="" src={goldAnimation} /></div> : <></>}</h1>
-                        {refund ? <h1 className="player-gold">Reembolso: {Math.floor(usedGold.current / 10)}</h1> : <></>}
-                        <h1>RONDA {round}</h1>
-                        <h2 ref={formatedTimeRef}>Tiempo: 00:00</h2>
+                        {refund ? <h1 className="player-gold">{t('shop.refund', { amount: Math.floor(usedGold.current / 10) })}</h1> : <></>}
+                        <h1>{t('shop.round', { round })}</h1>
+                        <h2 ref={formatedTimeRef}>{t('shop.time')}</h2>
                     </div>
                     <div className="game-character">
                         <img className="character-avatar" style={{ borderColor: user?.color }} src={character?.imagen} alt={character?.nombre} />
-                        <img className="character-ability available" src={character?.habilidad_personaje?.icono} style={null} alt="Habilidad" />
+                        <img className="character-ability available" src={character?.habilidad_personaje?.icono} style={null} alt={t('shop.abilityIconAlt')} />
                     </div>
                     <div className="extra">
                         <div className="game-modifiers">
@@ -234,7 +258,7 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
                         {shopItems.map((item, index) => (
                             <div
                                 key={item.id}
-                                className={`shop-item-wrapper ${item.isBought ? 'bought' : ''}`}
+                                className={`shop-item-wrapper ${item.isBought ? 'bought' : ''} ${item.type === 'mission'?'mission-item':''}`}
                                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: item.isBought ? 0.5 : 1 }}
                             >
                                 {/* Renderizado condicional según el tipo de ítem */}
@@ -242,67 +266,58 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
                                     <div className={item.type}>
                                         {item.type === 'modifier' ? (
                                             <Modifier modifierInfo={item.data} bigger={true} />
+                                        ) : item.type === 'mission' ? (
+                                            <div className="mission-display">
+                                                <h4>{t(`shop.missions.${item.data.id}.name`)}</h4>
+                                                <p>{t(`shop.missions.${item.data.id}.description`)}</p>
+                                                <p className="mission-meta">
+                                                    {t('shop.missionGoal', { current: item.data.accepted ? item.data.progress : 0, target: item.data.meta.objetivo })}
+                                                    {' · '}{t('shop.missionDifficulty', { level: item.data.dificultad })}
+                                                </p>
+                                                <p className="mission-reward">{t('shop.missionReward', { gold: item.data.recompensa_oro })}</p>
+                                            </div>
                                         ) : (
-                                            <Stage width={250 * scale * scaleMultiplier} height={180 * scale * scaleMultiplier} s scaleX={scale * scaleMultiplier} scaleY={scale * scaleMultiplier}>
-                                                <Layer>
-                                                    <Group
-                                                        onMouseOver={() => item.data.efectos ? setHoveredIndex(index) : null}
-                                                        onMouseLeave={() => item.data.efectos ? setHoveredIndex(null) : null}
-                                                        onTap={() => item.data.efectos ? hoveredIndex != null ? setHoveredIndex(null) : setHoveredIndex(index) : null}
-                                                    >
-                                                        <Card
-                                                            cardInfo={item?.data}
-                                                            x={55}
-                                                            y={0}
-                                                            isDraggable={false}
-                                                            cardSuit={item?.palo == "Diamante" ? DiamonIcon : HeartIcon}
-                                                        />
-
-
-                                                        {/* Ventana emergente simple */}
-                                                        {hoveredIndex === index && item.data.efectos && (
-                                                            <Label x={0} y={0}>
-
-                                                                <Rect
-                                                                    width={150}
-                                                                    height={90}
-                                                                    fill="#685a5a"
-                                                                    x={40}
-                                                                    y={0}
-                                                                    cornerRadius={5}
-                                                                    stroke={"black"}
-                                                                />
-                                                                <Text
-                                                                    text={item.data.efectos[0].description}
-                                                                    fill="white"
-                                                                    padding={5}
-                                                                    fontSize={16}
-                                                                    width={150}
-                                                                    align="center"
-                                                                    fontFamily="Alagard"
-                                                                    x={40}
-                                                                    y={0}
-                                                                />
-                                                            </Label>
-                                                        )}
-                                                    </Group>
-                                                </Layer>
-                                            </Stage>
+                                            <ShopItemCard
+                                                item={item}
+                                                index={index}
+                                                hoveredIndex={hoveredIndex}
+                                                setHoveredIndex={setHoveredIndex}
+                                                DiamonIcon={DiamonIcon}
+                                                HeartIcon={HeartIcon}
+                                            />
                                         )}
                                     </div>
                                 </div>
                                 <div className="item-purchase-controls" style={{ marginTop: '10px', textAlign: 'center' }}>
-                                    <p style={{ margin: '5px 0', fontWeight: 'bold' }}>
-                                        <img src={GoldIcon} alt="Oro" style={{ width: '16px', verticalAlign: 'middle', marginRight: '5px' }} />
-                                        {membershipAvailable && item.data.valor === 2 ? " " + 0 : item.isAmego ? Math.floor(item.price / 2): item.price}
-                                        {(membershipAvailable && item.data.valor === 2) || item.isAmego && <span className="discount"> {" " + item.price + " "} </span>}
-                                    </p>
-                                    <button
-                                        onClick={() => handleBuyItem(index)}
-                                        disabled={item.isBought || gold < calcFinalPrice(item)}
-                                    >
-                                        {item.isBought ? 'Comprado' : 'Comprar'}
-                                    </button>
+                                    {item.type === 'mission' ? (
+                                        item.data.offer ? (
+                                            <button onClick={() => handleMissionAction(index)}>
+                                                {t('shop.missionAccept')}
+                                            </button>
+                                        ) : isMissionCompleted({ progress: item.data.progress ?? 0 }, item.data.meta) ? (
+                                            <button onClick={() => handleMissionAction(index)}>
+                                                {t('shop.missionClaim')}
+                                            </button>
+                                        ) : (
+                                            <button disabled>
+                                                {t('shop.missionInProgress')}
+                                            </button>
+                                        )
+                                    ) : (
+                                        <>
+                                            <p style={{ margin: '5px 0', fontWeight: 'bold' }}>
+                                                <img src={GoldIcon} alt={t('shop.goldIconAlt')} style={{ width: '16px', verticalAlign: 'middle', marginRight: '5px' }} />
+                                                {membershipAvailable && item.data.valor === 2 ? " " + 0 : item.isAmego ? Math.floor(item.price / 2) : item.price}
+                                                {(membershipAvailable && item.data.valor === 2) || item.isAmego && <span className="discount"> {" " + item.price + " "} </span>}
+                                            </p>
+                                            <button
+                                                onClick={() => handleBuyItem(index)}
+                                                disabled={item.isBought || gold < calcFinalPrice(item)}
+                                            >
+                                                {item.isBought ? t('shop.bought') : t('shop.buy')}
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -311,7 +326,7 @@ const GameShop = ({ gold, setGold, coinAnimation, goldAnimation, goldAnimationVa
                         onClick={() => {
                             closeShop()
                         }}>
-                        Seguir
+                        {t('shop.continue')}
                     </button>
                 </div>
                 <div className="shop-man">

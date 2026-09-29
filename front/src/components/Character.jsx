@@ -1,4 +1,5 @@
 import React, { Fragment, useContext } from "react";
+import { useTranslation } from "react-i18next";
 
 import { matchContext } from "../context/MatchProvider.jsx";
 import {  settingsContext } from "../context/SettingsProvider.jsx";
@@ -6,6 +7,7 @@ import {  settingsContext } from "../context/SettingsProvider.jsx";
 import './Character.css';
 
 const Character = ({characterInfo, fastSelector = false}) => {
+    const {t} = useTranslation('characters')
     const {setNewCharacter} = useContext(matchContext)
     const {startButtonSound} = useContext( settingsContext)
     if(fastSelector){
@@ -19,12 +21,12 @@ const Character = ({characterInfo, fastSelector = false}) => {
                     </div>
                     <div>
                         <div className="character-abilitie">
-                            <img className="abilitie-icon" src={characterInfo.habilidad_personaje.icono} alt={"Habilidad de " +  characterInfo.nombre}/>
+                            <img className="abilitie-icon" src={characterInfo.habilidad_personaje.icono} alt={t('alt.abilityIcon', { nombre: characterInfo.nombre })}/>
                             
                         </div>
                     </div>
                     <div>
-                        <button onClick={(event)=>{startButtonSound(true);setNewCharacter(characterInfo)}}>Seleccionar</button>
+                        <button onClick={(event)=>{startButtonSound(true);setNewCharacter(characterInfo)}}>{t('select')}</button>
                     </div>
                 </div>
             </Fragment>
@@ -37,11 +39,11 @@ const Character = ({characterInfo, fastSelector = false}) => {
                     <div className="character-info">
                         <img className="character-image" src={characterInfo.imagen} alt={characterInfo.nombre}/>
                         <h1>{characterInfo.nombre}</h1>
-                        <button onClick={(event)=>{startButtonSound(true);setNewCharacter(characterInfo)}}>Seleccionar</button>
+                        <button onClick={(event)=>{startButtonSound(true);setNewCharacter(characterInfo)}}>{t('select')}</button>
                     </div>
                     <div>
                         <div className="character-abilitie">
-                            <img className="abilitie-icon" src={characterInfo.habilidad_personaje.icono} alt={"Habilidad de " +  characterInfo.nombre}/>
+                            <img className="abilitie-icon" src={characterInfo.habilidad_personaje.icono} alt={t('alt.abilityIcon', { nombre: characterInfo.nombre })}/>
                             <div className="abilitie-text">
                                 <p>{characterInfo.habilidad_personaje.descripcion}</p>
                             </div>

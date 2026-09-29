@@ -1,4 +1,5 @@
 import { Component } from "react";
+import i18n from "../../i18n/index.js";
 
 /**
  * Boundary para capturar errores de render en componentes hijos (Card, Konva,
@@ -24,13 +25,13 @@ class ErrorBoundary extends Component {
             return (
                 <div className="game">
                     <div className="gameOver-menu">
-                        <h1 className="lose">ERROR</h1>
-                        <p>Se ha producido un error inesperado durante la partida.</p>
+                        <h1 className="lose">{i18n.t('errorBoundary.title', 'ERROR')}</h1>
+                        <p>{i18n.t('errorBoundary.message', 'Se ha producido un error inesperado durante la partida.')}</p>
                         <button onClick={() => window.location.assign("/")}>
-                            INICIO
+                            {i18n.t('errorBoundary.home', 'INICIO')}
                         </button>
                         <button onClick={() => window.location.reload()}>
-                            REINTENTAR
+                            {i18n.t('errorBoundary.retry', 'REINTENTAR')}
                         </button>
                     </div>
                 </div>

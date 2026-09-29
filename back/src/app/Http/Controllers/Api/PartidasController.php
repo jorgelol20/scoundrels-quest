@@ -12,11 +12,11 @@ class PartidasController extends Controller
 {
     public function index($limit = 10)
     {
-        $limit = min((int) $limit, 100);
+        $limit = min(max((int) $limit, 1), 100);
         $partidas = Partidas::select('id', 'created_at', 'usuario_id', 'personaje_id', 'tiempo', 'victoria', 'rondas', 'oro_obtenido', 'vida_curada', 'enemigos_enfrentados')
         ->with(
             [
-                'modificadores:imagen,nivel,nombre,descripcion', 
+                'modificadores:id,imagen,nivel,nombre,descripcion', 
                 'jugador:id,nick,es_admin,color,avatar', 
                 'personaje'
             ]
@@ -36,8 +36,13 @@ class PartidasController extends Controller
 
     public function store(StorePartidaRequest $request)
     {
-        $partida = Partidas::create($request->validated());
-        $partida->modificadores()->attach($request->modificadores);
+        $data = $request->validated();
+
+        // La identidad se toma SIEMPRE del token, nunca del cuerpo.
+        $data['usuario_id'] = $request->user()->id;
+
+        $partida = Partidas::create($data);
+        $partida->modificadores()->sync($request->validated('modificadores', []));
         $partida->load('modificadores');
         return response()->json($partida, 201);
     }
@@ -51,15 +56,25 @@ class PartidasController extends Controller
     public function update(UpdatePartidaRequest $request, $id)
     {
         $partida = Partidas::findOrFail($id);
-        $partida->update($request->validated());
+        $data = $request->validated();
 
-        return response()->json($partida, 201);
+        // `modificadores` es una relación pivote, no una columna.
+        $modificadores = $data['modificadores'] ?? null;
+        unset($data['modificadores']);
+
+        $partida->update($data);
+
+        if ($modificadores !== null) {
+            $partida->modificadores()->sync($modificadores);
+        }
+
+        return response()->json($partida->fresh(), 200);
     }
 
     public function destroy($id)
     {
         Partidas::findOrFail($id)->delete();
-        return response()->json(['message' => 'Partida eliminada'], 201);
+        return response()->json(['message' => __('api.partida_deleted')]);
     }
 
     public function ranking_partidas()

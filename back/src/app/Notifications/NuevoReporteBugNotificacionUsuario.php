@@ -36,12 +36,12 @@ class NuevoReporteBugNotificacionUsuario extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Reporte recibido.")
-            ->greeting("¡Gracias por tu reporte!")
-            ->line("Gracias por tu reporte de {$this->reporteBug->tipo}")
-            ->line("Los administradores revisarán el reporte y te llegará una notificación cuando el reporte cambie de estado.")
-            ->line("Puedes acceder al resto de tus reportes desde tu perfil.")
-            ->action("Ver la página del reporte", config('app.frontend_url') . "/reportes-bug/{$this->reporteBug->id}");
+            ->subject(__('mail.nuevo_usuario_subject'))
+            ->greeting(__('mail.nuevo_usuario_greeting'))
+            ->line(__('mail.nuevo_usuario_line_tipo', ['tipo' => $this->reporteBug->tipo]))
+            ->line(__('mail.nuevo_usuario_line_revision'))
+            ->line(__('mail.nuevo_usuario_line_perfil'))
+            ->action(__('mail.nuevo_usuario_action'), config('app.frontend_url') . "/reportes-bug/{$this->reporteBug->id}");
     }
 
     /**

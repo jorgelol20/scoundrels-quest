@@ -16,7 +16,11 @@ class StoreCartaRequest extends FormRequest
         return [
             'palo' => 'required|string|max:50',
             'valor' => 'required|integer',
-            'imagen' => 'nullable|image|max:2048'
+            'imagen' => 'nullable|image|max:2048',
+            'activa' => 'sometimes|boolean',
+            'especial' => 'sometimes|boolean',
+            'efectos' => 'sometimes|nullable|array',
+            'translations' => 'sometimes|nullable|array',
         ];
     }
 }

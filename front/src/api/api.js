@@ -1,4 +1,6 @@
 import axios from 'axios';
+import i18n from '../i18n/index.js';
+import { normalizeLocale } from '../i18n/detector.js';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const api = axios.create({
     //URL del servidor de Laravel
@@ -13,6 +15,12 @@ api.interceptors.request.use(config => {
     const token = localStorage.getItem('auth_token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Fase 0 i18n: el back resuelve el idioma con Accept-Language (fallback 'es')
+    try {
+        config.headers['Accept-Language'] = normalizeLocale(i18n.language?.split('-')[0]);
+    } catch {
+        config.headers['Accept-Language'] = 'es';
     }
     return config;
 });

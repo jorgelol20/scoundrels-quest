@@ -1,0 +1,106 @@
+{
+  "aria": "About this card dungeon",
+  "bannerAlt": "Scoundrel's Quest — free card dungeon (Scoundrels Quest)",
+  "srTitle": "Scoundrel's Quest (Scoundrels Quest) — Free Roguelike Card Web Game",
+  "srText1a": "Descend free with no ads into ",
+  "srStrong1": "Scoundrel's Quest",
+  "srText1b": ", the ",
+  "srStrong2": "Scoundrel web game",
+  "srText1c": " also known as ",
+  "srStrong3": "Scoundrels Quest",
+  "srText1d": ": 8 antiheroes, 4-card hands and 10 rounds of dungeon in your browser, no download.",
+  "content": {
+    "h2": "Scoundrel's Quest (Scoundrels Quest): 44 cards between you and the way out",
+    "p1a": "No board here: the dungeon is a ",
+    "p1strong1": "poker deck",
+    "p1b": ". Each round deals hands of 4 cards —diamonds to arm yourself, hearts to patch yourself up and ",
+    "p1strong2": "spades and clubs",
+    "p1c": " coming for your throat— and you only descend when hand and deck hit zero. That is how you play ",
+    "p1strong3": "Scoundrel",
+    "p1d": " in ",
+    "p1strong4": "Scoundrel's Quest",
+    "p1e": ", a ",
+    "p1strong5": "roguelike web game",
+    "p1f": " based on the Scoundrel card game (also known as Scoundrels Quest): your weapon only bites twice against weaker enemies, and fleeing is rationed.",
+    "h3Why": "Why descend into this dungeon?",
+    "li1a": "Free with no ads, in your browser",
+    "li1b": ": no downloads, no installs, no real gold spent.",
+    "li2a": "8 antiheroes with unique abilities",
+    "li2b": ": howl with the warrior, cheat with the gambler, drink with the vampire or tame beasts with the tamer.",
+    "li3": "Each round you pick 1 of 3 modifiers, raid the shop hunting Excalibur and run into the Slime Queen, the Mimic or the Demon Shaman.",
+    "li4a": "Tutorial with combat simulator: learn ",
+    "li4strong": "how to play Scoundrel",
+    "li4b": " by testing every card before you bleed for real.",
+    "li5a": "Your legend gets recorded",
+    "li5b": ": ranking, achievements, missions and match history with a free account.",
+    "h3Faq": "Tavern talk about Scoundrel",
+    "q1": "What is Scoundrel?",
+    "a1a": "",
+    "a1b": " is the single-deck tabletop game where every card is a decision: wield diamonds, swallow hearts or bleed against spades and clubs. No dice, no board: just you, 44 cards and your greed.",
+    "q2": "Is Scoundrel's Quest free?",
+    "a2a": "Yes. ",
+    "a2b": " is a ",
+    "a2strong": "roguelike web game based on the Scoundrel card game",
+    "a2c": " with no ads — sign in with email, Google or X and descend.",
+    "q3": "How do you win a run?",
+    "a3": "By surviving all 10 rounds: clear every 4-card hand and empty the deck without hitting 0 health. Each round spits out more and meaner enemies — waves of 5, 7 and 9 — with poisons, weapon-breakers, plunder and arcane seals."
+  },
+  "schema": {
+    "q1": "What is Scoundrel?",
+    "a1": "Scoundrel is the single-deck tabletop game where every card is a decision: diamonds are weapons that only bite twice against weaker enemies, hearts heal, and spades and clubs come for you. Fleeing is rationed.",
+    "q2": "What is Scoundrel's Quest (Scoundrels Quest)?",
+    "a2": "Scoundrel's Quest, also known as Scoundrels Quest, is a free roguelike web game with no ads, based on the Scoundrel card game: pick 1 of 8 antiheroes with unique abilities and survive 10 rounds in your browser, no download needed.",
+    "q3": "How do you win a run?",
+    "a3": "By clearing 4-card hands and emptying the 44-card deck in each of the 10 rounds, using modifiers, the shop and minibosses like the Slime Queen or the Mimic."
+  },
+  "routes": {
+    "home": {
+      "title": "Scoundrel's Quest (Scoundrels Quest) | Free Roguelike Card Web Game",
+      "description": "Descend into Scoundrel's Quest (Scoundrels Quest): a free card roguelike with no ads in your browser. Poker deck, 8 antiheroes with unique abilities, modifiers, a shop hiding Excalibur and 10 rounds."
+    },
+    "jugar": {
+      "title": "Play Scoundrel Online Free — Scoundrel's Quest",
+      "description": "The dungeon awaits: survive 10 rounds of Scoundrel's Quest with weapons, heals, modifiers and minibosses like the Slime Queen or the Mimic. Free, no download."
+    },
+    "tutorial": {
+      "title": "How to Play Scoundrel — Scoundrel's Quest Rules & Tutorial",
+      "description": "Master the dungeon: 4-card hands, wearing diamonds, rationed fleeing, modifiers, shop and minibosses. The complete Scoundrel's Quest guide with combat simulator."
+    },
+    "login": {
+      "title": "Login — Scoundrel's Quest | Scoundrel Web Game",
+      "description": "Log in to Scoundrel's Quest to descend into the dungeon free, save runs, unlock achievements and climb the ranking."
+    },
+    "signup": {
+      "title": "Create Free Account — Play Scoundrel Online | Scoundrels Quest",
+      "description": "Create a free account with email, Google or X and descend into Scoundrel's Quest (Scoundrels Quest): a free card roguelike with no ads."
+    },
+    "creditos": {
+      "title": "Credits — Scoundrel's Quest Team",
+      "description": "Meet the team behind Scoundrel's Quest, free with no ads. Credits and acknowledgements of this roguelike web game based on the Scoundrel card game."
+    },
+    "privacy": {
+      "title": "Privacy Policy — Scoundrel's Quest",
+      "description": "Privacy policy of Scoundrel's Quest, free roguelike web game."
+    },
+    "cookies": {
+      "title": "Cookie Policy — Scoundrel's Quest",
+      "description": "Cookie policy of Scoundrel's Quest, the free card roguelike."
+    },
+    "terms": {
+      "title": "Terms of Use — Scoundrel's Quest",
+      "description": "Terms of use of Scoundrel's Quest, free roguelike web game."
+    },
+    "legal": {
+      "title": "Legal Notice — Scoundrel's Quest",
+      "description": "Legal notice of Scoundrel's Quest, the free card roguelike."
+    },
+    "partida": {
+      "title": "Match Detail — Scoundrel's Quest | Scoundrels Quest",
+      "description": "Relive this Scoundrel's Quest dungeon descent: rounds, enemies and strategy of the run."
+    },
+    "perfil": {
+      "title": "Adventurer Profile — Scoundrel's Quest | Scoundrel Web Game",
+      "description": "Player profile in Scoundrel's Quest: stats, matches and achievements of this free card roguelike."
+    }
+  }
+}

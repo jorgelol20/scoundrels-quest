@@ -29,8 +29,10 @@ class ReporteBug extends Model
 
     protected static function generarTitulo(ReporteBug $reporte): string
     {
-        $tipo = ucfirst($reporte->tipo);
-        $fecha = now()->format('d-m-Y H:i');
+        // Etiqueta del tipo y fecha en el locale activo (el título queda
+        // fijado en la creación como registro histórico, igual que los logs).
+        $tipo = __('enums.tipo.'.$reporte->tipo);
+        $fecha = now()->locale(app()->getLocale())->isoFormat('L LT');
 
         $usuario = $reporte->usuario?->nick
             ?? "Usuario#{$reporte->usuario_id}";

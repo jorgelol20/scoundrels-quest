@@ -1,7 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './Loading.css';
 
-const Loading = ({ message = "Cargando..." }) => {
+const Loading = (props) => {
+  const { t } = useTranslation('common');
+  const message = props.message ?? t('loading');
   return (
     <div className="container">
       <div className="loader" role="status">

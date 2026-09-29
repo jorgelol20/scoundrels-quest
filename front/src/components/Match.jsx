@@ -4,7 +4,10 @@ import Placeholder from '/images/placeholder.webp'
 import CommentsIcon from '/images/comments_icon.webp'
 import './Match.css'
 import Modifier from "./Modifier";
+import { useTranslation } from 'react-i18next';
+import { fmtDate } from "../i18n/format.js";
 const Match = ({ match, showUser }) => {
+    const { t, i18n } = useTranslation('match');
     const {isLoading } = useCharacters()
     if (!isLoading) {
         return (
@@ -15,23 +18,23 @@ const Match = ({ match, showUser }) => {
                     <img className="character-image" src={match.personaje.imagen} alt={match.personaje.nombre} title={match.personaje.nombre}/>
                     <div className="match-info">
                         <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'center' }}>
-                            <h2 className={match.victoria ? 'win' : 'lose'}>{match.victoria ? 'Victoria' : 'Derrota'}</h2>
-                            <p>Jugada el {new Date(match.created_at).toLocaleDateString('es-ES')}</p>
+                            <h2 className={match.victoria ? 'win' : 'lose'}>{match.victoria ? t('win') : t('loss')}</h2>
+                            <p>{t('playedOn', { date: fmtDate(i18n.language, match.created_at) })}</p>
                             <div className="match-comments">
-                                <img src={CommentsIcon} alt="Cantidad de comentarios" title="Cantidad de comentarios"/>
+                                <img src={CommentsIcon} alt={t('commentsCount')} title={t('commentsCount')}/>
                                 <p>{match.comentarios_count}</p>
                             </div>
                         </div>
                         <div className="match-modifiers">
                             {match.modificadores?.length > 0 ? match.modificadores.map((modifierInfo) => {
                                 return <Modifier key={crypto.randomUUID()} modifierInfo={modifierInfo} />
-                            }) : <h1>Sin modificadores</h1>}
+                            }) : <h1>{t('noModifiers')}</h1>}
                             
                         </div>
                     </div>
                     {showUser ?
                         <div className="player-info">
-                            <img className='user-avatar' style={{ borderColor: match.jugador.color }} src={match.jugador.avatar !== "" && match.jugador.avatar ? match.jugador.avatar : Placeholder} alt={`Avatar de ${match.jugador.nick}`} title={`Avatar de ${match.jugador.nick}`}/>
+                            <img className='user-avatar' style={{ borderColor: match.jugador.color }} src={match.jugador.avatar !== "" && match.jugador.avatar ? match.jugador.avatar : Placeholder} alt={t('avatarOf', { nick: match.jugador.nick })} title={t('avatarOf', { nick: match.jugador.nick })}/>
                             <p className={match.jugador.es_admin?"admin":"user"}>{match.jugador.nick}</p>
                         </div>
                         : <></>}

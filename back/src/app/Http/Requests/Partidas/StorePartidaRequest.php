@@ -8,21 +8,23 @@ class StorePartidaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // La partida se registra siempre a nombre del usuario autenticado:
+        // `usuario_id` ya no se acepta desde el cuerpo de la petición.
+        return (bool) $this->user();
     }
 
     public function rules(): array
     {
         return [
-            'usuario_id' => 'required|exists:usuarios,id',
-            'personaje_id' => 'required|exists:personajes,id',
-            'tiempo' => 'required|integer',
+            'personaje_id' => 'required|integer|exists:personajes,id',
+            'tiempo' => 'required|integer|min:0|max:86400',
             'victoria' => 'required|boolean',
-            'rondas' => 'required|integer',
-            'modificadores' => 'nullable|array',
-            'oro_obtenido' => 'required|integer',
-            'vida_curada' => 'required|integer',
-            'enemigos_enfrentados' => 'required|integer',
+            'rondas' => 'required|integer|min:0|max:500',
+            'modificadores' => 'nullable|array|max:50',
+            'modificadores.*' => 'integer|exists:modificadores,id',
+            'oro_obtenido' => 'required|integer|min:0|max:1000000',
+            'vida_curada' => 'required|integer|min:0|max:1000000',
+            'enemigos_enfrentados' => 'required|integer|min:0|max:1000000',
         ];
     }
 }

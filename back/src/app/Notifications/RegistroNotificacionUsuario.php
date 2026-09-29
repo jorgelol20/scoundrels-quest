@@ -36,10 +36,10 @@ class RegistroNotificacionUsuario extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("¡Bienvenido a Scoundrel's Quest!")
-            ->line("¿Preparado para este desafio?")
-            ->action("Ver mi perfil", config('app.frontend_url') . "/perfil/{$this->usuario->nick}")
-            ->line("Muchas gracias por registarte.");
+            ->subject(__('mail.registro_subject'))
+            ->line(__('mail.registro_line1'))
+            ->action(__('mail.registro_action'), config('app.frontend_url') . "/perfil/{$this->usuario->nick}")
+            ->line(__('mail.registro_line2'));
     }
 
     /**

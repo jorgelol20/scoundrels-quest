@@ -1,75 +1,56 @@
+import { useTranslation } from "react-i18next";
+
 import { useCharacters } from "../../hooks/useCharacter.js";
 import PlaceholderImage from "/images/placeholder.webp";
 
 /*
 
  */
-const characterStyles = {
-    guerrero: "Ofensivo",
-    paladin: "Defensivo",
-    elfo: "Control",
-    mago: "Información",
-    apostador: "Riesgo",
-    herrero: "Ofensivo",
-    cazador: "Economía",
-    vampiro: "Drenaje",
-    domador: "Control",
-};
-
-const characterStrategies = {
-    guerrero: "Lo ideal es jugar al rededor del 50% de la vida e intentar obtener los modificadores de vida extra para que ese 50% sea superior y no ir siempre a riesgo de morir por una mala decisión.",
-    paladin: "Es el personaje más equilibrado por lo que encaja en cualquier estilo de juego.",
-    elfo: "Con la posibilidad de huir hasta 2 veces por mano, puedes pensar mejor cuando jugartela o usar tu habilidad.",
-    mago: "Personaje ideal si te gusta un ritmo de juego más pausado y calmado dado que te permite pensar con varios turnos a futuro.",
-    apostador: "La opción más viable es: no usar su habilidad.",
-    herrero: "",
-    cazador: "",
-    vampiro: "",
-    domador: "",
-};
-
-const getStrategyNote = (character) => {
-    const code = character?.habilidad_personaje?.codigo;
-    return characterStrategies[code] || "";
-};
-
-const getCharacterStyle = (character) => {
-    const code = character?.habilidad_personaje?.codigo;
-    return characterStyles[code] || "Híbrido";
-};
-
 const CharacterTutorial = () => {
+    const { t } = useTranslation('characters');
     const { characters, isLoading, error } = useCharacters();
+
+    // Un código sin traducción devuelve "" (o el texto por defecto) para
+    // mantener la lógica original de fallback por personaje.
+    const getStrategyNote = (character) => {
+        const code = character?.habilidad_personaje?.codigo;
+        return code ? t(`strategies.${code}`, { defaultValue: '' }) : '';
+    };
+
+    const getCharacterStyle = (character) => {
+        const code = character?.habilidad_personaje?.codigo;
+        return t(`styles.${code}`, { defaultValue: t('styles.fallback') });
+    };
+
 
     return (
         <section className="character-tutorial" aria-labelledby="character-tutorial-title">
             <header className="character-tutorial-header">
-                <p className="character-tutorial-kicker">Elige tu estilo de juego</p>
-                <h1 id="character-tutorial-title">Personajes</h1>
-                <p>
-                    Cada personaje cambia la forma de superar la mazmorra. Revisa su habilidad
-                    y su estrategia antes de comenzar tu partida.
-                </p>
+                <p className="character-tutorial-kicker">{t('kicker')}</p>
+                <h1 id="character-tutorial-title">{t('title')}</h1>
+                <p>{t('subtitle')}</p>
                 {!isLoading && !error && characters?.length > 0 && (
-                    <span className="character-count">{characters.length} personajes disponibles</span>
+                    <span className="character-count">
+                        {t('count', { count: characters.length })}
+                    </span>
                 )}
             </header>
 
             {isLoading && (
                 <div className="character-tutorial-status">
-                    Cargando personajes...
+                    {t('loading')}
                 </div>
             )}
 
             {!isLoading && error && (
                 <div className="character-tutorial-status character-tutorial-error">
-                    No se han podido cargar los personajes.
+                    {t('loadError')}
                 </div>
             )}
 
             {!isLoading && !error && characters?.length === 0 && (
                 <div className="character-tutorial-status">
-                    Todavía no hay personajes disponibles.
+                    {t('empty')}
                 </div>
             )}
 
@@ -78,7 +59,7 @@ const CharacterTutorial = () => {
                     className="character-timeline"
                     role="list"
                     tabIndex="0"
-                    aria-label="Lista de personajes desplazable"
+                    aria-label={t('aria.list')}
                 >
                     {characters.map((character, index) => {
                         const ability = character?.habilidad_personaje;
@@ -99,22 +80,24 @@ const CharacterTutorial = () => {
                                                 onError={(event) => {
                                                     event.currentTarget.src = PlaceholderImage;
                                                 }}
-                                                alt={`Retrato de ${character.nombre}`}
+                                                alt={t('alt.portrait', { nombre: character.nombre })}
                                             />
                                         </div>
                                         <div className="character-heading">
-                                            <span className="character-order">Personaje {index + 1} de {characters.length}</span>
+                                            <span className="character-order">
+                                                {t('position', { index: index + 1, total: characters.length })}
+                                            </span>
                                             <h2>{character.nombre}</h2>
                                             <span className="character-style">{getCharacterStyle(character)}</span>
                                             <span className="character-code">
-                                                {ability?.nombre || "Habilidad especial"}
+                                                {ability?.nombre || t('specialAbility')}
                                             </span>
                                         </div>
                                     </div>
 
                                     <div className="character-card-content">
                                         <p className="character-description">
-                                            {character.descripcion || "Sin descripción disponible."}
+                                            {character.descripcion || t('noDescription')}
                                         </p>
 
                                         <div className="character-ability">
@@ -123,22 +106,22 @@ const CharacterTutorial = () => {
                                                 onError={(event) => {
                                                     event.currentTarget.src = PlaceholderImage;
                                                 }}
-                                                alt={`Icono de la habilidad de ${character.nombre}`}
+                                                alt={t('alt.ability', { nombre: character.nombre })}
                                             />
                                             <div>
-                                                <h3>Habilidad</h3>
+                                                <h3>{t('ability')}</h3>
                                                 <p>
                                                     {ability?.descripcion ||
-                                                        "Este personaje todavía no tiene una habilidad visible."}
+                                                        t('abilityFallback')}
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="character-strategy">
-                                            <h3>Estrategia ideal</h3>
+                                            <h3>{t('strategyTitle')}</h3>
                                             <p className={strategyNote ? "strategy-filled" : "strategy-placeholder"}>
                                                 {strategyNote ||
-                                                    "Sin estrategia fija."}
+                                                    t('strategyFallback')}
                                             </p>
                                         </div>
                                     </div>
