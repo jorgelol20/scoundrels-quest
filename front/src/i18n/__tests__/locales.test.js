@@ -9,7 +9,7 @@ const LOCALES = resolve(HERE, '..', '..', 'locales');
 
 const readNs = (lang, ns) => JSON.parse(readFileSync(join(LOCALES, lang, `${ns}.json`), 'utf8'));
 
-/** Namespaces = ficheros en disco (fuente de verdad, incluye los lazy). */
+/** Namespaces = ficheros en disco (fuente de verdad; todos van eager en `resources`). */
 const namespaces = readdirSync(join(LOCALES, 'es'))
     .filter((f) => f.endsWith('.json'))
     .map((f) => f.replace(/\.json$/, ''))
