@@ -108,9 +108,16 @@ export const useUser = () => {
 
     /**
      * Función para cerrar sesión.
-     * Reenvía al usuario directamente a la página de Login.
+     * Revoca el token en el backend (POST /logout) y limpia el estado local.
      */
-    const logout = () => {
+    const logout = async () => {
+        try {
+            // Revoca el token de Sanctum en el servidor. Se ignora el
+            // resultado: si falla, la sesión local se cierra igualmente.
+            await api.post('/logout');
+        } catch {
+            // Sin conexión o token ya caducado: se continúa con la limpieza local.
+        }
         localStorage.removeItem('auth_token');
         delete api.defaults.headers.common['Authorization'];
         queryClient.removeQueries({ queryKey: ['authUser'] });
@@ -151,7 +158,8 @@ export const useUser = () => {
     const signup = useMutation({
         mutationFn: async (form) => {
             // Nota: Se cambió ({form}) a (form) para consistencia
-            const { data } = await api.post(`/usuarios/`, form, {
+            // Ruta pública /signup (POST /usuarios exige auth:sanctum).
+            const { data } = await api.post(`/signup`, form, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             return data;

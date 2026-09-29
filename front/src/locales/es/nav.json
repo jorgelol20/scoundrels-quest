@@ -1,0 +1,26 @@
+{
+  "home": "Inicio",
+  "login": "Iniciar sesión",
+  "signup": "Registrarse",
+  "adminPanel": "Panel Admin",
+  "searchPlaceholder": "Buscar usuario",
+  "activePlayers": "{{count}} activos",
+  "notificationsPending": "Tienes {{count}} notificaciones pendientes.",
+  "exitMatchTitle": "Salir de la Partida",
+  "exitMatchMessage": "Si sales, la partida contará como derrota.",
+  "gameIconAlt": "Icono juego",
+  "footer": {
+    "toggleLabel": "Expandir/Contraer navegación del footer",
+    "versionAndDate": "V. Alfa · Última actualización: {{date}}",
+    "dateUnavailable": "No disponible",
+    "support": "soporte@scoundrels-quest.com",
+    "legalNavLabel": "Enlaces legales",
+    "reportError": "REPORTAR ERROR",
+    "credits": "Créditos",
+    "privacy": "Privacidad",
+    "cookies": "Cookies",
+    "terms": "Términos de uso",
+    "legal": "Información legal",
+    "bannerAlt": "Banner"
+  }
+}

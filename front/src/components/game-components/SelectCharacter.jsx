@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import './SelectCharacter.css';
 import Character from "../Character.jsx";
 import Loading from "../Loading.jsx";
@@ -6,6 +7,7 @@ import { matchContext } from "../../context/MatchProvider";
 
 const SelectCharacter = () => {
     const {availableCharacters} = useContext(matchContext)
+    const { t } = useTranslation('game');
     const [characterList, setCharacterList] = useState([])
 
     const [isFastSelector, setIsFastSelector] = useState(() => {
@@ -46,7 +48,7 @@ const SelectCharacter = () => {
                 </div>
                 <div className="character-menu">
                     <div className="character-menu-input">
-                        <label htmlFor="checkbox-setting">Selector rápido</label>
+                        <label htmlFor="checkbox-setting">{t('select.fastSelector')}</label>
                         <input
                             id="checkbox-setting"
                             className="checkbox-setting"

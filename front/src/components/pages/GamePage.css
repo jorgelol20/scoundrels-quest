@@ -110,13 +110,28 @@
 }
 
 
+.board-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    aspect-ratio: 800 / 440;
+    max-height: 78vh;
+}
+
 .game-window {
-    padding: 1em;
+    padding: 0;
     background-color: var(--second-color);
-    width: 50cqw;
-    height: 100%;
+    width: auto;
+    height: auto;
     border: 0.5cqw groove var(--second-color-dark);
     /* background-color: aqua; */
+}
+
+.game-window canvas {
+    display: block;
 }
 
 
@@ -425,11 +440,17 @@ span {
         align-items: center;
     }
 
+    .board-wrap {
+        width: 100%;
+        flex: none;
+        aspect-ratio: 420 / 760;
+        max-height: 72vh;
+    }
+
     .game-window {
 
-        height: 100%;
-        width: 80%;
-        max-height: 35cqw;
+        height: auto;
+        width: auto;
     }
 
     .logs-container {

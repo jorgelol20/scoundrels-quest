@@ -1,0 +1,106 @@
+{
+  "aria": "Sobre esta mazmorra de cartas",
+  "bannerAlt": "Scoundrel's Quest — mazmorra de cartas gratis (Scoundrels Quest)",
+  "srTitle": "Scoundrel's Quest (Scoundrels Quest) — Roguelike de cartas gratis online",
+  "srText1a": "Desciende gratis y sin anuncios a ",
+  "srStrong1": "Scoundrel's Quest",
+  "srText1b": ", el ",
+  "srStrong2": "Scoundrel web game",
+  "srText1c": " también conocido como ",
+  "srStrong3": "Scoundrels Quest",
+  "srText1d": ": 8 antihéroes, manos de 4 cartas y 10 rondas de mazmorra en tu navegador, sin descargas.",
+  "content": {
+    "h2": "Scoundrel's Quest (Scoundrels Quest): 44 cartas entre tú y la salida",
+    "p1a": "Aquí no hay tablero: la mazmorra es una ",
+    "p1strong1": "baraja de póker",
+    "p1b": ". Cada ronda te sirve manos de 4 cartas —diamantes para armarte, corazones para remendarte y ",
+    "p1strong2": "picas y tréboles",
+    "p1c": " que van a por tu cuello— y solo bajas al siguiente nivel si dejas la mano y el mazo a cero. Así se juega a ",
+    "p1strong3": "Scoundrel",
+    "p1d": " en ",
+    "p1strong4": "Scoundrel's Quest",
+    "p1e": ", un ",
+    "p1strong5": "roguelike web",
+    "p1f": " basado en el juego Scoundrel (también conocido como Scoundrels Quest): tu arma solo repite filo contra enemigos más débiles que el anterior, y huir solo se permite unas pocas veces.",
+    "h3Why": "¿Por qué bajar a esta mazmorra?",
+    "li1a": "Gratis y sin anuncios, en tu navegador",
+    "li1b": ": sin descargas, sin instalaciones y sin dejarte oro real.",
+    "li2a": "8 antihéroes con habilidades únicas",
+    "li2b": ": aúlla con el guerrero, haz trampas con el apostador, bebe con el vampiro o doma bestias con el domador.",
+    "li3": "Cada ronda eliges 1 modificador de 3, arrasas la tienda buscando a Excalibur y te cruzas con la Reina Slime, el Mímico o el Chamán Demoníaco.",
+    "li4a": "Tutorial con simulador de combate: aprende ",
+    "li4strong": "cómo jugar a Scoundrel",
+    "li4b": " probando cada carta antes de sangrar de verdad.",
+    "li5a": "Tu leyenda queda registrada",
+    "li5b": ": ranking, logros, misiones e historial de partidas con cuenta gratuita.",
+    "h3Faq": "Preguntas de taberna sobre Scoundrel",
+    "q1": "¿Qué es Scoundrel?",
+    "a1a": "",
+    "a1b": " es el juego de mesa de una sola baraja donde cada carta es una decisión: empuñar diamantes, tragar corazones o sangrar contra picas y tréboles. Sin dados ni tablero: solo tú, 44 cartas y tu avaricia.",
+    "q2": "¿Scoundrel's Quest es gratis?",
+    "a2a": "Sí. ",
+    "a2b": " es un ",
+    "a2strong": "roguelike web basado en el juego Scoundrel",
+    "a2c": ": 100% gratis y sin anuncios. Entra con email, Google o X y baja a la mazmorra.",
+    "q3": "¿Cómo se gana una partida?",
+    "a3": "Aguantando las 10 rondas: vacía cada mano de 4 cartas y deja el mazo a cero sin quedarte sin vida. Cada ronda escupe más enemigos y más duros —oleadas de 5, 7 y 9— con venenos, rompearmas, saqueos y sellos arcanos."
+  },
+  "schema": {
+    "q1": "¿Qué es Scoundrel?",
+    "a1": "Scoundrel es el juego de mesa de una sola baraja donde cada carta es una decisión: los diamantes son armas que solo repiten filo contra enemigos más débiles, los corazones curan y las picas y los tréboles van a por ti. Las huidas son limitadas.",
+    "q2": "¿Qué es Scoundrel's Quest (Scoundrels Quest)?",
+    "a2": "Scoundrel's Quest, también conocido como Scoundrels Quest, es un roguelike web gratis y sin anuncios, basado en el juego Scoundrel: elige 1 de 8 antihéroes con habilidades únicas y sobrevive 10 rondas en tu navegador, sin descargas.",
+    "q3": "¿Cómo se gana una partida?",
+    "a3": "Vaciando manos de 4 cartas y dejando a cero la baraja de 44 cartas en cada una de las 10 rondas, con modificadores, tienda y minibosses como la Reina Slime o el Mímico."
+  },
+  "routes": {
+    "home": {
+      "title": "Scoundrel's Quest (Scoundrels Quest) | Roguelike de Cartas Gratis",
+      "description": "Scoundrel's Quest (Scoundrels Quest): roguelike de cartas gratis y sin anuncios. Baraja de póker, 8 antihéroes, modificadores, tienda y 10 rondas."
+    },
+    "jugar": {
+      "title": "Juega a Scoundrel Gratis Online — Scoundrel's Quest",
+      "description": "La mazmorra te espera: sobrevive 10 rondas de Scoundrel's Quest con armas, curaciones, modificadores y minibosses como la Reina Slime o el Mímico. Gratis y sin descargas."
+    },
+    "tutorial": {
+      "title": "Cómo Jugar a Scoundrel — Reglas y Tutorial de Scoundrel's Quest",
+      "description": "Domina la mazmorra: manos de 4 cartas, diamantes que se desgastan, huidas contadas, modificadores, tienda y minibosses. La guía completa de Scoundrel's Quest con simulador de combate."
+    },
+    "login": {
+      "title": "Iniciar Sesión — Scoundrel's Quest | Scoundrel Web Game",
+      "description": "Inicia sesión en Scoundrel's Quest para bajar gratis a la mazmorra, guardar tus partidas, desbloquear logros y subir en el ranking."
+    },
+    "signup": {
+      "title": "Crea una Cuenta Gratis — Juega a Scoundrel Online | Scoundrels Quest",
+      "description": "Crea una cuenta gratis con email, Google o X y baja a la mazmorra de Scoundrel's Quest (Scoundrels Quest): roguelike de cartas gratis y sin anuncios."
+    },
+    "creditos": {
+      "title": "Créditos — Equipo de Scoundrel's Quest",
+      "description": "Conoce al equipo de Scoundrel's Quest, gratis y sin anuncios. Créditos y agradecimientos de este roguelike web basado en el juego Scoundrel."
+    },
+    "privacy": {
+      "title": "Política de Privacidad — Scoundrel's Quest",
+      "description": "Política de privacidad de Scoundrel's Quest, roguelike web gratis."
+    },
+    "cookies": {
+      "title": "Política de Cookies — Scoundrel's Quest",
+      "description": "Política de cookies de Scoundrel's Quest, el roguelike de cartas gratis."
+    },
+    "terms": {
+      "title": "Términos de Uso — Scoundrel's Quest",
+      "description": "Términos de uso de Scoundrel's Quest, roguelike web gratis."
+    },
+    "legal": {
+      "title": "Aviso Legal — Scoundrel's Quest",
+      "description": "Aviso legal de Scoundrel's Quest, el roguelike de cartas gratis."
+    },
+    "partida": {
+      "title": "Detalle de Partida — Scoundrel's Quest | Scoundrels Quest",
+      "description": "Revive esta descenso a la mazmorra de Scoundrel's Quest: rondas, enemigos y estrategia de la partida."
+    },
+    "perfil": {
+      "title": "Perfil de Aventurero — Scoundrel's Quest | Scoundrel Web Game",
+      "description": "Perfil de jugador en Scoundrel's Quest: estadísticas, partidas y logros de este roguelike de cartas gratis."
+    }
+  }
+}

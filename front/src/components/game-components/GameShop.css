@@ -218,6 +218,41 @@
     transform: translateY(0.3cqh);
 }
 
+.shop-card-fit {
+    width: 100%;
+    aspect-ratio: 200 / 170;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.mission-display {
+    width: 100%;
+    height: 100%;
+    color: var(--main-white);
+    text-align: center;
+
+    h4 {
+        margin: 0 0 0.4em 0;
+        color: var(--main-gold);
+        font-size: 1.1em;
+    }
+
+    p {
+        margin: 0.3em 0;
+        font-size: 0.9em;
+    }
+
+    .mission-meta {
+        color: var(--main-white);
+    }
+
+    .mission-reward {
+        color: var(--main-gold);
+        font-weight: bold;
+    }
+}
+
 .item-display {
     width: 100%;
     height: 12cqh;
@@ -320,13 +355,28 @@
             }
 
             .shop-item-wrapper {
-                width: 5em;
+                width: 44%;
+                min-width: 140px;
+                min-height: 220px;
+                max-height: 220px;
 
                 p {
                     font-size: 1em;
                 }
             }
-            
+
+            .item-display {
+                height: auto;
+                padding: 0.5em;
+                max-width: 80%;
+                min-height: 100px;
+
+                img {
+                    width: 75px;
+                    height: 75px;
+                }
+            }
+
         }
 
         .game-hud {
@@ -351,6 +401,7 @@
             width: 15em;
         }
 
+
         .dialog {
             top: 0;
             right: 0;
@@ -365,6 +416,16 @@
             font-size: 1.5em;
 
         }
+
+        .mission-display {
+            h4 {
+                font-size: 0.8em;
+            }
+
+            p {
+                font-size: 0.7em !important;
+            }
+        }
     }
 
 }
@@ -375,4 +436,87 @@
     position: absolute;
     top: -20px;
     right: -25px;
+}
+
+/* =======================================================
+   Solo resoluciones verticales: tendero en fila arriba con
+   diálogo legible + zona de modificadores usable.
+   Va después del bloque móvil para prevalecer en cascada.
+   ======================================================= */
+@media (max-width: 1080px) and (orientation: portrait) {
+
+
+    .game-shop .shop-man {
+        position: static;
+        order: -1;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 0.75em;
+        scale: 1;
+        margin: 0 0 0.5em 0;
+        background: none;
+    }
+
+    .game-shop .shop-man img {
+        height: 16vh;
+        min-height: 110px;
+        margin-top: 0;
+        flex: none;
+    }
+
+    .game-shop .dialog {
+        position: static;
+        flex: 1 1 auto;
+        width: auto;
+        max-width: none;
+        height: auto;
+        min-height: 4em;
+        font-size: 1rem;
+        line-height: 1.3;
+        padding: 0.6em 0.8em;
+    }
+
+    .game-shop .dialog p {
+        margin: 0;
+        overflow-wrap: break-word;
+    }
+
+    .game-shop .game-hud {
+        height: auto;
+
+        .character-avatar {
+            min-width: 100px !important;
+            min-height: 100px !important;
+            border: 0.5cqh groove;
+            border-radius: 50%;
+            background-color: var(--main-black);
+            margin-top: 15cqh;
+            margin-right: 5cqh;
+        }
+
+        .character-ability {
+            min-width: 35px;
+            min-height: 35px;
+            position: absolute;
+            margin-right: -50px;
+            margin-bottom: -5px;
+        }
+    }
+
+    .game-shop .game-hud .game-modifiers {
+        height: auto;
+        min-height: 5em;
+        max-height: 28vh;
+    }
+
+    .game-shop .game-hud .game-modifiers img {
+        width: 2em;
+        height: 2em;
+    }
+}
+
+.mission-item {
+    background-color: beige;
 }

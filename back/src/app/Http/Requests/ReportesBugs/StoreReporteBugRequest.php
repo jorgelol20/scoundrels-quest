@@ -34,18 +34,18 @@ class StoreReporteBugRequest extends FormRequest
     public function messages()
     {
         return [
-            'descripcion.required' => 'La descripción es obligatoria.',
-            'descripcion.string' => 'La descripción no puede estar vacía.',
-            'descripcion.max' => 'La descripción no puede superar los 2000 carácteres.',
-            'logs_partida.string' => 'Los logs de la partida no son válidos.',
-            'tipo.required' => 'El tipo de reporte es obligatorio.',
-            'tipo.in' => 'El tipo debe ser: visual, jugabilidad, rendimiento, error u otro.',
-            'severidad.in' => 'La severidad debe ser: baja, media, alta o crítica.',
-            'plataforma.string' => 'La plataforma no es válida.',
-            'plataforma.max' => 'La plataforma no puede superar los 100 carácteres.',
-            'screenshot.image' => 'Solo se admiten los formatos JPG, JPEG, PNG y WEBP',
-            'screenshot.mimes' => 'Solo se admiten los formatos JPG, JPEG, PNG y WEBP',
-            'screenshot.max' => 'Tamaño máximo de la captura: 4MB',
+            'descripcion.required' => __('api.reporte_descripcion_required'),
+            'descripcion.string' => __('api.reporte_descripcion_string'),
+            'descripcion.max' => __('api.reporte_descripcion_max'),
+            'logs_partida.string' => __('api.reporte_logs_string'),
+            'tipo.required' => __('api.reporte_tipo_required'),
+            'tipo.in' => __('api.reporte_tipo_in'),
+            'severidad.in' => __('api.reporte_severidad_in'),
+            'plataforma.string' => __('api.reporte_plataforma_string'),
+            'plataforma.max' => __('api.reporte_plataforma_max'),
+            'screenshot.image' => __('api.reporte_screenshot_image'),
+            'screenshot.mimes' => __('api.reporte_screenshot_mimes'),
+            'screenshot.max' => __('api.reporte_screenshot_max'),
         ];
     }
 }

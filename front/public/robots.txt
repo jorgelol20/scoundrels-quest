@@ -1,5 +1,10 @@
 User-agent: *
 Allow: /
 Disallow: /ajustes
+Disallow: /perfil
+Disallow: /partida/
+Disallow: /admin-panel
+Disallow: /reportes-bug/
+Disallow: /auth/
 
 Sitemap: https://scoundrels-quest.com/sitemap.xml

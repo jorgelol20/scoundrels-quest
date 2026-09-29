@@ -1,223 +1,150 @@
 import { Fragment } from "react";
+import { useTranslation } from "react-i18next";
+import { fmtDate } from "../../i18n/format.js";
 import "./LegalPage.css";
 
+const UPDATED_AT = "2026-09-04T12:00:00Z";
+
 const LegalPage = () => {
+    const { t, i18n } = useTranslation("legal");
+
     return (
         <Fragment>
             <div className="legal">
                 <div className="legal-page">
-                    <h1>Información legal</h1>
+                    <h1>{t("legal.title")}</h1>
 
                     <p className="legal-updated">
-                        Última actualización: 4 de septiembre de 2026
+                        {t("legal.updatedAt", {
+                            date: fmtDate(i18n.language, UPDATED_AT, {
+                                dateStyle: "long",
+                            }),
+                        })}
                     </p>
 
-                    <h2>1. Identificación del proyecto</h2>
+                    <h2>{t("legal.s1.title")}</h2>
 
                     <p>
-                        <strong>Scoundrel's Quest</strong> es un proyecto
-                        independiente de videojuego desarrollado como proyecto
-                        personal.
+                        <strong>{t("legal.s1.brandName")}</strong>{" "}
+                        {t("legal.s1.p1b")}
                     </p>
 
                     <ul>
                         <li>
-                            <strong>Responsable del proyecto:</strong> Jorge
-                            Colomer
+                            <strong>{t("legal.s1.li1.label")}</strong>{" "}
+                            {t("legal.s1.li1.text")}
                         </li>
 
                         <li>
-                            <strong>Correo de contacto:</strong>{" "}
+                            <strong>{t("legal.s1.li2.label")}</strong>{" "}
                             <a href="mailto:soporte@scoundrels-quest.com">
                                 soporte@scoundrels-quest.com
                             </a>
                         </li>
 
                         <li>
-                            <strong>Dominio:</strong> scoundrels-quest.com
+                            <strong>{t("legal.s1.li3.label")}</strong>{" "}
+                            {t("legal.s1.li3.text")}
                         </li>
                     </ul>
 
-                    <p>
-                        El proyecto se ofrece gratuitamente y actualmente no
-                        contiene publicidad.
-                    </p>
+                    <p>{t("legal.s1.p2")}</p>
 
-                    <h2>2. Naturaleza del proyecto</h2>
+                    <h2>{t("legal.s2.title")}</h2>
 
-                    <p>
-                        Scoundrel's Quest es un proyecto personal desarrollado
-                        con fines de entretenimiento, aprendizaje y desarrollo
-                        de software.
-                    </p>
+                    <p>{t("legal.s2.p1")}</p>
 
-                    <p>
-                        Actualmente no se cobra por el acceso al juego ni se
-                        requiere ningún pago para utilizar sus funcionalidades.
-                    </p>
+                    <p>{t("legal.s2.p2")}</p>
 
-                    <h2>3. Propiedad intelectual</h2>
+                    <h2>{t("legal.s3.title")}</h2>
+
+                    <p>{t("legal.s3.p1")}</p>
+
+                    <p>{t("legal.s3.p2")}</p>
+
+                    <h2>{t("legal.s4.title")}</h2>
 
                     <p>
-                        El código, ilustraciones, personajes, diseños, textos y
-                        demás elementos originales creados específicamente para
-                        Scoundrel's Quest pertenecen a sus respectivos autores
-                        o se utilizan con la autorización correspondiente.
+                        {t("legal.s4.p1a")} <em>{t("legal.s4.gameName")}</em>
+                        {t("legal.s4.p1b")}
                     </p>
 
-                    <p>
-                        Salvo que la legislación aplicable permita lo
-                        contrario, no está permitida la reproducción,
-                        distribución, modificación o explotación de los
-                        contenidos originales sin la autorización
-                        correspondiente.
-                    </p>
+                    <p>{t("legal.s4.p2")}</p>
 
-                    <h2>4. Inspiración en Scoundrel</h2>
+                    <p>{t("legal.s4.p3")}</p>
 
-                    <p>
-                        Scoundrel's Quest está inspirado en las mecánicas del
-                        juego <em>Scoundrel</em>, creado por Zach Gage y Kurt
-                        Bieg.
-                    </p>
+                    <h2>{t("legal.s5.title")}</h2>
 
-                    <p>
-                        Scoundrel's Quest es una obra independiente y no está
-                        afiliada, patrocinada, autorizada ni respaldada por
-                        Zach Gage o Kurt Bieg.
-                    </p>
+                    <p>{t("legal.s5.p1")}</p>
 
-                    <p>
-                        Las ilustraciones, personajes, diseños y demás
-                        elementos artísticos propios de Scoundrel's Quest han
-                        sido creados específicamente para este proyecto.
-                    </p>
+                    <p>{t("legal.s5.p2")}</p>
 
-                    <h2>5. Servicio gratuito</h2>
+                    <p>{t("legal.s5.p3")}</p>
 
-                    <p>
-                        El acceso a Scoundrel's Quest es gratuito.
-                    </p>
+                    <h2>{t("legal.s6.title")}</h2>
 
-                    <p>
-                        El proyecto puede ofrecer un enlace externo a Ko-fi
-                        para realizar donaciones voluntarias destinadas a
-                        apoyar su desarrollo.
-                    </p>
+                    <p>{t("legal.s6.p1")}</p>
 
-                    <p>
-                        La donación no es necesaria para utilizar el juego ni
-                        constituye un pago obligatorio por el acceso al
-                        servicio.
-                    </p>
+                    <p>{t("legal.s6.p2")}</p>
 
-                    <h2>6. Comunicaciones por correo electrónico</h2>
+                    <p>{t("legal.s6.p3")}</p>
 
-                    <p>
-                        Scoundrel's Quest puede enviar automáticamente
-                        determinados correos electrónicos relacionados con el
-                        funcionamiento del servicio.
-                    </p>
+                    <h2>{t("legal.s7.title")}</h2>
 
-                    <p>
-                        Entre ellos se encuentra el correo de bienvenida que se
-                        envía cuando se crea una cuenta, así como correos
-                        relacionados con solicitudes de soporte y reportes de
-                        errores.
-                    </p>
+                    <p>{t("legal.s7.p1")}</p>
 
-                    <p>
-                        Estas comunicaciones tienen una finalidad funcional y
-                        no constituyen publicidad ni comunicaciones comerciales
-                        de carácter promocional.
-                    </p>
+                    <p>{t("legal.s7.p2")}</p>
 
-                    <h2>7. Disponibilidad</h2>
+                    <p>{t("legal.s7.p3")}</p>
 
-                    <p>
-                        Scoundrel's Quest se proporciona tal y como se encuentra
-                        disponible en cada momento.
-                    </p>
+                    <h2>{t("legal.s8.title")}</h2>
 
-                    <p>
-                        Al tratarse de un proyecto personal y gratuito, pueden
-                        producirse interrupciones, errores, modificaciones o
-                        periodos de mantenimiento.
-                    </p>
-
-                    <p>
-                        El proyecto puede cambiar, suspenderse o dejar de estar
-                        disponible en el futuro.
-                    </p>
-
-                    <h2>8. Servicios de terceros</h2>
-
-                    <p>
-                        Scoundrel's Quest utiliza determinados servicios de
-                        terceros necesarios para su funcionamiento o disponibles
-                        como funcionalidades externas.
-                    </p>
+                    <p>{t("legal.s8.intro")}</p>
 
                     <ul>
-                        <li>Google, para autenticación mediante Google.</li>
-                        <li>X, para autenticación mediante X.</li>
-                        <li>IONOS, para infraestructura de servidor y correo.</li>
-                        <li>
-                            Cloudflare, para servicios relacionados con DNS y
-                            proxy.
-                        </li>
-                        <li>
-                            Ko-fi, como plataforma externa para donaciones
-                            voluntarias.
-                        </li>
+                        <li>{t("legal.s8.li1")}</li>
+                        <li>{t("legal.s8.li2")}</li>
+                        <li>{t("legal.s8.li3")}</li>
+                        <li>{t("legal.s8.li4")}</li>
+                        <li>{t("legal.s8.li5")}</li>
                     </ul>
 
-                    <p>
-                        Estos servicios disponen de sus propias condiciones de
-                        uso y políticas de privacidad.
-                    </p>
+                    <p>{t("legal.s8.outro")}</p>
 
-                    <h2>9. Protección de datos</h2>
+                    <h2>{t("legal.s9.title")}</h2>
 
                     <p>
-                        El tratamiento de los datos personales de los usuarios
-                        se describe en la{" "}
-                        <a href="/privacy">Política de Privacidad</a>.
+                        {t("legal.s9.p1a")} <a href="/privacy">
+                            {t("legal.s9.linkLabel")}
+                        </a>
+                        {t("legal.s9.p1b")}
                     </p>
 
-                    <h2>10. Cookies</h2>
+                    <h2>{t("legal.s10.title")}</h2>
 
                     <p>
-                        La información sobre las cookies y tecnologías
-                        similares utilizadas por Scoundrel's Quest se encuentra
-                        disponible en la{" "}
-                        <a href="/cookies">Política de Cookies</a>.
+                        {t("legal.s10.p1a")} <a href="/cookies">
+                            {t("legal.s10.linkLabel")}
+                        </a>
+                        {t("legal.s10.p1b")}
                     </p>
 
-                    <h2>11. Contenido de usuarios</h2>
+                    <h2>{t("legal.s11.title")}</h2>
+
+                    <p>{t("legal.s11.p1")}</p>
+
+                    <p>{t("legal.s11.p2")}</p>
 
                     <p>
-                        Los usuarios pueden proporcionar determinados
-                        contenidos para personalizar sus perfiles, como
-                        avatares y banners.
+                        {t("legal.s11.p3a")} <a href="/terms">
+                            {t("legal.s11.linkLabel")}
+                        </a>
+                        {t("legal.s11.p3b")}
                     </p>
 
-                    <p>
-                        El usuario es responsable de disponer de los derechos
-                        necesarios para utilizar los contenidos que suba y debe
-                        respetar los derechos de terceros.
-                    </p>
+                    <h2>{t("legal.s12.title")}</h2>
 
-                    <p>
-                        Para obtener más información, consulta los{" "}
-                        <a href="/terms">Términos de Uso</a>.
-                    </p>
-
-                    <h2>12. Contacto</h2>
-
-                    <p>
-                        Para cualquier consulta relacionada con el proyecto:
-                    </p>
+                    <p>{t("legal.s12.contactIntro")}</p>
 
                     <p>
                         <a href="mailto:soporte@scoundrels-quest.com">

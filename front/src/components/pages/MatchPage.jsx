@@ -1,10 +1,12 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import "./MatchPage.css"
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { useMatch } from "../../hooks/useMatch.js";
 import Loading from "../Loading.jsx";
 import Modifier from './../Modifier.jsx'
 import { useUser } from "../../hooks/useUser.js";
+import { fmtDate } from '../../i18n/format.js';
 
 import GoldIcon from '/images/gold.webp'
 import FullHealthIcon from '/images/full_health.png'
@@ -13,6 +15,8 @@ import Comentario from "../Comentario.jsx";
 import AllDamageAnimation from '/images/animations/AllDamageAnimation.webp'
 
 const MatchPage = () => {
+    const { t, i18n } = useTranslation('profile');
+    const { t: tMatch } = useTranslation('match');
     const { getMatchById, isLoading: matchLoading } = useMatch();
     const { user, isLoading: userLoading, isError, comment, commentError, isCommenting } = useUser();
     const { matchId } = useParams();
@@ -35,7 +39,7 @@ const MatchPage = () => {
                 localStorage.removeItem('auth_token');
                 navigate('/login');
             } else {
-                return <p>Error al conectar con el servidor</p>
+                return <p>{t('serverError')}</p>
             }
         }
     }, [userLoading])
@@ -108,38 +112,40 @@ const MatchPage = () => {
                 <div className="match-body">
                     <div className="match-info">
                         <div className="match-parameters">
-                            <h1>ID de la partida: {match.id}</h1>
+                            <h1>{t('match.idLabel', { id: match.id })}</h1>
                             <div style={{ display: "flex", alignItems: "center" }}>
                                 <img className="character-image" src={character.imagen} alt={character.nombre} />
                                 <div className="match-modifiers">
                                     {match.modificadores.length > 0 ? match.modificadores.map((modifierInfo) => {
                                         return <Modifier key={modifierInfo.id} modifierInfo={modifierInfo} />
-                                    }) : <h1>Sin modificadores</h1>}
+                                    }) : <h1>{tMatch('noModifiers')}</h1>}
                                 </div>
                             </div>
                             <div className="match-text">
                                 <br />
-                                <p>Jugada el {new Date(match.created_at).toLocaleString('es-ES', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
+                                <p>{tMatch('playedOn', {
+                                    date: fmtDate(i18n.language, match.created_at, {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })
                                 })}</p>
                                 <div className="info">
-                                    <h2 className={match.victoria ? 'win' : 'lose'}>{match.victoria ? 'Victoria' : 'Derrota'}</h2>
-                                    <h2><strong>{`Tiempo: ${String(Math.floor((match.tiempo / 60 / 60))).padStart(2, '0')}:${String(Math.floor((match.tiempo / 60 % 60))).padStart(2, '0')}:${String(match.tiempo % 60).padStart(2, '0')}`}</strong></h2>
-                                    <h2><strong>Rondas superadas: {match.rondas}</strong></h2>
+                                    <h2 className={match.victoria ? 'win' : 'lose'}>{match.victoria ? tMatch('win') : tMatch('loss')}</h2>
+                                    <h2><strong>{t('match.time', { time: `${String(Math.floor((match.tiempo / 60 / 60))).padStart(2, '0')}:${String(Math.floor((match.tiempo / 60 % 60))).padStart(2, '0')}:${String(match.tiempo % 60).padStart(2, '0')}` })}</strong></h2>
+                                    <h2><strong>{t('match.rounds', { count: match.rondas })}</strong></h2>
                                 </div>
                                 <div className="info extra-info">
-                                    <h2>Oro total obtenido: <span style={{ color: 'var(--main-gold)' }}>{match.oro_obtenido}<img src={GoldIcon} /></span></h2>
-                                    <h2>Vida total curada: <span style={{ color: 'var(--main-red)' }}>{match.vida_curada}<img src={FullHealthIcon} /></span></h2>
-                                    <h2>Enemigos enfrentados: <span style={{ color: 'var(--main-red)' }}>{match.enemigos_enfrentados}<img src={AllDamageAnimation} /></span></h2>
+                                    <h2>{t('match.totalGold')} <span style={{ color: 'var(--main-gold)' }}>{match.oro_obtenido}<img src={GoldIcon} /></span></h2>
+                                    <h2>{t('match.totalHealed')} <span style={{ color: 'var(--main-red)' }}>{match.vida_curada}<img src={FullHealthIcon} /></span></h2>
+                                    <h2>{t('match.enemiesFaced')} <span style={{ color: 'var(--main-red)' }}>{match.enemigos_enfrentados}<img src={AllDamageAnimation} /></span></h2>
                                 </div>
                             </div>
                         </div>
                         <div className="player-info">
-                            <img className='user-avatar' onClick={() => { navigate(`/perfil/${player.nick}`) }} style={{ borderColor: player.color }} src={player.avatar !== "" && player.avatar ? player.avatar : Placeholder} alt={`Avatar de ${match.jugador.nick}`} />
+                            <img className='user-avatar' onClick={() => { navigate(`/perfil/${player.nick}`) }} style={{ borderColor: player.color }} src={player.avatar !== "" && player.avatar ? player.avatar : Placeholder} alt={t('avatarOf', { nick: match.jugador.nick })} />
                             <p className={player.es_admin ? "admin" : "user"} x="50%" y="10" textAnchor="middle" fontFamily="Alagard" fontWeight="bold" fill="#333">
                                 {player.nick}
                             </p>
@@ -156,8 +162,8 @@ const MatchPage = () => {
                 </div>
                 <div className="comment-input">
                     <form onSubmit={(e) => { handleSubmit(e) }}>
-                        <input type="text" ref={commentRef} placeholder="Escribe tu comentario..." />
-                        <button type="submit" disabled={isLoadingComments} >Comentar</button>
+                        <input type="text" ref={commentRef} placeholder={t('match.commentPlaceholder')} />
+                        <button type="submit" disabled={isLoadingComments} >{t('match.commentSubmit')}</button>
                     </form>
                 </div>
             </div>

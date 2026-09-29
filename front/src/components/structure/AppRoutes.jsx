@@ -1,5 +1,7 @@
 import React, { Fragment, lazy, Suspense } from "react";
 import { Routes, Route } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
+import Seo from './Seo.jsx';
 
 
 const LoginPage = lazy(() => import('../pages/LoginPage.jsx'));
@@ -21,9 +23,11 @@ const GoogleCallback = lazy(()=> import("./GoogleCallback.jsx"));
 const BugReportPage = lazy(()=> import("../pages/BugReportPage.jsx"));
 
 const AppRoutes = () => {
+    const { t } = useTranslation('common');
     return (
         <Fragment>
-            <Suspense fallback={<div>Cargando página...</div>}>
+            <Seo />
+            <Suspense fallback={<div>{t('loadingPage')}</div>}>
                 <Routes>
                     <Route path="/perfil/:nick/editar" element={<ProfileEdit/>}/>
                     <Route path='/perfil/:nick' element={<ProfilePage/>}/>

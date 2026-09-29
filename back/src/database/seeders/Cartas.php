@@ -14,6 +14,7 @@ class Cartas extends Seeder
     public function run(): void
     {
         $palos = ['Pica', 'Corazon', 'Diamante', 'Trebol'];
+        $palosEn = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
         $valores = [
             '2' => 'Dos',
             '3' => 'Tres',
@@ -29,12 +30,13 @@ class Cartas extends Seeder
             '13' => 'Rey',
             '14' => 'As'
         ];
-        
+
         $fecha = (int) date('n');
         $evento = $fecha === 10 ? 'halloween/':'';
         $evento = $fecha === 12 ? 'navidad/':$evento;
 
-        foreach ($palos as $palo) {
+        foreach ($palos as $i => $palo) {
+            $paloEn = $palosEn[$i];
             foreach ($valores as $num => $nombre) {
                 $esEspecial = $num > 10 && in_array($palo, ['Diamante', 'Corazon']);
                 $efectos = null;
@@ -57,6 +59,24 @@ class Cartas extends Seeder
 
                     // Lo codificamos tal y como lo necesitas para tu base de datos
                     $efectos = json_encode($arrayEfectos);
+
+                    // Mapa nombre => descripción en cada idioma (solo efectos con texto)
+                    $efectosEs = [];
+                    foreach ($arrayEfectos as $efecto) {
+                        if (isset($efecto['description'])) {
+                            $efectosEs[$efecto['name']] = $efecto['description'];
+                        }
+                    }
+                    $efectosEn = array_intersect_key([
+                        'restore_ability' => 'Restores your character ability but heals nothing.',
+                        'progresive_heal' => 'Heals 10 damage and 3 health each round for 3 rounds.',
+                        'dmg_reduction' => 'Reduces the next attack you would suffer by 10.',
+                        'heal_roulete' => 'Heals 100 health, but has a 25% chance of doing the opposite.',
+                        'invincibility_turns' => 'The first attack you take with this weapon deals 0 damage.',
+                        'revive' => 'If you were to attack an enemy and die, it leaves you at 1 health.',
+                        'health_steal' => 'Steal 1 health from enemies defeated with this weapon.',
+                        'weapon_dmg' => 'The mighty Excalibur! No enemy is a match for this weapon.',
+                    ], $efectosEs);
                 }
 
                 $eventoCarta = $palo === 'Trebol' || $palo === 'Pica' ? $evento : '';
@@ -71,6 +91,10 @@ class Cartas extends Seeder
                         'activa' => true,
                         'especial' => $esEspecial,
                         'efectos' => $efectos,
+                        'translations' => [
+                            'es' => ['palo' => $palo, 'efectos' => $efectosEs ?? []],
+                            'en' => ['palo' => $paloEn, 'efectos' => $efectosEn ?? []],
+                        ],
                     ]
                 );
             }

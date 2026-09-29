@@ -17,11 +17,12 @@ class StoreUsuarioRequest extends FormRequest
             'nick' => 'required|string|unique:usuarios,nick|max:30',
             'email' => [
                 'required',
-                'unique:usuarios,email,',
+                'email',
+                'unique:usuarios,email',
                 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
             ],
             'password' => [
-                'sometimes',
+                'required',
                 'string',
                 'min:8',
                 // Al menos una mayúscula, una minúscula, un número y un caracter especial
@@ -38,22 +39,22 @@ class StoreUsuarioRequest extends FormRequest
     public function messages()
     {
         return [
-            'nick.required' => 'El nick es obligatorio.',
-            'nick.max' => 'El nick no puede superar los 30 carácteres.',
-            'nick.string' => 'El nick no puede estar vacío.',
-            'nick.unique' => 'Este nick ya está en uso.',
-            'password.regex' => 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial [-_@$!%*?&].',
-            'password.required' => 'La contraseña es obligatoria.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial [-_@$!%*?&].',
-            'password.string' => 'La contraseña no puede estar vacía.',
-            'email.email' => 'El correo introducido no es válido.',
-            'email.required' => 'El correo es obligatorio.',
-            'email.unique' => 'Este correo ya está en uso.',
-            'email.regex' => 'El correo no tiene un formato válido.',
-            'avatar.image' => 'Solo se admiten los formatos JPG, JPEG, PNG, WEBP y GIF',
-            'avatar.mimes' => 'Solo se admiten los formatos JPG, JPEG, PNG, WEBP y GIF',
-            'avatar.max' => 'Tamaño máximo de la imagen: 2MB',
-            'color.regex' => 'El formato del color debe ser hexadecimal',
+            'nick.required' => __('api.user_nick_required'),
+            'nick.max' => __('api.user_nick_max'),
+            'nick.string' => __('api.user_nick_string'),
+            'nick.unique' => __('api.user_nick_unique'),
+            'password.regex' => __('api.user_password_regex'),
+            'password.required' => __('api.user_password_required'),
+            'password.min' => __('api.user_password_min'),
+            'password.string' => __('api.user_password_string'),
+            'email.email' => __('api.user_email_email'),
+            'email.required' => __('api.user_email_required'),
+            'email.unique' => __('api.user_email_unique'),
+            'email.regex' => __('api.user_email_regex'),
+            'avatar.image' => __('api.user_avatar_image'),
+            'avatar.mimes' => __('api.user_avatar_mimes'),
+            'avatar.max' => __('api.user_avatar_max'),
+            'color.regex' => __('api.user_color_regex'),
         ];
     }
 }

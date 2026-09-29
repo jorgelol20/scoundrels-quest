@@ -1,0 +1,48 @@
+{
+  "kicker": "Elige tu estilo de juego",
+  "title": "Personajes",
+  "subtitle": "Cada personaje cambia la forma de superar la mazmorra. Revisa su habilidad y su estrategia antes de comenzar tu partida.",
+  "count_one": "{{count}} personaje disponible",
+  "count_other": "{{count}} personajes disponibles",
+  "loading": "Cargando personajes…",
+  "loadError": "No se han podido cargar los personajes.",
+  "empty": "Todavía no hay personajes disponibles.",
+  "position": "Personaje {{index}} de {{total}}",
+  "noDescription": "Sin descripción disponible.",
+  "ability": "Habilidad",
+  "abilityFallback": "Este personaje todavía no tiene una habilidad visible.",
+  "specialAbility": "Habilidad especial",
+  "strategyTitle": "Estrategia ideal",
+  "strategyFallback": "Sin estrategia fija.",
+  "styles": {
+    "fallback": "Híbrido",
+    "guerrero": "Ofensivo",
+    "paladin": "Defensivo",
+    "elfo": "Control",
+    "mago": "Información",
+    "apostador": "Riesgo",
+    "herrero": "Ofensivo",
+    "cazador": "Economía",
+    "vampiro": "Drenaje",
+    "domador": "Control"
+  },
+  "strategies": {
+    "guerrero": "Lo ideal es jugar al rededor del 50% de la vida e intentar obtener los modificadores de vida extra para que ese 50% sea superior y no ir siempre a riesgo de morir por una mala decisión.",
+    "paladin": "Es el personaje más equilibrado por lo que encaja en cualquier estilo de juego.",
+    "elfo": "Con la posibilidad de huir hasta 2 veces por mano, puedes pensar mejor cuando jugartela o usar tu habilidad.",
+    "mago": "Personaje ideal si te gusta un ritmo de juego más pausado y calmado dado que te permite pensar con varios turnos a futuro.",
+    "apostador": "La opción más viable es: no usar su habilidad."
+  },
+  "select": "Seleccionar",
+  "aria": {
+    "list": "Lista de personajes desplazable"
+  },
+  "alt": {
+    "portrait": "Retrato de {{nombre}}",
+    "ability": "Icono de la habilidad de {{nombre}}",
+    "abilityIcon": "Habilidad de {{nombre}}"
+  },
+  "achievements": {
+    "iconAlt": "Icono logro {{nombre}}"
+  }
+}

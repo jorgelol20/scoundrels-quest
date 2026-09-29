@@ -1,0 +1,58 @@
+{
+  "status": {
+    "abierto": "Abierto",
+    "en_revision": "En revisión",
+    "solucionado": "Solucionado",
+    "descartado": "Descartado",
+    "duplicado": "Duplicado"
+  },
+  "severity": {
+    "baja": "Baja",
+    "media": "Media",
+    "alta": "Alta",
+    "critica": "Crítica"
+  },
+  "filters": {
+    "allStates": "Todos los estados"
+  },
+  "detail": {
+    "loadError": "No se ha podido cargar el reporte.",
+    "back": "Volver",
+    "reportedBy": "Reportado por: {{nick}}",
+    "techInfo": "Información técnica",
+    "character": "Personaje:",
+    "error": "Error:",
+    "activeModifiers": "Modificadores activos:",
+    "handCards": "Cartas en mano: ({{count}})",
+    "deckCards": "Cartas en baraja: ({{count}})",
+    "userInfo": "Información del usuario",
+    "nickLabel": "Nick:",
+    "idLabel": "Id:",
+    "isAdmin": "Es admin:",
+    "isTester": "Es tester:",
+    "yes": "Si",
+    "no": "No",
+    "consoleLogs": "Logs de consola",
+    "screenshot": "Captura",
+    "screenshotAlt": "Captura del bug",
+    "stateLabel": "Estado",
+    "severityLabel": "Severidad",
+    "save": "Guardar cambios",
+    "saving": "Guardando..."
+  },
+  "comments": {
+    "title": "Comentarios",
+    "empty": "Aún no hay comentarios.",
+    "delete": "Eliminar",
+    "placeholder": "Escribe un comentario...",
+    "submit": "Comentar",
+    "sending": "Enviando..."
+  },
+  "admin": {
+    "searchUsers": "Buscar usuario",
+    "title": "Reportes de bugs ({{count}})",
+    "loadError": "Error al cargar los reportes.",
+    "noReports": "No hay reportes {{suffix}}.",
+    "noReportsState": "en estado \"{{estado}}\""
+  }
+}

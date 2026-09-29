@@ -1,4 +1,5 @@
 import { Fragment, useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useReportBugs } from './../../hooks/useReportBugs.js';
 import './BugForm.css';
 
@@ -6,12 +7,14 @@ import Folder from '/images/folder.svg'
 import { useLocation } from 'react-router-dom';
 import ConfirmationModal from './ConfirmationModal.jsx';
 
+// `value` es el identificador que se envía al backend: NO se traduce.
+// `labelKey` es la clave de traducción del texto visible.
 const TIPOS = [
-    { value: 'visual', label: 'Visual' },
-    { value: 'jugabilidad', label: 'Jugabilidad' },
-    { value: 'rendimiento', label: 'Rendimiento' },
-    { value: 'error', label: 'Error' },
-    { value: 'otro', label: 'Otro' },
+    { value: 'visual', labelKey: 'types.visual' },
+    { value: 'jugabilidad', labelKey: 'types.jugabilidad' },
+    { value: 'rendimiento', labelKey: 'types.rendimiento' },
+    { value: 'error', labelKey: 'types.error' },
+    { value: 'otro', labelKey: 'types.otro' },
 ];
 
 /**
@@ -54,6 +57,7 @@ const parseBugInfo = (bugInfo) => {
 
 const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
     const { newReporte } = useReportBugs();
+    const { t } = useTranslation('modals');
 
 
     const parsedBugInfo = useMemo(() => parseBugInfo(bugInfo), [bugInfo]);
@@ -80,7 +84,9 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
         const detalles = e.target.value;
         setDetallesTrampas(detalles);
 
-        const baseValue = 'El jugador ha hecho trampas';
+        // El valor es el propio texto traducido: se usa la misma clave en el <option>
+        // y aquí, para que la comparación siga funcionando en ambos idiomas.
+        const baseValue = t('modals:bugForm.cheatBase');
         setFormData(prev => ({
             ...prev,
             descripcion: detalles ? `${baseValue}: ${detalles}` : baseValue
@@ -130,8 +136,8 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
         return (
             <Fragment>
                 <div className="bug-form-success">
-                    <p>¡Gracias! Tu reporte ha sido enviado correctamente.</p>
-                    <button type="button" onClick={onClose}>Cerrar</button>
+                    <p>{t('modals:bugForm.successMessage')}</p>
+                    <button type="button" onClick={onClose}>{t('modals:bugForm.close')}</button>
                 </div>
             </Fragment>
         );
@@ -159,38 +165,38 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
                                     X
                                 </button>
                             </div>
-                            <h2>Reportar a {reportedUserInfo.nick}</h2>
+                            <h2>{t('modals:bugForm.reportUserTitle', { nick: reportedUserInfo.nick })}</h2>
                             <div className="bug-form-field">
-                                <label htmlFor="descripcion">Motivo</label>
+                                <label htmlFor="descripcion">{t('modals:bugForm.reason')}</label>
                                 <select
                                     id="descripcion"
                                     name="descripcion"
                                     value={formData.descripcion}
                                     onChange={handleChange}
                                 >
-                                    <option value="">Selecciona una razón...</option>
-                                    <option value="El jugador tiene un banner inapropiado">
-                                        El jugador tiene un banner inapropiado
+                                    <option value="">{t('modals:bugForm.selectReason')}</option>
+                                    <option value={t('modals:bugForm.reasons.badBanner')}>
+                                        {t('modals:bugForm.reasons.badBanner')}
                                     </option>
-                                    <option value="El jugador tiene un avatar inapropiado">
-                                        El jugador tiene un avatar inapropiado
+                                    <option value={t('modals:bugForm.reasons.badAvatar')}>
+                                        {t('modals:bugForm.reasons.badAvatar')}
                                     </option>
-                                    <option value="Tanto el avatar como el banner son inapropiados">
-                                        Tanto el avatar como el banner son inapropiados
+                                    <option value={t('modals:bugForm.reasons.badBoth')}>
+                                        {t('modals:bugForm.reasons.badBoth')}
                                     </option>
-                                    <option value="El jugador ha hecho trampas">
-                                        El jugador ha hecho trampas
+                                    <option value={t('modals:bugForm.cheatBase')}>
+                                        {t('modals:bugForm.cheatBase')}
                                     </option>
-                                    <option value="Otro">
-                                        Otro
+                                    <option value={t('modals:bugForm.otherReason')}>
+                                        {t('modals:bugForm.otherReason')}
                                     </option>
                                 </select>
 
-                                {(formData.descripcion.startsWith('El jugador ha hecho trampas') || formData.descripcion.startsWith('Otro')) && (
+                                {(formData.descripcion.startsWith(t('modals:bugForm.cheatBase')) || formData.descripcion.startsWith(t('modals:bugForm.otherReason'))) && (
                                     <textarea
                                         value={detallesTrampas}
                                         onChange={handleTrampasChange}
-                                        placeholder="Indique las trampas"
+                                        placeholder={t('modals:bugForm.cheatPlaceholder')}
                                         rows="4"
                                         style={{ marginTop: '10px', width: '100%' }}
                                     />
@@ -198,11 +204,11 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
                             </div>
 
                             <div className="bug-form-field">
-                                <label htmlFor="screenshot">Captura de pantalla</label>
+                                <label htmlFor="screenshot">{t('modals:bugForm.screenshot')}</label>
                                 <div className="custom-file-container">
                                     <label htmlFor="file-upload" className="file-button">
                                         <span className="icon"><img src={Folder} /></span>
-                                        <span className="text">Seleccionar Archivo</span>
+                                        <span className="text">{t('modals:bugForm.selectFile')}</span>
                                     </label>
                                     <input type="file" id="file-upload" onChange={handleFileChange} />
                                     <span id="file-name" className="file-status">{screenshot?.name}</span>
@@ -212,7 +218,7 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
 
                             {parsedBugInfo?.logs && (
                                 <div className="bug-form-field">
-                                    <label htmlFor="logs_preview">Logs de la partida (adjuntos automáticamente)</label>
+                                    <label htmlFor="logs_preview">{t('modals:bugForm.logsAttached')}</label>
                                     <textarea
                                         id="logs_preview"
                                         value={parsedBugInfo.logs}
@@ -224,10 +230,10 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
 
                             <div className="bug-form-actions">
                                 <button type="button" onClick={onClose} disabled={isSubmitting}>
-                                    Cancelar
+                                    {t('modals:bugForm.cancel')}
                                 </button>
                                 <button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting ? 'Enviando...' : 'Enviar reporte'}
+                                    {isSubmitting ? t('modals:bugForm.sending') : t('modals:bugForm.submit')}
                                 </button>
                             </div>
                         </form>
@@ -250,31 +256,31 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
                     </div>
                     <form className="bug-form" onSubmit={handleSubmit}>
 
-                        <h2>Reportar</h2>
+                        <h2>{t('modals:bugForm.title')}</h2>
 
                         {parsedBugInfo?.personaje && (
                             <p className="bug-form-context">
-                                Detectado durante la partida con <strong>{parsedBugInfo.personaje}</strong>
+                                {t('modals:bugForm.detectedDuring')} <strong>{parsedBugInfo.personaje}</strong>
                             </p>
                         )}
 
                         <div className="bug-form-field">
-                            <label htmlFor="tipo">Tipo<span>*</span></label>
+                            <label htmlFor="tipo">{t('modals:bugForm.type')}<span>*</span></label>
                             <select
                                 id="tipo"
                                 name="tipo"
                                 value={formData.tipo}
                                 onChange={handleChange}
                             >
-                                {TIPOS.map((t) => (
-                                    <option key={t.label} value={t.value}>{t.label}</option>
+                                {TIPOS.map((tipo) => (
+                                    <option key={tipo.value} value={tipo.value}>{t(`modals:bugForm.${tipo.labelKey}`)}</option>
                                 ))}
                             </select>
                             {errors.tipo && <span className="bug-form-error">{errors.tipo[0]}</span>}
                         </div>
 
                         <div className="bug-form-field">
-                            <label htmlFor="descripcion">Descripción<span>* ({formData.descripcion.length}/2000)</span></label>
+                            <label htmlFor="descripcion">{t('modals:bugForm.descriptionCount', { len: formData.descripcion.length })}<span>*</span></label>
                             <textarea
                                 id="descripcion"
                                 name="descripcion"
@@ -282,7 +288,7 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
                                 onChange={handleChange}
                                 maxLength={2000}
                                 rows={5}
-                                placeholder="Describe qué ha pasado, qué esperabas que pasara y cómo reproducirlo"
+                                placeholder={t('modals:bugForm.descriptionPlaceholder')}
                                 required
 
                             />
@@ -290,11 +296,11 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
                         </div>
 
                         <div className="bug-form-field">
-                            <label htmlFor="screenshot">Captura de pantalla</label>
+                            <label htmlFor="screenshot">{t('modals:bugForm.screenshot')}</label>
                             <div className="custom-file-container">
                                 <label htmlFor="file-upload" className="file-button">
                                     <span className="icon"><img src={Folder} /></span>
-                                    <span className="text">Seleccionar Archivo</span>
+                                    <span className="text">{t('modals:bugForm.selectFile')}</span>
                                 </label>
                                 <input type="file" id="file-upload" onChange={handleFileChange} />
                                 <span id="file-name" className="file-status">{screenshot?.name}</span>
@@ -304,7 +310,7 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
 
                         {parsedBugInfo?.logs && (
                             <div className="bug-form-field">
-                                <label htmlFor="logs_preview">Logs de la partida (adjuntos automáticamente)</label>
+                                <label htmlFor="logs_preview">{t('modals:bugForm.logsAttached')}</label>
                                 <textarea
                                     id="logs_preview"
                                     value={parsedBugInfo.logs}
@@ -316,7 +322,7 @@ const BugForm = ({ bugInfo, onClose, reportUser, reportedUserInfo }) => {
 
                         <div className="bug-form-actions">
                             <button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? 'Enviando...' : 'Enviar reporte'}
+                                {isSubmitting ? t('modals:bugForm.sending') : t('modals:bugForm.submit')}
                             </button>
                         </div>
                     </form>

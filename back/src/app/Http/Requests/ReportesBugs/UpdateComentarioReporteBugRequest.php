@@ -24,9 +24,9 @@ class UpdateComentarioReporteBugRequest extends FormRequest
     public function messages()
     {
         return [
-            'comentario.required' => 'El comentario no puede estar vacío.',
-            'comentario.string' => 'El comentario no es válido.',
-            'comentario.max' => 'El comentario no puede superar los 250 carácteres.',
+            'comentario.required' => __('api.reporte_comentario_required'),
+            'comentario.string' => __('api.reporte_comentario_string'),
+            'comentario.max' => __('api.reporte_comentario_max'),
         ];
     }
 }

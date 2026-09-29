@@ -15,9 +15,12 @@ class UpdateModificadorRequest extends FormRequest
     {
         return [
             'nombre' => 'sometimes|string|max:100',
-            'descripcion' => 'sometimes|string|max:300',
+            'descripcion' => 'sometimes|nullable|string|max:300',
             'imagen' => 'nullable|image|max:2048',
-            'efectos' => 'sometimes|array'
+            'efectos' => 'sometimes|array',
+            'nivel' => 'sometimes|integer|min:1',
+            'activo' => 'sometimes|boolean',
+            'translations' => 'sometimes|nullable|array',
         ];
     }
 }
