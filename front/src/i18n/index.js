@@ -30,66 +30,23 @@ import esSeo from '../locales/es/seo.json';
 import enSeo from '../locales/en/seo.json';
 import esTutorial from '../locales/es/tutorial.json';
 import enTutorial from '../locales/en/tutorial.json';
+import esLegal from '../locales/es/legal.json';
+import enLegal from '../locales/en/legal.json';
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './detector.js';
 
 /**
- * Namespaces pesados que solo se necesitan en sus rutas: se cargan bajo
- * demanda con import() dinámico (Vite los separa en chunks propios).
- * El resto va en el bundle inicial vía `resources`.
+ * Todos los namespaces van en el bundle inicial vía `resources`.
  *
- * NOTA: `tutorial` fue lazy y mostraba las claves crudas
- * (p. ej. `tutorial.slides.shop.label`) cuando su chunk no cargaba
- * (despliegue parcial, 404 del chunk). Al ser una página que visita
- * todo jugador nuevo, va en el bundle inicial: ~43KB (~9KB gzip)
- * a cambio de cero claves crudas. `legal` sigue lazy (páginas raras).
- */
-const LAZY_NAMESPACES = ['legal'];
-
-// Loaders explícitos (nada de template literals): Vite solo genera chunks
-// para estos ficheros y el resto de JSONs se empaquetan en el bundle.
-// Así ningún namespace eager depende de un chunk que pueda faltar.
-const lazyLoaders = {
-    legal: {
-        es: () => import('../locales/es/legal.json'),
-        en: () => import('../locales/en/legal.json'),
-    },
-};
-
-const lazyBackend = {
-    type: 'backend',
-    init() {},
-    /**
-     * @param {string} language
-     * @param {string} namespace
-     * @param {(err: Error|null, data: object|false) => void} callback
-     */
-    read(language, namespace, callback) {
-        const load = lazyLoaders[namespace]?.[language];
-        if (!load) {
-            callback(new Error(`namespace '${namespace}' no es lazy`), false);
-            return;
-        }
-        load()
-            .then((mod) => callback(null, mod.default ?? mod))
-            .catch((err) => {
-                // Visible en DevTools: si un chunk lazy falta en el despliegue,
-                // i18next mostraría las claves crudas. Revisar Network/legal-*.js.
-                console.error(`[i18n] no se pudo cargar el chunk '${language}/${namespace}.json'. ¿Despliegue parcial?`, err);
-                callback(err, false);
-            });
-    },
-};
-
-/**
- * Detección en detector.js, estado en SettingsProvider.
- * `useSuspense: true`: las páginas con namespaces lazy (legales, tutorial)
- * suspenden dentro del <Suspense> de AppRoutes hasta que carga su chunk.
+ * NOTA: `tutorial` y `legal` fueron lazy (import() dinámico con backend
+ * propio) y mostraban las claves crudas (p. ej. `legal.s1.li1.label`)
+ * cuando su chunk no cargaba (despliegue parcial, 404 del chunk).
+ * Van en el bundle inicial a cambio de cero claves crudas.
  */
 if (!i18n.isInitialized) {
-    i18n.use(lazyBackend).use(initReactI18next).init({
+    i18n.use(initReactI18next).init({
         resources: {
-            es: { common: esCommon, nav: esNav, settings: esSettings, home: esHome, ranking: esRanking, match: esMatch, profile: esProfile, auth: esAuth, modals: esModals, bugs: esBugs, game: esGame, characters: esCharacters, credits: esCredits, seo: esSeo, tutorial: esTutorial },
-            en: { common: enCommon, nav: enNav, settings: enSettings, home: enHome, ranking: enRanking, match: enMatch, profile: enProfile, auth: enAuth, modals: enModals, bugs: enBugs, game: enGame, characters: enCharacters, credits: enCredits, seo: enSeo, tutorial: enTutorial },
+            es: { common: esCommon, nav: esNav, settings: esSettings, home: esHome, ranking: esRanking, match: esMatch, profile: esProfile, auth: esAuth, modals: esModals, bugs: esBugs, game: esGame, characters: esCharacters, credits: esCredits, seo: esSeo, tutorial: esTutorial, legal: esLegal },
+            en: { common: enCommon, nav: enNav, settings: enSettings, home: enHome, ranking: enRanking, match: enMatch, profile: enProfile, auth: enAuth, modals: enModals, bugs: enBugs, game: enGame, characters: enCharacters, credits: enCredits, seo: enSeo, tutorial: enTutorial, legal: enLegal },
         },
         fallbackLng: DEFAULT_LOCALE,
         supportedLngs: SUPPORTED_LOCALES,
