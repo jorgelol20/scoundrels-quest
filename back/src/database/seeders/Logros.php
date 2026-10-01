@@ -123,6 +123,15 @@ class Logros extends Seeder
                 'codigo' => 'victoria_domador'
             ],
             [
+                'nombre' => 'Tesoro eterno',
+                'descripcion' => 'Gana tu primera partida con `El Espectro`.',
+                'nombre_en' => 'Eternal Treasure',
+                'descripcion_en' => 'Win your first run with `The Spectre`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'victoria_espectro'
+            ],
+            [
                 'nombre' => 'Ludópata',
                 'descripcion' => 'Usa la habilidad de `El Apostador` 100 veces.',
                 'nombre_en' => 'Compulsive Gambler',
@@ -202,6 +211,15 @@ class Logros extends Seeder
                 'icono' => '/storage/logros/Plata.webp',
                 'meta' => 100,
                 'codigo' => 'habilidad_domador'
+            ],
+            [
+                'nombre' => 'Presencia espectral',
+                'descripcion' => 'Usa la habilidad de `El Espectro` 100 veces.',
+                'nombre_en' => 'Spectral Presence',
+                'descripcion_en' => 'Use `The Spectre\'s` ability 100 times.',
+                'icono' => '/storage/logros/Plata.webp',
+                'meta' => 100,
+                'codigo' => 'habilidad_espectro'
             ],
             [
                 'nombre' => 'Textura gelatinosa',

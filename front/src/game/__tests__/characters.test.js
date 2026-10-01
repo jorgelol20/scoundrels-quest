@@ -6,6 +6,8 @@ import {
     elfCaltrops,
     calcVampireAbility,
     applyBounty,
+    spectreWeaken,
+    nextSpectreHands,
 } from '../characters.js';
 
 const E = (valor, palo) => ({ valor, palo, key: `${palo}-${valor}` });
@@ -44,6 +46,12 @@ describe('applyPassiveToState', () => {
     it('código desconocido o nulo no se maneja', () => {
         expect(applyPassiveToState({ ...CHARACTER_DEFAULTS }, 'bardo').handled).toBe(false);
         expect(applyPassiveToState({ ...CHARACTER_DEFAULTS }, null).handled).toBe(false);
+    });
+
+    it('espectro activa flag de inmunidad', () => {
+        const { state, handled } = applyPassiveToState({ ...CHARACTER_DEFAULTS }, 'espectro');
+        expect(handled).toBe(true);
+        expect(state.isSpectre).toBe(true);
     });
 });
 
@@ -108,6 +116,40 @@ describe('calcVampireAbility', () => {
     it('cuesta un cuarto de la vida y da +5 de daño', () => {
         expect(calcVampireAbility(20)).toEqual({ healthCost: 5, newHealth: 15, dmgBonus: 5 });
         expect(calcVampireAbility(6)).toEqual({ healthCost: 1, newHealth: 5, dmgBonus: 5 });
+    });
+});
+
+describe('spectreWeaken', () => {
+    it('debilita -3 a toda Pica/Trebol con suelo 0', () => {
+        const r = spectreWeaken([E(5, 'Pica'), E(9, 'Trebol'), E(4, 'Corazon'), E(6, 'Diamante')]);
+        expect(r.room.map((c) => c.valor)).toEqual([2, 6, 4, 6]);
+        expect(r.weakened).toEqual([
+            { prevValor: 5, valor: 2, palo: 'Pica' },
+            { prevValor: 9, valor: 6, palo: 'Trebol' },
+        ]);
+    });
+
+    it('suelo 0 y miniboss exento', () => {
+        const room = [E(2, 'Pica'), { valor: 16, palo: 'Miniboss', key: 'm' }];
+        const r = spectreWeaken(room);
+        expect(r.room[0].valor).toBe(0);
+        expect(r.room[1].valor).toBe(16);
+        expect(r.weakened).toEqual([{ prevValor: 2, valor: 0, palo: 'Pica' }]);
+    });
+
+    it('sin enemigos no toca nada y no muta', () => {
+        const room = [E(3, 'Corazon')];
+        const r = spectreWeaken(room);
+        expect(r.weakened).toEqual([]);
+        expect(r.room).toBe(room);
+    });
+});
+
+describe('nextSpectreHands', () => {
+    it('decrementa con suelo 0', () => {
+        expect(nextSpectreHands(2)).toBe(1);
+        expect(nextSpectreHands(1)).toBe(0);
+        expect(nextSpectreHands(0)).toBe(0);
     });
 });
 

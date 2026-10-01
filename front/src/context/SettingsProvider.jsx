@@ -10,6 +10,7 @@ import DefaultBanner from '/images/banner.webp'
 import { useLocation } from "react-router-dom";
 import i18n from "../i18n/index.js";
 import { normalizeLocale, persistLocale, resolveInitialLocale } from "../i18n/detector.js";
+import { normalizeThemePreference, resolveSeasonalTheme, THEMES, THEME_PREFERENCES, THEME_STORAGE_KEY } from "../game/season.js";
 import api from "../api/api.js";
 
 export const settingsContext = createContext();
@@ -33,6 +34,13 @@ const SettingsProvider = ({ children }) => {
 
     // Estado del idioma (Fase 0 i18n: 'es' | 'en', extensible)
     const [locale, setLocale] = useState(() => resolveInitialLocale(user?.locale));
+
+    // Tema estacional: 'auto' | 'halloween' | 'default' (persistido, por defecto auto)
+    const [themePreference, setThemePreference] = useState(() => {
+        if (typeof localStorage === 'undefined') return THEME_PREFERENCES.AUTO;
+        return normalizeThemePreference(localStorage.getItem(THEME_STORAGE_KEY));
+    });
+    const theme = resolveSeasonalTheme(new Date(), themePreference);
 
     // Refs
     const musicRef = useRef(null);
@@ -236,6 +244,30 @@ const SettingsProvider = ({ children }) => {
         }
     };
 
+    /**
+     * Cambia el tema (auto | halloween | default) y lo persiste.
+     * El adaptador aplica `data-theme="halloween"` en <html> o lo retira.
+     *
+     * @param {string} preference 'auto' | 'halloween' | 'default'
+     */
+    const changeTheme = (preference) => {
+        const next = normalizeThemePreference(preference);
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(THEME_STORAGE_KEY, next);
+        }
+        setThemePreference(next);
+    };
+
+    // Aplica el tema efectivo en <html data-theme="halloween"> (o lo retira)
+    useEffect(() => {
+        if (typeof document === 'undefined') return;
+        if (theme === THEMES.HALLOWEEN) {
+            document.documentElement.dataset.theme = THEMES.HALLOWEEN;
+        } else {
+            delete document.documentElement.dataset.theme;
+        }
+    }, [theme]);
+
     const value = {
         effectsVolume,
         musicVolume,
@@ -246,7 +278,9 @@ const SettingsProvider = ({ children }) => {
         bannerImage,
         locale,
         changeLocale,
-        changeEffectsSound,
+        theme,
+        themePreference,
+        changeTheme,        changeEffectsSound,
         changeMusicSound,
         startButtonSound,
         startAchievementSound,

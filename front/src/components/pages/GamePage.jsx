@@ -38,6 +38,8 @@ import {
     elfCaltrops,
     calcVampireAbility,
     applyBounty,
+    spectreWeaken,
+    nextSpectreHands,
 } from "../../game/characters.js";
 import {
     calcStageLayout,
@@ -228,6 +230,9 @@ const GamePageInner = () => {
     const canScape = useRef(true);
     const [isVampire, setIsVampire] = useState(false)
     const vampireAbilityUsed = useRef(false);
+    const [isSpectre, setIsSpectre] = useState(false);
+    // Toque espectral: manos futuras restantes tras aplicar a la activa (2).
+    const spectreHandsLeft = useRef(0);
     const [maxHealthSteal, setMaxHealthSteal] = useState(3);
     const [isTaming, setIsTaming] = useState(false);
     const [tameDamage, setTameDamage] = useState(0);
@@ -507,6 +512,18 @@ const GamePageInner = () => {
             setRoom(result.room);
         }
 
+        const spectre = () => {
+            // Toque espectral puro en game/characters.js; aquí solo logs y commit.
+            // Aplica a la sala activa y deja 2 manos futuras (-3, suelo 0).
+            const result = spectreWeaken(room);
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.spectre'))
+            result.weakened.forEach((weakened) => {
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.spectreWeakened', { prevValor: weakened.prevValor, palo: weakened.palo, valor: weakened.valor }))
+            });
+            setRoom(result.room);
+            spectreHandsLeft.current = 2;
+        }
+
         const scape = () => {
             if (!canScape.current) return;
 
@@ -721,7 +738,21 @@ const GamePageInner = () => {
             // Extraer cartas de la mazmorra identificadas por su clave
             // (filtrar por clave es robusto frente a reordenaciones del mazo).
             const actualToDraw = Math.min(cardsNeeded, dungeon.length);
-            const newCards = dungeon.slice(-actualToDraw).reverse();
+            let newCards = dungeon.slice(-actualToDraw).reverse();
+
+            // Toque espectral: las 2 manos tras activar entran debilitadas -3
+            // (solo Pica/Trebol; minibosses exentos; suelo 0).
+            if (isSpectre && spectreHandsLeft.current > 0 && newCards.length > 0) {
+                const weakened = spectreWeaken(newCards);
+                if (weakened.weakened.length > 0) {
+                    newCards = weakened.room;
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.spectre'))
+                    weakened.weakened.forEach((w) => {
+                        logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.spectreWeakened', { prevValor: w.prevValor, palo: w.palo, valor: w.valor }))
+                    });
+                }
+                spectreHandsLeft.current = nextSpectreHands(spectreHandsLeft.current);
+            }
             const drawnKeys = new Set(newCards.map((c) => c?.key));
 
             setDungeon(prevDungeon => prevDungeon.filter(c => !drawnKeys.has(c?.key)));
@@ -855,7 +886,7 @@ const GamePageInner = () => {
                 sealTurns.current -= 1;
             }
 
-        }, [room, dungeon, maxHealth, health, gold, isGambler, isVampire, minibossCard, lastCardBoss, getChamanPower, startPlaceCardSound, damageAnimation, healAnimation]);
+        }, [room, dungeon, maxHealth, health, gold, isGambler, isVampire, isSpectre, minibossCard, lastCardBoss, getChamanPower, startPlaceCardSound, damageAnimation, healAnimation]);
 
         const applyCharacterPassive = useCallback((char) => {
             // passiveAppliedRef evita reaplicar la pasiva (doble apply al volver
@@ -878,6 +909,7 @@ const GamePageInner = () => {
                 isVampire,
                 maxHealthSteal,
                 tameDamage,
+                isSpectre,
             }, code);
             if (!handled) return;
             if (next.isWarrior !== isWarrior) {
@@ -902,6 +934,9 @@ const GamePageInner = () => {
             setBlacksmithDmg(next.blacksmithDmg);
             if (next.isVampire !== isVampire) {
                 setIsVampire(next.isVampire);
+            }
+            if (next.isSpectre !== isSpectre) {
+                setIsSpectre(next.isSpectre);
             }
             setMaxHealthSteal(next.maxHealthSteal);
             setTameDamage(next.tameDamage);
@@ -1025,6 +1060,8 @@ const GamePageInner = () => {
             setIsGambler(false);
             setIsWarrior(false);
             setIsVampire(false);
+            setIsSpectre(false);
+            spectreHandsLeft.current = 0;
             vampireAbilityUsed.current = false;
             setBlacksmithDmg(0)
             setMaxScapes(1);
@@ -1384,6 +1421,12 @@ const GamePageInner = () => {
             const cardEffects = card?.efectos;
             const effectsList = Array.isArray(cardEffects) ? cardEffects : [cardEffects];
             effectsList.forEach((effect) => {
+                // Pasiva Espectro: inmune a efectos de carta enemiga
+                // (Pica/Trebol). Minibosses (palo 'Miniboss') exentos.
+                if (isSpectre && effect?.name && (card?.palo === 'Pica' || card?.palo === 'Trebol')) {
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.spectreImmune', { valor: card?.valor, palo: card?.palo }))
+                    return;
+                }
                 applyCardEffect(effect, card?.valor)
             });
         }
@@ -1892,6 +1935,7 @@ const GamePageInner = () => {
                 handleNewAchievement('habilidad_paladin')
             },
             elfo: () => { elf(); setAvailableAbility(false); handleNewAchievement('habilidad_elfo') },
+            espectro: () => { spectre(); setAvailableAbility(false); handleNewAchievement('habilidad_espectro') },
             mago: () => { shuffleDeck(dungeon); setAvailableAbility(false); handleNewAchievement('habilidad_mago') },
             apostador: () => {
                 gambler().catch((gamblerError) => console.error("Error en la apuesta:", gamblerError));

@@ -20,6 +20,7 @@ export const CHARACTER_DEFAULTS = {
     isVampire: false,
     maxHealthSteal: 3,
     tameDamage: 0,
+    isSpectre: false,
 };
 
 const isEnemy = (card) => card?.palo === 'Pica' || card?.palo === 'Trebol';
@@ -51,6 +52,8 @@ export const applyPassiveToState = (state, charCode) => {
             return { state: { ...state, isVampire: true, maxHealthSteal: 10 }, handled: true };
         case 'domador':
             return { state: { ...state, tameDamage: 1 }, handled: true };
+        case 'espectro':
+            return { state: { ...state, isSpectre: true }, handled: true };
         default:
             return { state, handled: false };
     }
@@ -117,6 +120,41 @@ export const calcVampireAbility = (health) => {
 };
 
 const isBountyTarget = (card) => card?.palo === 'Pica' || card?.palo === 'Trebol';
+
+/**
+ * Toque espectral: -3 a todos los enemigos Pica/Trébol de la sala,
+ * con suelo de 0. Minibosses (palo 'Miniboss') exentos. No muta la entrada.
+ *
+ * @param {Array} room sala actual
+ * @param {number} [amount=3] cantidad a reducir
+ * @returns {{room:Array, weakened:Array<{prevValor:number, valor:number, palo:string|undefined}>}}
+ */
+export const spectreWeaken = (room, amount = 3) => {
+    const isSpectreTarget = (card) =>
+        (card?.palo === 'Pica' || card?.palo === 'Trebol');
+    const weaken = (card) => ({ ...card, valor: Math.max(0, card?.valor - amount) });
+    const describe = (card) => ({
+        prevValor: card?.valor,
+        valor: Math.max(0, card?.valor - amount),
+        palo: card?.palo,
+    });
+    const weakened = room.filter(isSpectreTarget).map(describe);
+    if (weakened.length === 0) {
+        return { room, weakened };
+    }
+    return {
+        room: room.map((card) => (isSpectreTarget(card) ? weaken(card) : card)),
+        weakened,
+    };
+};
+
+/**
+ * Manos restantes del toque espectral (3 contando la activa:
+ * al activar se aplica a la sala y quedan 2 futuras).
+ * @param {number} left manos restantes
+ * @returns {number}
+ */
+export const nextSpectreHands = (left) => Math.max(0, (left ?? 0) - 1);
 
 /**
  * Recompensa del cazador: oro extra permanente a los 2 enemigos más

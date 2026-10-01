@@ -77,6 +77,12 @@
         text-shadow: 0.5px 0px 0px var(--main-gold);
     }
 
+    /* Color explícito en el párrafo: sin esto hereda el color global
+    claro y el texto queda ilegible sobre la caja blanca. */
+    .abilitie-text p {
+        color: var(--main-black);
+    }
+
     .character-description {
         border: 0.3cqw solid var(--main-color);
         border-radius: 0.5cqw;
@@ -88,6 +94,10 @@
         word-wrap: break-word;
         width: 93%;
         text-shadow: 0.5px 0px 0px var(--main-gold);
+    }
+
+    .character-description p {
+        color: var(--main-black);
     }
 
 }
