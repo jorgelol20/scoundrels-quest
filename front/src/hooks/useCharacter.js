@@ -1,16 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import api from '../api/api.js';
 
 /**
  * Hook para gestionar los personajes.
  */
 export const useCharacters = () => {
+    // Suscribe el hook al idioma: al cambiar re-renderiza, cambia la
+    // queryKey y refetchea con el Accept-Language nuevo.
+    const { i18n } = useTranslation();
 
     /**
      * Obtiene el listado completo de personajes.
+     * Clave por idioma: al cambiar el locale se refetchea con el
+     * Accept-Language nuevo (el back traduce nombre/descripcion).
      */
     const { data: characters, isLoading, error } = useQuery({
-        queryKey: ['characters'],
+        queryKey: ['characters', i18n.language],
         queryFn: async () => {
             let { data } = await api.get('/personajes');
             return data;

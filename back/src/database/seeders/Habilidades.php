@@ -121,6 +121,17 @@ class Habilidades extends Seeder
                 'coste_oro' => null,
                 'usos_por_ronda' => 1,
             ],
+            [
+                'nombre' => 'Toque espectral',
+                'descripcion' => 'Permite bajar el daño recibido en 3 durante 3 manos contando la mano activa. Además, eres inmune a cualquier efecto de carta enemiga.',
+                'nombre_en' => 'Spectral Touch',
+                'descripcion_en' => 'Reduce incoming damage by 3 for 3 hands, starting with the current one. You are also immune to any enemy card effect.',
+                'icono' => '/storage/habilidades/ToqueEspectral.webp',
+                'codigo' => 'espectro',
+                'efectos' => null,
+                'coste_oro' => null,
+                'usos_por_ronda' => 1,
+            ],
         ];
 
         foreach ($habilidadesData as $data) {

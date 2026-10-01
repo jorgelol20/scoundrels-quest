@@ -117,6 +117,7 @@ Route::get('/ranking-partidas', [PartidasApiController::class, 'ranking_partidas
 // Controlador Partidas.
 Route::apiResource('/partidas', PartidasApiController::class)
     ->only(['index', 'show'])
+    ->middleware('locale')
     ->names('api.partidas');
 // Registrar partida: exige sesión y la identidad se toma del token.
 Route::post('/partidas', [PartidasApiController::class, 'store'])
@@ -130,6 +131,7 @@ Route::apiResource('/partidas', PartidasApiController::class)
 // Controlador Modificadores.
 Route::apiResource('/modificadores', ModificadoresApiController::class)
     ->only(['index', 'show'])
+    ->middleware('locale')
     ->names('api.modificadores');
 Route::apiResource('/modificadores', ModificadoresApiController::class)
     ->only(['store', 'update', 'destroy'])
@@ -139,6 +141,7 @@ Route::apiResource('/modificadores', ModificadoresApiController::class)
 // Controlador Personajes.
 Route::apiResource('/personajes', PersonajesApiController::class)
     ->only(['index', 'show'])
+    ->middleware('locale')
     ->names('api.personajes');
 Route::apiResource('/personajes', PersonajesApiController::class)
     ->only(['store', 'update', 'destroy'])
@@ -148,6 +151,7 @@ Route::apiResource('/personajes', PersonajesApiController::class)
 // Controlador Cartas.
 Route::apiResource('/cartas', CartaController::class)
     ->only(['index', 'show'])
+    ->middleware('locale')
     ->names('api.cartas');
 Route::apiResource('/cartas', CartaController::class)
     ->only(['store', 'update', 'destroy'])
@@ -158,6 +162,7 @@ Route::apiResource('/cartas', CartaController::class)
 // (lectura pública, escritura solo admin autenticado).
 Route::apiResource('/habilidades', HabilidadApiController::class)
     ->only(['index', 'show'])
+    ->middleware('locale')
     ->names('api.habilidades');
 Route::apiResource('/habilidades', HabilidadApiController::class)
     ->only(['store', 'update', 'destroy'])
@@ -167,6 +172,7 @@ Route::apiResource('/habilidades', HabilidadApiController::class)
 // Controlador Logros (solo lectura: el controlador no expone escritura).
 Route::apiResource('/logros', LogrosApiController::class)
     ->only(['index', 'show'])
+    ->middleware('locale')
     ->names('api.logros');
 
 //Inicio de sesión con Google
