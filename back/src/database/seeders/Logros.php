@@ -132,6 +132,15 @@ class Logros extends Seeder
                 'codigo' => 'victoria_espectro'
             ],
             [
+                'nombre' => 'Juventud Eterna',
+                'descripcion' => 'Gana tu primera partida con `La Alquimista`.',
+                'nombre_en' => 'Eternal Youth',
+                'descripcion_en' => 'Win your first run with `The Alchemist`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'victoria_alquimista'
+            ],
+            [
                 'nombre' => 'Ludópata',
                 'descripcion' => 'Usa la habilidad de `El Apostador` 100 veces.',
                 'nombre_en' => 'Compulsive Gambler',
@@ -220,6 +229,15 @@ class Logros extends Seeder
                 'icono' => '/storage/logros/Plata.webp',
                 'meta' => 100,
                 'codigo' => 'habilidad_espectro'
+            ],
+            [
+                'nombre' => 'Transmutación perfecta',
+                'descripcion' => 'Usa la habilidad de `La Alquimista` 100 veces.',
+                'nombre_en' => 'Perfect Transmutation',
+                'descripcion_en' => 'Use `The Alchemist\'s` ability 100 times.',
+                'icono' => '/storage/logros/Plata.webp',
+                'meta' => 100,
+                'codigo' => 'habilidad_alquimista'
             ],
             [
                 'nombre' => 'Textura gelatinosa',

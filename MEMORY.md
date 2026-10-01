@@ -2,6 +2,7 @@
 Memoria del proyecto entre sesiones. Máximo ~50 líneas: resume o elimina lo que ya no aporte.
 ## Estado actual
 - `AGENTS.md` completo (stack, arquitectura 3 capas, i18n, datos, límites, verificación manual). `README.md` aligerado a uso operativo + enlace a `AGENTS.md`.
+- Alquimista (id 11, codigo `alquimista`, activa): pasiva 2x50% independiente solo-Corazón-que-cura (+25% suelo+clamp, +1 daño); activa `Alquimia Básica` 1/ronda inmediata (pociones 25% c/u; avaricia x2 con arma, sin apilar). Arte `Alquimista.webp` + icono `AlquimiaBasica.webp` pendientes de subir. Logros `victoria_alquimista` (Juventud Eterna) y `habilidad_alquimista` (Transmutación perfecta).
 - Espectro (id 10, codigo `espectro`, activo): pasiva inmune a efectos Pica/Trebol no-miniboss, activa `spectreWeaken` -3 sala activa +2 manos, 1 uso/ronda. Arte `Espectro.webp` + icono pendiente de subir.
 - `Personajes.php` referencia habilidades por `codigo` (no id hardcodeado): robusto ante huecos del autoincremento (caso local `Toque espectral`=11).
 - i18n contenido: rutas públicas (`personajes`, `habilidades`, `cartas`, `modificadores`, `logros`, `partidas`) con middleware `locale`; `useCharacters` con queryKey por idioma + sync a `availableCharacters` (cambio en caliente sin recarga).

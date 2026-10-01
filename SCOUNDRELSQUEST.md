@@ -344,6 +344,20 @@ Los personajes a elegir son los siguientes:
 
             ],
 
+            [
+
+                'id' => 11,
+
+                'nombre' => 'Alquimista',
+
+                'descripcion' => 'Una alquimista veterana volviendo al lugar donde una vez fue feliz. Dice que descubrió la forma de duplicar dinero con C₆H₈O₇.',
+
+                'activo' => true,
+
+                'habilidad_id' => 11
+
+            ],
+
     ```
 
 # === HABILIDADES ===
@@ -550,9 +564,29 @@ Las habilidades donde `usos_por_ronda` es nulo, significa que pueden usarse vari
 
             ],
 
+            [
+
+                'nombre' => 'Alquimia Básica',
+
+                'descripcion' => 'Crea una pócima con efectos únicos que te ayudarán en la expedición. Las curaciones otorgan más poder de curación o daño.',
+
+                'icono' => '/storage/habilidades/AlquimiaBasica.webp',
+
+                'codigo' => 'alquimista',
+
+                'efectos' => null,
+
+                'coste_oro' => null,
+
+                'usos_por_ronda' => 1,
+
+            ],
+
     ```
 
     ***Nota:*** *Cazarecompensas (código `cazador`) existe en BD pero su habilidad no está implementada en partida: el botón no hace nada.*
+
+    ***Alquimista (código `alquimista`):*** *pasiva con dos tiradas independientes del 50% solo cuando una carta de curación (Corazón) cura de verdad —descartada sin efecto (anticura/vampiro/ya curado) no dispara—: +25% de curación (suelo, con clamp a vida máxima) y +1 de daño en la siguiente acción. Activa `Alquimia Básica` (1 uso por ronda, efecto inmediato): poción aleatoria 25% cada una — curativa (+2 si vida > 50% máx, +4 si < 50%, +3 si = 50%, con clamp), fuerza (+2 daño siguiente acción), avaricia (dobla el oro del siguiente enemigo derrotado con arma; extra_gold y midas aplican antes; un uso, sin apilar) y velocidad (+1 huida en `actualScapes` de la mano actual). La poción curativa es directa y no dispara la pasiva.*
 
     Posibles efectos apuesta ciega:
 

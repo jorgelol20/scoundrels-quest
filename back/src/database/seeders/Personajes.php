@@ -111,6 +111,15 @@ class Personajes extends Seeder
                 'activo' => true,
                 'habilidad_codigo' => 'espectro'
             ],
+            [
+                'id' => 11,
+                'nombre' => 'Alquimista',
+                'descripcion' => 'Una alquimista veterana volviendo al lugar donde una vez fue feliz. Dice que descubrió la forma de duplicar dinero con C₆H₈O₇.',
+                'nombre_en' => 'Alchemist',
+                'descripcion_en' => 'A veteran alchemist back where she was once happy. Claims she can double your coin with C₆H₈O₇ — citric acid, wishful thinking and a wink.',
+                'activo' => true,
+                'habilidad_codigo' => 'alquimista'
+            ],
 
         ];
 

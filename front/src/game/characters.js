@@ -21,6 +21,7 @@ export const CHARACTER_DEFAULTS = {
     maxHealthSteal: 3,
     tameDamage: 0,
     isSpectre: false,
+    isAlchemist: false,
 };
 
 const isEnemy = (card) => card?.palo === 'Pica' || card?.palo === 'Trebol';
@@ -54,6 +55,8 @@ export const applyPassiveToState = (state, charCode) => {
             return { state: { ...state, tameDamage: 1 }, handled: true };
         case 'espectro':
             return { state: { ...state, isSpectre: true }, handled: true };
+        case 'alquimista':
+            return { state: { ...state, isAlchemist: true }, handled: true };
         default:
             return { state, handled: false };
     }
@@ -146,6 +149,51 @@ export const spectreWeaken = (room, amount = 3) => {
         room: room.map((card) => (isSpectreTarget(card) ? weaken(card) : card)),
         weakened,
     };
+};
+
+/**
+ * Tirada de pasiva de la alquimista (curación): 50% (roll 0-99 < 50).
+ * El azar se inyecta desde el adaptador (sin Math.random en el puro).
+ * @param {number} roll tirada 0-99
+ * @returns {boolean}
+ */
+export const rollAlchemistHeal = (roll) => roll < 50;
+
+/**
+ * Tirada de pasiva de la alquimista (daño): 50% independiente (roll 0-99 < 50).
+ * @param {number} roll tirada 0-99
+ * @returns {boolean}
+ */
+export const rollAlchemistDmg = (roll) => roll < 50;
+
+/**
+ * Bonus de curación de la pasiva: +25% (suelo por defecto).
+ * @param {number} amount curación base ya con gluttony
+ * @returns {number} bonus a sumar
+ */
+export const calcAlchemistHealBonus = (amount) => Math.floor((amount ?? 0) * 0.25);
+
+/**
+ * Poción de Alquimia Básica según tirada 0-99 (25% cada una).
+ * @param {number} roll tirada 0-99
+ * @returns {'heal'|'force'|'greed'|'speed'}
+ */
+export const rollAlchemistPotion = (roll) => {
+    if (roll < 25) return 'heal';
+    if (roll < 50) return 'force';
+    if (roll < 75) return 'greed';
+    return 'speed';
+};
+
+/**
+ * Poción curativa: >50% vida máx +2, <50% +4, =50% +3 (punto medio).
+ * @param {{health:number, maxHealth:number}} input
+ * @returns {number}
+ */
+export const calcPotionHeal = ({ health, maxHealth }) => {
+    if (health * 2 > maxHealth) return 2;
+    if (health * 2 < maxHealth) return 4;
+    return 3;
 };
 
 /**

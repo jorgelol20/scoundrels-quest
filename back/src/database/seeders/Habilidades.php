@@ -132,6 +132,17 @@ class Habilidades extends Seeder
                 'coste_oro' => null,
                 'usos_por_ronda' => 1,
             ],
+            [
+                'nombre' => 'Alquimia Básica',
+                'descripcion' => 'Crea una pócima con efectos únicos que te ayudarán en la expedición. Las curaciones otorgan más poder de curación o daño.',
+                'nombre_en' => 'Basic Alchemy',
+                'descripcion_en' => 'Brews a one-of-a-kind tonic for the expedition. Healing also sharpens her craft — stronger mends or a sharper edge.',
+                'icono' => '/storage/habilidades/AlquimiaBasica.webp',
+                'codigo' => 'alquimista',
+                'efectos' => null,
+                'coste_oro' => null,
+                'usos_por_ronda' => 1,
+            ],
         ];
 
         foreach ($habilidadesData as $data) {

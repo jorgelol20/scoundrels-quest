@@ -40,6 +40,11 @@ import {
     applyBounty,
     spectreWeaken,
     nextSpectreHands,
+    rollAlchemistHeal,
+    rollAlchemistDmg,
+    calcAlchemistHealBonus,
+    rollAlchemistPotion,
+    calcPotionHeal,
 } from "../../game/characters.js";
 import {
     calcStageLayout,
@@ -233,6 +238,13 @@ const GamePageInner = () => {
     const [isSpectre, setIsSpectre] = useState(false);
     // Toque espectral: manos futuras restantes tras aplicar a la activa (2).
     const spectreHandsLeft = useRef(0);
+    const [isAlchemist, setIsAlchemist] = useState(false);
+    // Poción de avaricia: duplica el oro del siguiente enemigo con arma (un uso).
+    const alchemistGreedRef = useRef(false);
+    // Pasiva alquimista (+1 daño): se sortea en handleHeal pero se vuelca tras
+    // el reset de processCardAction (patrón abuela), si no se borraría antes
+    // del render y el panel de efectos nunca lo mostraría.
+    const alchemistDmgPendingRef = useRef(0);
     const [maxHealthSteal, setMaxHealthSteal] = useState(3);
     const [isTaming, setIsTaming] = useState(false);
     const [tameDamage, setTameDamage] = useState(0);
@@ -910,6 +922,7 @@ const GamePageInner = () => {
                 maxHealthSteal,
                 tameDamage,
                 isSpectre,
+                isAlchemist,
             }, code);
             if (!handled) return;
             if (next.isWarrior !== isWarrior) {
@@ -937,6 +950,9 @@ const GamePageInner = () => {
             }
             if (next.isSpectre !== isSpectre) {
                 setIsSpectre(next.isSpectre);
+            }
+            if (next.isAlchemist !== isAlchemist) {
+                setIsAlchemist(next.isAlchemist);
             }
             setMaxHealthSteal(next.maxHealthSteal);
             setTameDamage(next.tameDamage);
@@ -1062,6 +1078,9 @@ const GamePageInner = () => {
             setIsVampire(false);
             setIsSpectre(false);
             spectreHandsLeft.current = 0;
+            setIsAlchemist(false);
+            alchemistGreedRef.current = false;
+            alchemistDmgPendingRef.current = 0;
             vampireAbilityUsed.current = false;
             setBlacksmithDmg(0)
             setMaxScapes(1);
@@ -1450,6 +1469,22 @@ const GamePageInner = () => {
             if (gluttony) {
                 currentHeal.current += 1;
             }
+            // Pasiva alquimista: dos tiradas independientes del 50% solo cuando
+            // la carta cura de verdad (aquí ya se superó el guard de bloqueo).
+            // Orden: base -> gluttony -> +25% -> clamp a maxHealth.
+            if (isAlchemist) {
+                if (rollAlchemistHeal(Math.floor(Math.random() * 100))) {
+                    const bonus = calcAlchemistHealBonus(currentHeal.current);
+                    if (bonus > 0) {
+                        currentHeal.current += bonus;
+                        logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.alchemistHealSurge', { amount: bonus }))
+                    }
+                }
+                if (rollAlchemistDmg(Math.floor(Math.random() * 100))) {
+                    alchemistDmgPendingRef.current += 1;
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.alchemistDmgSurge'))
+                }
+            }
             if (vitamine && currentHeal.current + health > maxHealth) {
                 vitamineValue.current = Math.min(2, (currentHeal.current + health - maxHealth));
             }
@@ -1590,8 +1625,15 @@ const GamePageInner = () => {
             const canUseWeapon = combat.canUseWeapon;
 
             // Helpers locales para evitar duplicar lógica recurrente
-            const grantGoldReward = () => {
-                const earnedGold = calcGoldReward({ isGambler, goldMultiplier: goldMultiplier.current });
+            const grantGoldReward = (allowGreed = true) => {
+                let earnedGold = calcGoldReward({ isGambler, goldMultiplier: goldMultiplier.current });
+                // Avaricia alquímica: duplica la recompensa del kill con arma
+                // (extra_gold y midas ya aplicados antes); un uso y se consume.
+                if (allowGreed && alchemistGreedRef.current) {
+                    alchemistGreedRef.current = false;
+                    earnedGold = earnedGold * 2;
+                    logsRef.current.push(`${logsRef.current.length + 1} - ${t('game:logs.greedApplied', { amount: earnedGold })}`);
+                }
                 setGold(prev => prev + earnedGold);
                 coinAnimation(earnedGold);
                 totalEarnedGold.current += earnedGold;
@@ -1628,7 +1670,7 @@ const GamePageInner = () => {
                 isSlain = true;
                 invincibilityTurns.current -= 1;
                 damageAnimation(0);
-                if (weapon || midas.current) grantGoldReward();
+                if (weapon || midas.current) grantGoldReward(Boolean(weapon));
             } else if (canUseWeapon) {
 
                 // --- ATAQUE CON ARMA (daño precalculado en game/combat.js) ---
@@ -1666,7 +1708,7 @@ const GamePageInner = () => {
                 damageAnimation(finalDmg, true);
                 processDamageAndRevive(finalDmg);
                 if (midas.current) {
-                    grantGoldReward();
+                    grantGoldReward(false);
                 }
 
                 const vampireHeal = calcBarehandLifesteal({
@@ -1717,6 +1759,33 @@ const GamePageInner = () => {
             }
             handleWeapon(newWeapon);
             logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.forged', { valor: weaponValue }))
+        }
+
+        // Alquimia Básica: poción aleatoria inmediata (25% cada una).
+        // El azar vive aquí (adaptador); el mapeo y la cura son puros.
+        // La poción curativa es directa y no dispara la pasiva (solo Corazón).
+        const alchemist = () => {
+            const potion = rollAlchemistPotion(Math.floor(Math.random() * 100));
+            if (potion === 'heal') {
+                const amount = calcPotionHeal({ health, maxHealth });
+                if (!antiheal.current) {
+                    setHealth(prev => Math.min(maxHealth, prev + amount));
+                    healAnimation(amount);
+                    healedLife.current += amount;
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.potionHeal', { amount }))
+                } else {
+                    logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.potionHealBlocked'))
+                }
+            } else if (potion === 'force') {
+                userExtraDmg.current += 2;
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.potionForce'))
+            } else if (potion === 'greed') {
+                alchemistGreedRef.current = true;
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.potionGreed'))
+            } else {
+                actualScapes.current += 1;
+                logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.potionSpeed'))
+            }
         }
 
 
@@ -1855,6 +1924,10 @@ const GamePageInner = () => {
                     if (grandma) {
                         userExtraDmg.current += 1;
                     }
+                    // Pasiva alquimista pendiente (ver handleHeal): se vuelca aquí,
+                    // tras el reset, para que sobreviva al render y al panel.
+                    userExtraDmg.current += alchemistDmgPendingRef.current;
+                    alchemistDmgPendingRef.current = 0;
                 }
             }
             // Lógica de arma
@@ -1944,6 +2017,7 @@ const GamePageInner = () => {
                 handleNewAchievement('habilidad_apostador')
             },
             herrero: () => { blacksmith().catch((smithError) => console.error("Error al forjar el arma:", smithError)); setAvailableAbility(false); handleNewAchievement('habilidad_herrero') },
+            alquimista: () => { alchemist(); setAvailableAbility(false); handleNewAchievement('habilidad_alquimista') },
             vampiro: () => { setHealth(prev => prev - calcVampireAbility(prev).healthCost); userExtraDmg.current += calcVampireAbility(health).dmgBonus; handleNewAchievement('habilidad_vampiro'); vampireAbilityUsed.current = true; setAvailableAbility(false); },
             domador: () => { setIsTaming(true); setAvailableAbility(false); handleNewAchievement('habilidad_domador') },
             cazador: () => {
