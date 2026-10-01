@@ -4,7 +4,7 @@ nav {
     align-items: center;
     position: sticky;
     top: 0;
-    border: 0.3cqw solid #4c3e3e00;
+    border: 0.3cqw solid transparent;
     border-radius: 4px;
     padding: 10px 20px;
     padding-left: 20%;
@@ -13,7 +13,7 @@ nav {
     max-height: 2em;
     min-height: 2em;
     color: white;
-    background-color: #4c3e3ea2;
+    background-color: color-mix(in srgb, var(--main-color) 64%, transparent);
     background-size: 50px 50px;
     z-index: 1000;
 }
@@ -32,7 +32,7 @@ nav {
     margin-left: 1em;
     margin-right: 5px;
     text-decoration: none;
-    color: #f5e1da;
+    color: var(--main-white);
 
     img {
         width: 1.5em;
@@ -73,14 +73,14 @@ nav {
 }
 
 .navbar-items {
-    background-color: #5a4e4e6c;
+    background-color: color-mix(in srgb, var(--second-color) 42%, transparent);
     display: flex;
     justify-content: end;
     align-items: center;
     margin: 10px 20px;
     padding: 5px;
-    border-bottom: 1px solid #5a4e4ec0;
-    border-right: 1px solid #5a4e4ecc;
+    border-bottom: 1px solid color-mix(in srgb, var(--second-color) 75%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--second-color) 80%, transparent);
     min-width: 20em;
     width: 25cqw;
     max-height: 1em;
@@ -130,7 +130,7 @@ nav {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #aaa;
+    color: var(--main-silver);
     font-size: 0.7em;
 }
 @media (max-width: 1080px) {
@@ -245,4 +245,9 @@ nav {
     .notification-quantity{
         filter: brightness(1.2);
     }
+}
+
+/* Halloween: el enlace activo brilla en naranja. */
+[data-theme="halloween"] .menu_link--active {
+    text-shadow: 0 0 8px rgba(255, 107, 0, 0.8);
 }

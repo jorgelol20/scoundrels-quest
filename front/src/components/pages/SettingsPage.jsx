@@ -29,7 +29,9 @@ const SettingsPage = () => {
         changeShowLogs,
         showLogs,
         locale,
-        changeLocale
+        changeLocale,
+        themePreference,
+        changeTheme
     } = useContext(settingsContext);
 
     return (
@@ -86,6 +88,18 @@ const SettingsPage = () => {
                             <option value="en">English</option>
                         </select>
                         <p className="language-help">{t('languageHelp')}</p>
+                    </div>
+                    <div className="theme-setting">
+                        <label htmlFor="theme-select">{t('theme')}</label><br />
+                        <select
+                            id="theme-select"
+                            value={themePreference}
+                            onChange={(e) => { startButtonSound(true); changeTheme(e.target.value); }}
+                        >
+                            <option value="auto">{t('themeAuto')}</option>
+                            <option value="halloween">{t('themeHalloween')}</option>
+                            <option value="default">{t('themeDefault')}</option>
+                        </select>
                     </div>
                 </div>
             </div>

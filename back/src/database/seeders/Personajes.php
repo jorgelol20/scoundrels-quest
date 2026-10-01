@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Personajes as ModelPersonajes;
+use App\Models\Habilidad as ModelHabilidad;
 
 class Personajes extends Seeder
 {
@@ -17,6 +18,8 @@ class Personajes extends Seeder
         // de 'Cazarrecompensas'): mismo patrón de limpieza que Logros.
         ModelPersonajes::where('nombre', 'Cazador')->delete();
 
+        // Los personajes referencian su habilidad por `codigo` (estable),
+        // no por id numérico (frágil ante huecos del autoincremento).
         $personajesData = [
             [
                 'id' => 1,
@@ -25,7 +28,7 @@ class Personajes extends Seeder
                 'nombre_en' => 'Warrior',
                 'descripcion_en' => 'Born of his mother, he will die fighting in battle. He strikes such terror into his enemies that they flee in panic.',
                 'activo' => true,
-                'habilidad_id' => 1
+                'habilidad_codigo' => 'guerrero'
             ],
             [
                 'id' => 2,
@@ -34,7 +37,7 @@ class Personajes extends Seeder
                 'nombre_en' => 'Paladin',
                 'descripcion_en' => 'Taken in by a convent as a child and guided by faith, he is now a grown man. His will toward God is so strong that, in battle, it grants him enough vitality to defend his companions.',
                 'activo' => true,
-                'habilidad_id' => 2
+                'habilidad_codigo' => 'paladin'
             ],
             [
                 'id' => 3,
@@ -43,7 +46,7 @@ class Personajes extends Seeder
                 'nombre_en' => 'Elf',
                 'descripcion_en' => 'Raised in the wild thicket and knowing every secret of the forest, he has become a master of guerrilla warfare and the use of traps to weaken his enemies.',
                 'activo' => true,
-                'habilidad_id' => 3
+                'habilidad_codigo' => 'elfo'
             ],
             [
                 'id' => 4,
@@ -52,7 +55,7 @@ class Personajes extends Seeder
                 'nombre_en' => 'Mage',
                 'descripcion_en' => 'A student of ancient grimoires since his youth, devoted to unraveling the mysteries of arcane magic, allowing him to foresee future events.',
                 'activo' => true,
-                'habilidad_id' => 4
+                'habilidad_codigo' => 'mago'
             ],
             [
                 'id' => 5,
@@ -61,7 +64,7 @@ class Personajes extends Seeder
                 'nombre_en' => 'Gambler',
                 'descripcion_en' => 'Blind with faith (and cataracts), this cleric spends his days gambling at the tavern. Things don\'t always go well for him...',
                 'activo' => true,
-                'habilidad_id' => 5
+                'habilidad_codigo' => 'apostador'
             ],
             [
                 'id' => 6,
@@ -70,7 +73,7 @@ class Personajes extends Seeder
                 'nombre_en' => 'Blacksmith',
                 'descripcion_en' => 'He was born because his mother gave birth to him, and since then he hasn\'t stopped hitting things with a hammer. He forged swords, armor, and, according to him, "a frying pan that could kill a dragon".',
                 'activo' => true,
-                'habilidad_id' => 6
+                'habilidad_codigo' => 'herrero'
             ],
             [
                 'id' => 7,
@@ -79,7 +82,7 @@ class Personajes extends Seeder
                 'nombre_en' => 'Bounty Hunter',
                 'descripcion_en' => 'He\'ll do anything for money. Beats up old women, plunders villages, steals from children... BUT he would never hurt a little kitten, unless they pay him double.',
                 'activo' => true,
-                'habilidad_id' => 7
+                'habilidad_codigo' => 'cazador'
             ],
             [
                 'id' => 8,
@@ -88,7 +91,7 @@ class Personajes extends Seeder
                 'nombre_en' => 'Vampire',
                 'descripcion_en' => 'A walker of the night, sophisticated and cultured, whose composure hides a relentless predator. He feeds on the blood of his enemies to revitalize himself and unleash the true ferocity that lurks behind his gentlemanly manners.',
                 'activo' => true,
-                'habilidad_id' => 8
+                'habilidad_codigo' => 'vampiro'
             ],
             [
                 'id' => 9,
@@ -97,19 +100,34 @@ class Personajes extends Seeder
                 'nombre_en' => 'Tamer',
                 'descripcion_en' => 'Raised with wolves and trained by nature itself. He can soothe even the most fearsome beasts into fighting for him.',
                 'activo' => true,
-                'habilidad_id' => 9
+                'habilidad_codigo' => 'domador'
+            ],
+            [
+                'id' => 10,
+                'nombre' => 'Espectro',
+                'descripcion' => 'Fue un aventurero que falleció en la mazmorra y que sus grandes ansias de conseguir un gran tesoro lo dejaron vagando como espectro por la eternidad.',
+                'nombre_en' => 'Spectre',
+                'descripcion_en' => 'He was once an adventurer who died in the dungeon — his hunger for a fabled treasure left him roaming its halls as a spectre for all eternity.',
+                'activo' => true,
+                'habilidad_codigo' => 'espectro'
             ],
 
         ];
 
         foreach ($personajesData as $data) {
+            $habilidadId = ModelHabilidad::where('codigo', $data['habilidad_codigo'])->value('id');
+            if ($habilidadId === null) {
+                throw new \RuntimeException(
+                    "Personajes seeder: habilidad con codigo '{$data['habilidad_codigo']}' no encontrada. Ejecuta Habilidades antes que Personajes."
+                );
+            }
             ModelPersonajes::updateOrCreate(
                 ['nombre' => $data['nombre']],
                 [
                     'descripcion' => $data['descripcion'],
                     'imagen' => config('app.backend_url')."/storage/personajes/{$data['nombre']}.webp",
                     'activo' => $data['activo'],
-                    'habilidad_id' => $data['habilidad_id'],
+                    'habilidad_id' => $habilidadId,
                     'translations' => [
                         'es' => [
                             'nombre' => $data['nombre'],

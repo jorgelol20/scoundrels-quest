@@ -177,6 +177,15 @@ const MatchProvider = (props) => {
         }
     }, [isLoadingCard, isLoadingCharacter, isLoadingModifier, isLoadingAchievements, isLoadingUser]);
 
+    // Contenido traducido del back: al cambiar el idioma se refetchean los
+    // personajes (queryKey por idioma en useCharacters) y hay que propagar
+    // la lista nueva (incluye habilidad_personaje) a la UI visible.
+    useEffect(() => {
+        if (Array.isArray(characters) && characters.length > 0) {
+            setAvailableCharacters(characters);
+        }
+    }, [characters]);
+
     // Logros
     /**
      * Elimina un logro de la lista de logros recién obtenidos
@@ -226,34 +235,50 @@ const MatchProvider = (props) => {
         if (victoria) {
             //Logro victoria
             await handleNewAchievement('victoria')
-            switch (character.id) {
-                case 1:
+            // Por codigo de habilidad (robusto ante huecos de ids); fallback
+            // al id legacy si la relación no viene cargada.
+            const victoryCode = character?.habilidad_personaje?.codigo ?? `id:${character?.id}`;
+            switch (victoryCode) {
+                case 'guerrero':
+                case 'id:1':
                     await handleNewAchievement('victoria_guerrero')
                     break;
-                case 2:
+                case 'paladin':
+                case 'id:2':
 
                     await handleNewAchievement('victoria_paladin')
                     break;
-                case 3:
+                case 'elfo':
+                case 'id:3':
                     await handleNewAchievement('victoria_elfo')
                     break;
-                case 4:
+                case 'mago':
+                case 'id:4':
                     await handleNewAchievement('victoria_mago')
                     break;
-                case 5:
+                case 'apostador':
+                case 'id:5':
                     await handleNewAchievement('victoria_apostador')
                     break;
-                case 6:
+                case 'herrero':
+                case 'id:6':
                     await handleNewAchievement('victoria_herrero')
                     break;
-                case 7:
+                case 'cazador':
+                case 'id:7':
                     await handleNewAchievement('victoria_cazarrecompensas')
                     break;
-                case 8:
+                case 'vampiro':
+                case 'id:8':
                     await handleNewAchievement('victoria_vampiro')
                     break;
-                case 9:
+                case 'domador':
+                case 'id:9':
                     await handleNewAchievement('victoria_domador')
+                    break;
+                case 'espectro':
+                case 'id:10':
+                    await handleNewAchievement('victoria_espectro')
                     break;
             }
         } else {

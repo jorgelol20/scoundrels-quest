@@ -5,5 +5,9 @@
   "showLogs": "Show in-match logs",
   "back": "Back",
   "language": "Language",
-  "languageHelp": "Applies instantly and is saved in this browser."
+  "languageHelp": "Applies instantly and is saved in this browser.",
+  "theme": "Theme",
+  "themeAuto": "Automatic",
+  "themeHalloween": "Halloween",
+  "themeDefault": "Normal"
 }
