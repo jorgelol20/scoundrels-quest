@@ -4,14 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Concerns\HasTranslations;
 
 class Personajes extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     public $timestamps = false;
     protected $table = 'personajes';
-    protected $fillable = ['nombre', 'descripcion', 'imagen', 'activo', 'habilidad_id'];
+    protected $fillable = ['nombre', 'descripcion', 'imagen', 'activo', 'habilidad_id', 'translations'];
 
     /**
      * Get the attributes that should be cast.
@@ -21,7 +22,8 @@ class Personajes extends Model
     protected function casts(): array
     {
         return [
-            'activo' => 'boolean'
+            'activo' => 'boolean',
+            'translations' => 'array',
         ];
     }
 

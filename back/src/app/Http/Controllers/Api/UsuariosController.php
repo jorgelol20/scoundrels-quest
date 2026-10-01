@@ -8,6 +8,8 @@ use App\Models\Partidas;
 use App\Models\Usuarios;
 use App\Http\Requests\Usuarios\StoreUsuarioRequest;
 use App\Http\Requests\Usuarios\UpdateUsuarioRequest;
+use App\Http\Requests\Usuarios\StoreComentarioRequest;
+use App\Http\Requests\Usuarios\UpdateComentarioRequest;
 use App\Models\Logros;
 use App\Notifications\RegistroNotificacionUsuario;
 use DB;
@@ -58,32 +60,53 @@ class UsuariosController extends Controller
             'color' => $request->color
         ]);
         $token = $usuario->createToken('auth_token')->plainTextToken;
-        Notification::route('mail', $usuario->email)->notify(new RegistroNotificacionUsuario($usuario));
+        // El mail no puede tumbar el registro (p. ej. email con typo -> SMTP 550).
+        try {
+            Notification::route('mail', $usuario->email)->notify(new RegistroNotificacionUsuario($usuario));
+        } catch (\Exception $mailError) {
+            \Log::warning('No se pudo enviar el mail de registro', ['email' => $usuario->email, 'error' => $mailError->getMessage()]);
+        }
         return response()->json([
             "usuario" => $usuario,
             "access_token" => $token,
         ], 201);
     }
 
-    public function show(string $nick)
+    public function show(Request $request, string $nick)
     {
         $usuario = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar','banner', 'color', 'created_at', 'ultima_vez_visto')->where('nick', '=', $nick)->get();
-        $usuario->load([
+        // Los reportes de bug solo los ve su autor o un admin: no exponerlos
+        // en el perfil público de otro usuario.
+        $viewer = $request->user();
+        $puedeVerReportes = $viewer && ($viewer->es_admin || $usuario->contains('id', $viewer->id));
+        $with = [
             'tiene_jugadas' => function ($query) {
                 $query->with(['modificadores', 'personaje'])
                     ->withCount('comentarios');
             },
             'logros',
-            'reportesBug'
-        ]);
-        return response()->json(['usuario' => $usuario], 201);
+        ];
+        if ($puedeVerReportes) {
+            $with[] = 'reportesBug';
+        }
+        $usuario->load($with);
+        return response()->json(['usuario' => $usuario]);
     }
 
     // Buscar usuarios por coincidencia en el nick
     public function search(string $search)
     {
-        $usuarios = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar', 'banner', 'color')->where('nick', 'LIKE', '%' . $search . '%')->limit(3)->get();
-        return response()->json(['usuarios' => $usuarios], 201);
+        // Se escapan los comodines de LIKE para que el usuario no pueda
+        // forzar un escaneo de tabla completa ('%', '_', '\').
+        $termino = str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $search);
+        $termino = mb_substr($termino, 0, 30);
+
+        $usuarios = Usuarios::select('id', 'nick', 'es_admin', 'is_tester', 'avatar', 'banner', 'color')
+            ->where('nick', 'LIKE', '%' . $termino . '%')
+            ->limit(3)
+            ->get();
+
+        return response()->json(['usuarios' => $usuarios]);
     }
 
     // Actualizar info de un usuario
@@ -91,6 +114,13 @@ class UsuariosController extends Controller
     {
         $usuario = Usuarios::where('nick', $nick)->firstOrFail();
         $data = $request->validated();
+
+        // Defensa en profundidad: aunque la validación ya impide que estos
+        // campos viajen en el body, se eliminan siempre antes de persistir.
+        // `es_admin`/`is_tester` solo se conceden vía updateRol(), que exige
+        // el middleware 'admin'.
+        unset($data['es_admin'], $data['is_tester'], $data['id'], $data['ultima_vez_visto']);
+
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
@@ -109,19 +139,35 @@ class UsuariosController extends Controller
         } else {
             unset($data['banner']);
         }
-        if ($request->has('es_admin')) {
-            $currentUser = $request->user();
-            if ($currentUser && $currentUser->es_admin) {
-                $data['es_admin'] = filter_var($request->input('es_admin'), FILTER_VALIDATE_BOOLEAN);
-            }
-        }
-        if ($request->has('is_tester')) {
-            $currentUser = $request->user();
-            if ($currentUser && $currentUser->es_admin) {
-                $data['is_tester'] = filter_var($request->input('is_tester'), FILTER_VALIDATE_BOOLEAN);
-            }
-        }
+
         $usuario->update($data);
+        return response()->json($usuario);
+    }
+
+    /**
+     * Concede o revoca los roles (es_admin / is_tester) de un usuario.
+     *
+     * Ruta protegida por el middleware 'admin': solo un administrador
+     * autenticado puede invocarla. Se separó de `update()` precisamente
+     * porque antes los roles viajaban en el mismo cuerpo que el perfil y
+     * `$request->validated()` los aplicaba sin comprobar nada.
+     */
+    public function updateRol(Request $request, $nick)
+    {
+        $data = $request->validate([
+            'es_admin' => 'required|boolean',
+            'is_tester' => 'sometimes|boolean',
+        ]);
+
+        $usuario = Usuarios::where('nick', $nick)->firstOrFail();
+
+        // Asignación explícita: estos campos están fuera de $fillable.
+        $usuario->es_admin = filter_var($data['es_admin'], FILTER_VALIDATE_BOOLEAN);
+        if (array_key_exists('is_tester', $data)) {
+            $usuario->is_tester = filter_var($data['is_tester'], FILTER_VALIDATE_BOOLEAN);
+        }
+        $usuario->save();
+
         return response()->json($usuario);
     }
 
@@ -131,7 +177,7 @@ class UsuariosController extends Controller
     {
         if (!$request->user()->es_admin) {
             return response()->json([
-                'message' => 'No tienes los permisos necesarios para acceder a este recurso.'
+                'message' => __('api.forbidden')
             ], 403);
         }
         $usuario = Usuarios::where('nick', $nick)->firstOrFail();
@@ -141,6 +187,11 @@ class UsuariosController extends Controller
                 'avatar' => $archivoPath
             ]
         );
+
+        return response()->json([
+            'message' => __('api.usuario_avatar_deleted'),
+            'usuario' => $usuario->fresh(),
+        ]);
     }
 
     // Función para eliminar ÚNICAMENTE el banner del perfil
@@ -149,7 +200,7 @@ class UsuariosController extends Controller
     {
         if (!$request->user()->es_admin) {
             return response()->json([
-                'message' => 'No tienes los permisos necesarios para acceder a este recurso.'
+                'message' => __('api.forbidden')
             ], 403);
         }
         $usuario = Usuarios::where('nick', $nick)->firstOrFail();
@@ -159,58 +210,78 @@ class UsuariosController extends Controller
                 'banner' => $archivoPath
             ]
         );
+
+        return response()->json([
+            'message' => __('api.usuario_banner_deleted'),
+            'usuario' => $usuario->fresh(),
+        ]);
     }
 
     public function destroy(Request $request, $id)
     {
         if (!$request->user()->es_admin) {
             return response()->json([
-                'message' => 'No tienes los permisos necesarios para acceder a este recurso.'
+                'message' => __('api.forbidden')
             ], 403);
         }
-        Usuarios::findOrFail($id)->delete();
-        return response()->json(['message' => 'Usuario eliminado'], 201);
+        // El parámetro de ruta de apiResource es el nick (string), no el id.
+        Usuarios::where('nick', $id)->firstOrFail()->delete();
+        return response()->json(['message' => __('api.usuario_deleted')]);
     }
 
     // Función para guardar un comentario
-    public function storeComentario(Request $request)
+    public function storeComentario(StoreComentarioRequest $request)
     {
-        $partida = Partidas::findOrFail($request->partida_id);
+        $partida = Partidas::findOrFail($request->validated('partida_id'));
         $usuarioId = $request->user()->id;
-        $partida->comentarios()->attach($usuarioId, [
-            'comentario' => $request->comentario,
-            'created_at' => now(),
-            'updated_at' => now()
+
+        $partida->comentarios()->syncWithoutDetaching([
+            $usuarioId => [
+                'comentario' => $request->validated('comentario'),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
         ]);
 
-        (new NotificacionController())->store(
-            usuario_id: $partida->usuario_id,
-            tipo: 'comentario',
-            descripcion:"Tu partida (ID: $partida->id) ha recibido un nuevo comentario.",
-            partida_id: $partida->id,
-        );
+        // No se notifica al propio autor.
+        if ($partida->usuario_id !== $usuarioId) {
+            (new NotificacionController())->store(
+                usuario_id: $partida->usuario_id,
+                tipo: 'comentario',
+                descripcion: __('api.notif_partida_comentario', ['id' => $partida->id]),
+                partida_id: $partida->id,
+            );
+        }
 
-        return response()->json(['message' => 'Comentario añadido con éxito']);
+        return response()->json(['message' => __('api.comentario_added')]);
     }
 
     //Función para actualizar un comentario
-    public function updateComentario(Request $request)
+    public function updateComentario(UpdateComentarioRequest $request, $id)
     {
-        if ($request->user()->id !== $request->usuario_id) {
-            return response()->json([
-                'message' => 'No tienes los permisos necesarios para acceder a este recurso.'
-            ], 403);
-        }
-        $partida = Partidas::findOrFail($request->partida_id);
-        $usuarioId = $request->usuario_id;
+        $usuarioId = $request->user()->id;
+        $comentario = DB::table('comentarios_usuario_partida')
+            ->where('id', $id)
+            ->where('usuario_id', $usuarioId)   // el autor real, no el del body
+            ->first();
 
-        // updateExistingPivot busca por la FK del usuario y actualiza los campos extra
+        if (!$comentario) {
+            return response()->json(['message' => __('api.forbidden')], 403);
+        }
+
+        $partida = Partidas::findOrFail($request->validated('partida_id'));
+
+        // El comentario debe pertenecer a la partida indicada en el body.
+        if ((int) $comentario->partida_id !== (int) $partida->id) {
+            return response()->json(['message' => __('api.forbidden')], 403);
+        }
+
         $partida->comentarios()->updateExistingPivot($usuarioId, [
-            'comentario' => $request->comentario,
+            'comentario' => $request->validated('comentario'),
             'updated_at' => now()
         ]);
 
-        return response()->json(['message' => 'Comentario actualizado con éxito']);
+        return response()->json(['message' => __('api.comentario_updated')]);
     }
 
     // Función para eliminar un comentario
@@ -219,31 +290,40 @@ class UsuariosController extends Controller
     {
         if (!$request->user()->es_admin) {
             return response()->json([
-                'message' => 'No tienes los permisos necesarios para acceder a este recurso.'
+                'message' => __('api.forbidden')
             ], 403);
         }
         $existe = DB::table('comentarios_usuario_partida')->where('id', $id)->first();
         if (!$existe) {
-            return response()->json(['message' => 'El comentario no existe'], 404);
+            return response()->json(['message' => __('api.comentario_not_found')], 404);
         }
         DB::table('comentarios_usuario_partida')->where('id', $id)->delete();
-        Notificacion::create([
-            'usuario_id'  => $existe->usuario_id,
-            'tipo'        => 'comentario',
-            'descripcion' => 'Se ha eliminado uno de tus comentarios.',
-            'reporte_id'  => null,
-            'partida_id'  => $existe->partida_id,
-        ]);
+        // No se notifica a un autor inexistente.
+        if ($existe->usuario_id) {
+            Notificacion::create([
+                'usuario_id'  => $existe->usuario_id,
+                'tipo'        => 'comentario',
+                'descripcion' => __('api.notif_comentario_deleted'),
+                'reporte_id'  => null,
+                'partida_id'  => $existe->partida_id,
+            ]);
+        }
         return response()->json([
             'status' => 'success',
-            'message' => 'Comentario eliminado correctamente'
+            'message' => __('api.comentario_deleted')
         ]);
     }
 
     // Función para obtener el ranking de usuarios por victoria
     public function ranking_victorias()
     {
-        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'es_admin', 'is_tester')
+        // Sin `email`: estas rutas son públicas y filtrar el correo expondría
+        // la dirección de todos los usuarios a cualquier visitante anónimo.
+        //
+        // El filtro se hace con `has()` sobre la relación y no con `having()`:
+        // `having` sin `groupBy` es inválido en SQLite y en MySQL descarta
+        // todas las filas, dejando el ranking siempre vacío.
+        $usuarios = Usuarios::select('id', 'nick', 'avatar', 'color', 'es_admin', 'is_tester')
             ->withCount([
                 'tiene_jugadas as total_victorias' => function ($query) {
                     $query->where('victoria', true);
@@ -253,7 +333,7 @@ class UsuariosController extends Controller
                 },
                 'tiene_jugadas'
             ])
-            ->having('total_victorias', '>', 0)
+            ->whereHas('tiene_jugadas', fn ($q) => $q->where('victoria', true))
             ->orderBy('total_victorias', 'desc')
             ->get();
         return response()->json(['usuarios' => $usuarios]);
@@ -262,12 +342,13 @@ class UsuariosController extends Controller
     // Función para obtener el ranking de usuarios por record de rondas
     public function ranking_rondas()
     {
-        $usuarios = Usuarios::select('id', 'nick', 'email', 'avatar', 'color', 'es_admin', 'is_tester')
+        // Sin `email` (ruta pública). Ver ranking_victorias().
+        $usuarios = Usuarios::select('id', 'nick', 'avatar', 'color', 'es_admin', 'is_tester')
             ->withMax('tiene_jugadas as record_rondas', 'rondas')
             ->withCount([
                 'tiene_jugadas as total_partidas'
             ])
-            ->having('total_partidas', '>', 0)
+            ->has('tiene_jugadas', '>=', 1)
             ->orderBy('record_rondas', 'desc')
             ->get();
 
@@ -285,6 +366,23 @@ class UsuariosController extends Controller
         return response()->json([
             'status' => 'alive',
             'fecha_guardada' => $user->ultima_vez_visto
+        ]);
+    }
+
+    // Fase 0 i18n: persiste el locale del usuario ('es' | 'en').
+    public function updateLocale(Request $request)
+    {
+        $validated = $request->validate([
+            'locale' => 'required|string|in:es,en',
+        ]);
+
+        $user = $request->user();
+        $user->locale = $validated['locale'];
+        $user->save();
+
+        return response()->json([
+            'locale' => $user->locale,
+            'message' => __('api.locale_ok'),
         ]);
     }
 
@@ -315,7 +413,7 @@ class UsuariosController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Logro registrado.',
+                'message' => __('api.logro_registered'),
                 'obtenido' => true,
             ]);
         }
@@ -347,7 +445,7 @@ class UsuariosController extends Controller
         ]);
 
         return response()->json([
-            'message' => $obtenido ? 'Logro completado.' : 'Progreso actualizado.',
+            'message' => $obtenido ? __('api.logro_completed') : __('api.progreso_updated'),
             'progreso' => $nuevoProgreso,
             'meta' => $logro->meta,
             'obtenido' => $obtenido,

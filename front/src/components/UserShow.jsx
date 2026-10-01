@@ -5,8 +5,10 @@ import Placeholder from '/images/placeholder.webp'
 import ConfirmationModal from "./modals/ConfirmationModal.jsx";
 import { useUser } from "../hooks/useUser";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 const UserShow = ({ userInfo, admin = false }) => {
+    const { t } = useTranslation('profile');
     const { deleteProfilePhoto, update } = useUser();
     const navigate = useNavigate();
 
@@ -22,16 +24,16 @@ const UserShow = ({ userInfo, admin = false }) => {
 
     let adminChangeMessage;
     if (userInfo.es_admin) {
-        adminChangeMessage = "El usuario dejará de ser administrador. ¿Estás seguro?";
+        adminChangeMessage = t('revokeAdmin');
     } else {
-        adminChangeMessage = "El usuario pasará a ser administrador. ¿Estás seguro?";
+        adminChangeMessage = t('grantAdmin');
     }
 
     let testerChangeMessage;
     if (userInfo.is_tester) {
-        testerChangeMessage = "El usuario dejará de ser tester. ¿Estás seguro?";
+        testerChangeMessage = t('revokeTester');
     } else {
-        testerChangeMessage = "El usuario pasará a ser tester. ¿Estás seguro?";
+        testerChangeMessage = t('grantTester');
     }
 
     const handleChangeAdmin = (nick, isAdmin) => {
@@ -55,28 +57,28 @@ const UserShow = ({ userInfo, admin = false }) => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={() => handleDeleteProfile(userInfo.nick)}
-                title="Confirmar Eliminación"
-                message="¿Estás seguro de que deseas eliminar la foto de perfil? Esta acción es irreversible."
+                title={t('confirmDeleteTitle')}
+                message={t('confirmDeleteMessage')}
             />
             <ConfirmationModal
                 isOpen={isAdminChangeModalOpen}
                 onClose={() => setIsAdminChangeModalOpen(false)}
                 onConfirm={() => handleChangeAdmin(userInfo.nick, userInfo.es_admin)}
-                title="Cambiar Rol de Administrador"
+                title={t('changeAdminTitle')}
                 message={adminChangeMessage}
             />
             <ConfirmationModal
                 isOpen={isTesterChangeModalOpen}
                 onClose={() => setIsTesterChangeModalOpen(false)}
                 onConfirm={() => handleChangeTester(userInfo.nick, userInfo.is_tester)}
-                title="Cambiar Rol de Administrador"
+                title={t('changeAdminTitle')}
                 message={testerChangeMessage}
             />
             <div className={admin ? "show-admin" : "show"}>
                 <img
                     className="show-avatar"
                     src={userInfo.avatar}
-                    alt={'Avatar de ' +  userInfo.nick}
+                    alt={t('avatarOf', { nick: userInfo.nick })}
                     style={{ borderColor: userInfo.color }}
                     onError={(e) => {
                         e.currentTarget.src = Placeholder;
@@ -86,27 +88,27 @@ const UserShow = ({ userInfo, admin = false }) => {
                 {admin ?
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <div style={{ display: "flex", flexDirection: "row" }}>
-                            <h1>Admin: <span className={userInfo.es_admin ? "admin" : "user"}>{userInfo.es_admin ? "Si" : "No"}</span></h1>
-                            <h1>Tester: <span className={userInfo.is_tester ? "tester" : "user"}>{userInfo.is_tester ? "Si" : "No"}</span></h1>
-                            <h1>Jugadas: {userInfo?.tiene_jugadas_count??0}</h1>
+                            <h1>{t('admin')} <span className={userInfo.es_admin ? "admin" : "user"}>{userInfo.es_admin ? t('yes') : t('no')}</span></h1>
+                            <h1>{t('tester')} <span className={userInfo.is_tester ? "tester" : "user"}>{userInfo.is_tester ? t('yes') : t('no')}</span></h1>
+                            <h1>{t('played')} {userInfo?.tiene_jugadas_count??0}</h1>
                         </div>
                         <div className="show-buttons">
-                            <button onClick={() => setIsDeleteModalOpen(true)}>Eliminar foto</button>
+                            <button onClick={() => setIsDeleteModalOpen(true)}>{t('deletePhoto')}</button>
                             <button
                                 onClick={() => {
                                     setIsAdminChangeModalOpen(true);
                                 }}
                             >
-                                Cambiar estado admin
+                                {t('changeAdminState')}
                             </button>
                             <button
                                 onClick={() => {
                                     setIsTesterChangeModalOpen(true);
                                 }}
                             >
-                                Cambiar estado tester
+                                {t('changeTesterState')}
                             </button>
-                            <button onClick={() => { navigate(`/perfil/${userInfo.nick}`) }}>Ver perfil</button>
+                            <button onClick={() => { navigate(`/perfil/${userInfo.nick}`) }}>{t('viewProfile')}</button>
                         </div>
                     </div>
                     : <></>

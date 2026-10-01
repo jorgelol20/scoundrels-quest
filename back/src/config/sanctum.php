@@ -4,7 +4,18 @@ use Laravel\Sanctum\Sanctum;
 $MINUTOS = 0;
 $HORAS = 0;
 $DIAS = 7;
-$tiempo_expiracion = ($DIAS * 24 * 60) + ($HORAS * 60) + $MINUTOS;
+$porDefecto = ($DIAS * 24 * 60) + ($HORAS * 60) + $MINUTOS;
+
+// La caducidad de los tokens pasa a ser configurable por entorno. Si no se
+// define SANCTUM_EXPIRATION se conservan los 7 días por defecto.
+// Un valor 0 desactiva la caducidad.
+// Ojo: env() devuelve "" cuando la variable existe pero está vacía y
+// (int) "" === 0 desactivaría la caducidad sin querer; solo se castea si hay
+// un valor numérico real.
+$envExpiracion = env('SANCTUM_EXPIRATION');
+$tiempo_expiracion = is_numeric($envExpiracion)
+    ? (int) $envExpiracion
+    : $porDefecto;
 
 return [
 

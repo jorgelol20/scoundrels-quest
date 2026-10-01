@@ -5,6 +5,7 @@ import VisibilityOff from '/images/visibility_off.svg'
 import Banner from '../structure/Banner.jsx';
 import './LoginPage.css'
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { settingsContext } from '../../context/SettingsProvider.jsx';
 
 import GoogleLogo from '/images/google-icon.svg'
@@ -13,6 +14,7 @@ import XLogo from '/images/x-icon.svg'
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Login = () => {
+    const { t } = useTranslation('auth');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [viewPassword, setViewPassword] = useState(false)
@@ -47,13 +49,13 @@ const Login = () => {
 
             <div className="form">
                 <form className="login-form" onSubmit={handleSubmit}>
-                    <h2>Iniciar Sesión</h2>
-                    {loginError ? <><br /><label className='form-error' htmlFor="newPassword"> {loginError.response?.errors?.email[0] ?? 'Credenciales no válidas'} </label><br /></> : <></>}
+                    <h2>{t('loginTitle')}</h2>
+                    {loginError ? <><br /><label className='form-error' htmlFor="newPassword"> {loginError.response?.errors?.email[0] ?? t('loginInvalidCredentials')} </label><br /></> : <></>}
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
+                        placeholder={t('loginEmailPlaceholder')}
                         required
                     />
                     <br />
@@ -62,16 +64,16 @@ const Login = () => {
                             type={viewPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Contraseña"
+                            placeholder={t('loginPasswordPlaceholder')}
                             required
                         /><button type="button" className='seePassword' onClick={() => { setViewPassword(!viewPassword) }}><img src={viewPassword ? VisibilityOn : VisibilityOff} /></button>
                     </div>
                     <br />
                     <div>
                         <button type="submit" onClick={(event) => { startButtonSound(true) }} disabled={isLogin}>
-                            {isLogin ? 'Entrando...' : 'Login'}
+                            {isLogin ? t('loginSubmitting') : t('loginSubmit')}
                         </button>
-                        <p>¿No tienes cuenta? <a onClick={() => { navigate('/signup') }}>¡Registrate!</a></p>
+                        <p>{t('loginNoAccount')} <a onClick={() => { navigate('/signup') }}>{t('loginRegisterLink')}</a></p>
                         <div className='social-login'>
                             <button type='button' className='google-login' onClick={loginWithGoogle}>Google <img className='google-icon' src={GoogleLogo} /></button>
                             <button type='button' className='google-login' onClick={loginWithX}>X <img className='google-icon' src={XLogo} /></button>

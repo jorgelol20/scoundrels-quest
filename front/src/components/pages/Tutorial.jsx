@@ -1,6 +1,7 @@
 // 1. React y librerías externas (NPM)
 import React, { useState, Fragment, useContext, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Layer, Label, Rect, Stage, Text, Image, Group } from "react-konva";
 import useImage from "use-image";
 
@@ -70,63 +71,41 @@ const getModifierEffects = (modifier) => {
     }
 };
 
+// Las categorías y filtros se guardan como claves estables (traducibles) en el
+// estado; sólo las etiquetas que se muestran pasan por t().
 const getModifierCategory = (modifier) => {
     const effectNames = getModifierEffects(modifier).map(effect => effect?.name);
 
     if (effectNames.some(name => ['user_clubs_dmg', 'user_spades_dmg', 'mma', 'critical_percentage', 'pentakill_dmg', 'blacksmith_dmg', 'tamer_dmg'].includes(name))) {
-        return 'Daño';
+        return 'damage';
     }
     if (effectNames.some(name => ['max_hp', 'dmg_reduction', 'lifeward', 'health_steal', 'vitamine', 'gluttony', 'grandma', 'tactical_change'].includes(name))) {
-        return 'Defensa';
+        return 'defense';
     }
     if (effectNames.some(name => ['gold_multiplier', 'interest', 'refund'].includes(name))) {
-        return 'Economía';
+        return 'economy';
     }
     if (effectNames.some(name => ['max_scapes', 'enemy_extra_dmg', 'ricochet', 'mma', 'user_clubs_dmg', 'user_spades_dmg'].includes(name))) {
-        return 'Control';
+        return 'control';
     }
 
-    return 'Otros';
+    return 'other';
 };
 
-const modifierFilters = ['Todos', 'Daño', 'Defensa', 'Economía', 'Control', 'Otros'];
-const effectFilters = ['Todos', 'Enemigo', 'Arma', 'Curación'];
-const effectDetails = {
-    'Anticuras': { origin: 'Enemigo', timing: 'Resto de la mano', value: 'Bloquea curación' },
-    'Reducción de daño': { origin: '13-Corazón', timing: 'Siguiente ataque', value: '-10 daño' },
-    'Oro extra': { origin: 'Enemigo', timing: 'Al jugar la carta', value: 'Valor del enemigo' },
-    'Ruleta de curación': { origin: '14-Corazón', timing: 'Al jugarla', value: '100 / 25%' },
-    'Invencibilidad': { origin: '11-Diamante', timing: 'Primer ataque', value: '0 daño' },
-    'Saqueo': { origin: 'Enemigo', timing: 'Al jugar la carta', value: '2× valor' },
-    'Veneno': { origin: 'Enemigo', timing: '3 manos', value: '1 por turno' },
-    'Curación progresiva': { origin: '12-Corazón', timing: '3 rondas', value: '10 + 3' },
-    'Restaurar habilidad': { origin: '11-Corazón', timing: 'Al jugarla', value: 'Habilidad' },
-    'Robo de vida': { origin: '13-Diamante', timing: 'Al derrotar', value: '1 vida' },
-    'Revivir': { origin: '12-Diamante', timing: 'Al morir', value: '1 vida' },
-    'Espinoso': { origin: 'Enemigo', timing: 'Al jugar la carta', value: '3 daño' },
-    'Rompe Armas': { origin: 'Enemigo', timing: 'Al jugar la carta', value: 'Arma activa' },
-    'Mitosis': { origin: 'Enemigo', timing: 'Al derrotar', value: '2 enemigos' },
-    'Robaalmas': { origin: 'Enemigo', timing: '3 turnos', value: '-3 vida máxima' },
-    'Sello Arcano': { origin: 'Enemigo', timing: '3 turnos', value: 'Habilidad bloqueada' },
-    'Bloqueo': { origin: 'Enemigo', timing: 'Al huir', value: 'Permanece en mano' },
-};
+const modifierFilters = ['all', 'damage', 'defense', 'economy', 'control', 'other'];
+const effectFilters = ['all', 'enemy', 'weapon', 'heal'];
+// Efectos que tienen ficha de detalle en effects.details.<id>
+const effectsWithDetails = [
+    'antiheal', 'dmg_reduction', 'extra_gold', 'heal_roulete', 'invincibility',
+    'plunder', 'poison', 'progresive_heal', 'restore_ability', 'health_steal',
+    'revive', 'thorny', 'weapon_breaker', 'mitosis', 'souleater', 'seal', 'blocked',
+];
 const simulatorEffectOptions = [
-    { id: 'invincibility', label: 'Invencibilidad', description: 'El primer golpe con arma hace 0 de daño.' },
-    { id: 'revive', label: 'Revivir', description: 'Si ibas a morir, sobrevives con 1 de vida.' },
-    { id: 'health_steal', label: 'Robo de vida', description: 'Recuperas 1 de vida al derrotar con arma.' },
-    { id: 'dmg_reduction', label: 'Reducción de daño', description: 'Resta 10 al siguiente daño enemigo.' },
+    'invincibility', 'revive', 'health_steal', 'dmg_reduction',
 ];
 const simulatorEnemyEffectOptions = [
-    { id: 'thorny', label: 'Espinoso', description: 'El enemigo te inflige 3 de daño adicional.' },
-    { id: 'poison', label: 'Veneno', description: 'Sufres 1 de daño al pasar la mano.' },
-    { id: 'weapon_breaker', label: 'Rompe Armas', description: 'El enemigo destruye el arma activa.' },
-    { id: 'plunder', label: 'Saqueo', description: 'Pierdes el doble del valor del enemigo en oro.' },
-    { id: 'extra_gold', label: 'Oro extra', description: 'Ganas oro equivalente al valor del enemigo.' },
-    { id: 'souleater', label: 'Robaalmas', description: 'Pierdes 3 de vida máxima durante 3 turnos.' },
-    { id: 'antiheal', label: 'Anticuras', description: 'No puedes curarte durante el resto de la mano.' },
-    { id: 'mitosis', label: 'Mitosis', description: 'Al derrotar al enemigo aparecen dos enemigos más débiles.' },
-    { id: 'seal', label: 'Sello Arcano', description: 'La habilidad queda bloqueada durante 3 turnos.' },
-    { id: 'blocked', label: 'Bloqueo', description: 'La carta no puede salir de la mano al huir.' },
+    'thorny', 'poison', 'weapon_breaker', 'plunder', 'extra_gold',
+    'souleater', 'antiheal', 'mitosis', 'seal', 'blocked',
 ];
 
 const getCardEffectName = (card) => {
@@ -144,107 +123,25 @@ const getCardEffectName = (card) => {
 };
 
 const cardReferenceDetails = [
-    {
-        type: 'Enemigo',
-        icon: SpadeIcon,
-        values: 'Base: 2-14',
-        availability: 'Mazo inicial y nuevas rondas',
-        description: 'Se juega contra el arma activa. Su valor determina el daño que recibes.',
-    },
-    {
-        type: 'Arma',
-        icon: DiamondIcon,
-        values: 'Base: 2-10',
-        availability: 'Valores 11-14 en tienda',
-        description: 'Se coloca en la zona de equipo y reduce el daño de los enemigos.',
-    },
-    {
-        type: 'Curación',
-        icon: HeartIcon,
-        values: 'Base: 2-10',
-        availability: 'Valores 11-14 en tienda',
-        description: 'Se juega para recuperar vida. Las cartas especiales añaden otros efectos.',
-    },
-    {
-        type: 'Enemigo',
-        icon: ClubIcon,
-        values: 'Base: 2-14',
-        availability: 'Mazo inicial y nuevas rondas',
-        description: 'Los tréboles son enemigos monstruosos con las mismas reglas de combate.',
-    },
+    { id: 'spade', icon: SpadeIcon },
+    { id: 'diamond', icon: DiamondIcon },
+    { id: 'heart', icon: HeartIcon },
+    { id: 'club', icon: ClubIcon },
 ];
 
 const minibossDetails = [
-    {
-        name: 'Reina Slime',
-        effect: 'Sticky',
-        value: '16',
-        timing: 'Cada golpe recibido',
-        description: 'Reduce su valor a la mitad y crea dos slimes más débiles. La Reina Slime queda derrotada cuando llega a valor 2.',
-    },
-    {
-        name: 'Araña gigante',
-        effect: 'Telaraña',
-        value: '6 por parte',
-        timing: 'Al atacar una parte',
-        description: 'La Araña está dividida en partes. Al eliminar una parte, no podrás huir durante 3 turnos.',
-    },
-    {
-        name: 'Chamán demoníaco',
-        effect: 'Fuerza del caos',
-        value: 'Variable',
-        timing: 'Cada 5 manos',
-        description: 'Su valor cambia según los enemigos restantes. Si lo atacas, se elimina inmediatamente, pero puede volver a aparecer.',
-    },
-    {
-        name: 'Reina de los Ladrones',
-        effect: 'Último saqueo',
-        value: '12',
-        timing: 'Última mano de la ronda',
-        description: 'Al derrotarla, roba el 25% de tu oro y destruye el arma utilizada para vencerla.',
-    },
-    {
-        name: 'Rey Hada',
-        effect: 'Suministros',
-        value: '30',
-        timing: 'Cada curación',
-        description: 'Cada vez que te curas, el Rey Hada reduce tu vida máxima en 2, hasta un mínimo de 2.',
-    },
-    {
-        name: 'Guantes',
-        effect: 'Bolas de pelo',
-        value: '9',
-        timing: 'Última mano de la ronda',
-        description: 'Cada vez que huyas, Guantes añade una carta de bola de pelo con valor 0 y un efecto aleatorio.',
-    },
-    {
-        name: 'Bola de pelo',
-        effect: 'Invocación',
-        value: '0',
-        timing: 'Al huir',
-        description: 'No es un miniboss independiente: es una carta invocada por Guantes que puede volver a llamar a su dueño.',
-    },
-    {
-        name: 'Mímico',
-        effect: 'Camuflaje',
-        value: '16 real',
-        timing: 'Aparece disfrazado',
-        description: 'Se hace pasar por una curación, pero su valor real es 16. Necesitarás comparar sus pistas para descubrirlo.',
-    },
+    'reina_slime',
+    'arana_gigante',
+    'chaman_demoniaco',
+    'reina_ladrones',
+    'rey_hada',
+    'guantes',
+    'bola_pelo',
+    'mimico',
 ];
 
-const simulatorCharacterNotes = {
-    guerrero: 'A mitad de vida o menos, aumenta su daño un 50% y puede hacer huir enemigos.',
-    paladin: 'Comienza con 25 de vida máxima. En cada ronda recupera 5 de vida.',
-    elfo: 'Reduce el valor de dos cartas y puede huir una vez adicional.',
-    mago: 'Puede ver información de las siguientes cartas y barajar el mazo.',
-    apostador: 'Recibe 50 de oro al comenzar y gana 10 de oro base por enemigo derrotado con arma.',
-    herrero: 'Gana 1 de daño adicional con armas y puede crear un arma durante la ronda.',
-    vampiro: 'Roba vida al derrotar enemigos, con un límite máximo de 10.',
-    domador: 'Gana 1 de daño adicional con armas y puede convertir enemigos en armas.',
-};
-
 const Tutorial = () => {
+    const { t } = useTranslation('tutorial');
     const navigate = useNavigate();
     const { modifiers } = useModifier()
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -266,10 +163,10 @@ const Tutorial = () => {
 
     // Tutorial 2
     const modificadores = Array.isArray(modifiers) ? modifiers : [];
-    const [modifierFilter, setModifierFilter] = useState('Todos');
-    const [effectFilter, setEffectFilter] = useState('Todos');
+    const [modifierFilter, setModifierFilter] = useState('all');
+    const [effectFilter, setEffectFilter] = useState('all');
     const visibleModifiers = modificadores.filter(modifier =>
-        modifierFilter === 'Todos' || getModifierCategory(modifier) === modifierFilter
+        modifierFilter === 'all' || getModifierCategory(modifier) === modifierFilter
     );
 
     // Escala para react-konva
@@ -294,9 +191,9 @@ const Tutorial = () => {
     const slide1 = (
         <Fragment>
             <div className="slide-1 slide">
-                <h1>Bienvenido a </h1>
-                <img src={GameIcon} alt="Banner Menu" />
-                <p>El roguelike estratégico de cartas más adictivo y difícil.</p>
+                <h1>{t('sections.welcome.title')}{' '}</h1>
+                <img src={GameIcon} alt={t('sections.welcome.bannerAlt')} />
+                <p>{t('sections.welcome.subtitle')}</p>
             </div>
         </Fragment>
     );
@@ -305,11 +202,11 @@ const Tutorial = () => {
         <Fragment>
             <div className="slide-2 slide">
                 <div className="container explanation-card">
-                    <h1>Tu objetivo</h1>
-                    <p>Te has adentrado en la mazmorra para conseguir <span>riquezas</span> y no tener que preocuparte más de ser pobre. ¿Sencillo verdad?</p>
-                    <h2><strong>¡Pues no!</strong></h2>
-                    <p>La ronda inicial contiene <span>44 cartas</span>: 26 enemigos, 9 armas y 9 curaciones. Para llevarte toda esa riqueza, tendrás que superar las <span>10 rondas</span> de la mazmorra.</p>
-                    <p>En cada ronda aparecen más enemigos, algunos con <span>efectos especiales</span>. Cuando llegues a 0 de vida perderás; si superas la ronda 10, ganarás la partida.</p>
+                    <h1>{t('sections.objective.title')}</h1>
+                    <p>{t('sections.objective.p1a')}<span>{t('sections.objective.p1Highlight')}</span>{t('sections.objective.p1b')}</p>
+                    <h2><strong>{t('sections.objective.motto')}</strong></h2>
+                    <p>{t('sections.objective.p2a')}<span>{t('sections.objective.p2Highlight1')}</span>{t('sections.objective.p2b')}<span>{t('sections.objective.p2Highlight2')}</span>{t('sections.objective.p2c')}</p>
+                    <p>{t('sections.objective.p3a')}<span>{t('sections.objective.p3Highlight')}</span>{t('sections.objective.p3b')}</p>
                 </div>
             </div>
         </Fragment>
@@ -319,14 +216,14 @@ const Tutorial = () => {
         <Fragment>
             <div className="slide-3 slide">
                 <div className="slide-3-info explanation-card">
-                    <h1>Cartas</h1>
-                    <p>En <span>Scoundrel's Quest</span> se utilizan las cartas de la baraja de póker donde cada una tiene una función propia.</p>
+                    <h1>{t('sections.cards.title')}</h1>
+                    <p>{t('sections.cards.p1a')}<span>{t('sections.cards.gameName')}</span>{t('sections.cards.p1b')}</p>
                     <p>
-                        Los <strong>enemigos</strong> son las picas y los tréboles. Sus valores base pueden ir del 2 al 14, aunque en rondas avanzadas su daño puede aumentar. <br />
-                        Las <span>armas</span> son los diamantes y las <span style={{ color: 'var(--main-green)' }}>curaciones</span> son los corazones. Las armas y curaciones básicas tienen valores del 2 al 10.
+                        {t('sections.cards.p2a')}<strong>{t('sections.cards.enemiesStrong')}</strong>{t('sections.cards.p2b')}<br />
+                        {t('sections.cards.p2aWeapons')}<span>{t('sections.cards.weapons')}</span>{t('sections.cards.p2c')}<span style={{ color: 'var(--main-green)' }}>{t('sections.cards.healings')}</span>{t('sections.cards.p2d')}
                     </p>
-                    <p>Las cartas especiales de valor 11 o superior se pueden encontrar en la tienda y tienen efectos propios.</p>
-                    <p><span>Ponte encima </span> o <span>clica</span> en ellas para conocer más.</p>
+                    <p>{t('sections.cards.p3')}</p>
+                    <p><span>{t('sections.cards.hover')}</span>{t('sections.cards.p4b')}<span>{t('sections.cards.click')}</span>{t('sections.cards.p4c')}</p>
                 </div>
                 <div className="card-stage">
                     {/* Carta 2 */}
@@ -352,7 +249,7 @@ const Tutorial = () => {
                                     <Label x={0} y={0}>
                                         <Rect width={150} height={110} fill="#FFF" x={50} y={0} cornerRadius={5} stroke={"black"} />
 
-                                        <Text text={"¡Comida! Te servirá para curarte tras el combate. Su poder base va desde el 2 hasta el 10"} fill="var(--main-black)" padding={5} fontSize={16} width={150} align="center" fontFamily="Alagard" x={50} y={0} />
+                                        <Text text={t('sections.cards.tooltips.food')} fill="var(--main-black)" padding={5} fontSize={16} width={150} align="center" fontFamily="Alagard" x={50} y={0} />
                                         <Image image={shopManHappy} width={60} height={60} x={15} y={85} imageSmoothingEnabled={false} listening={false} />
                                     </Label>
                                 )}
@@ -382,7 +279,7 @@ const Tutorial = () => {
                                 {hoveredIndex === tutorial1Cards[2]?.id && (
                                     <Label x={0} y={0}>
                                         <Rect width={150} height={110} fill="#FFF" x={50} y={0} cornerRadius={5} stroke={"black"} />
-                                        <Text text={"Son las armas que te ayudarán en la mazmorra. Su poder base va desde el 2 hasta el 10."} fill="var(--main-black)" padding={5} fontSize={16} width={150} align="center" fontFamily="Alagard" x={50} y={0} />
+                                        <Text text={t('sections.cards.tooltips.weapon')} fill="var(--main-black)" padding={5} fontSize={16} width={150} align="center" fontFamily="Alagard" x={50} y={0} />
                                         <Image image={shopManNormal} width={60} height={60} x={15} y={85} imageSmoothingEnabled={false} listening={false} />
                                     </Label>
                                 )}
@@ -412,7 +309,7 @@ const Tutorial = () => {
                                 {hoveredIndex === tutorial1Cards[0]?.id && (
                                     <Label x={0} y={0}>
                                         <Rect width={150} height={90} fill="#FFF" x={50} y={20} cornerRadius={5} stroke={"black"} />
-                                        <Text text={"Se tratan de enemigos con forma humanoide. Su valor base va del 2 al 14."} fill="var(--main-black)" padding={5} fontSize={16} width={150} align="center" fontFamily="Alagard" x={50} y={20} />
+                                        <Text text={t('sections.cards.tooltips.humanoid')} fill="var(--main-black)" padding={5} fontSize={16} width={150} align="center" fontFamily="Alagard" x={50} y={20} />
                                         <Image image={shopManAngry} width={60} height={60} x={15} y={85} imageSmoothingEnabled={false} listening={false} />
                                     </Label>
 
@@ -443,7 +340,7 @@ const Tutorial = () => {
                                 {hoveredIndex === tutorial1Cards[3]?.id && (
                                     <Label x={0} y={0}>
                                         <Rect width={150} height={90} fill="#FFF" x={50} y={20} cornerRadius={5} stroke={"black"} />
-                                        <Text text={"Se tratan de enemigos monstruosos. Su valor base va del 2 al 14."} fill="var(--main-black)" padding={5} fontSize={16} width={150} align="center" fontFamily="Alagard" x={50} y={20} />
+                                        <Text text={t('sections.cards.tooltips.monster')} fill="var(--main-black)" padding={5} fontSize={16} width={150} align="center" fontFamily="Alagard" x={50} y={20} />
                                         <Image image={shopManThinking} width={60} height={60} x={15} y={85} imageSmoothingEnabled={false} listening={false} />
                                     </Label>
                                 )}
@@ -451,17 +348,17 @@ const Tutorial = () => {
                         </Stage>
                     </div>
                 </div>
-                <div className="card-reference-grid" aria-label="Resumen de tipos de carta">
+                <div className="card-reference-grid" aria-label={t('sections.cards.referenceAria')}>
                     {cardReferenceDetails.map((cardDetail, index) => (
-                        <article className={`card-reference-card card-reference-${index}`} key={`${cardDetail.type}-${index}`}>
+                        <article className={`card-reference-card card-reference-${index}`} key={`${cardDetail.id}-${index}`}>
                             <div className="card-reference-icon">
-                                <img src={cardDetail.icon} alt={`Palo de ${cardDetail.type}`} />
-                                <span>{cardDetail.type}</span>
+                                <img src={cardDetail.icon} alt={t('aria.cardSuit', { type: t(`sections.cards.reference.${cardDetail.id}.type`) })} />
+                                <span>{t(`sections.cards.reference.${cardDetail.id}.type`)}</span>
                             </div>
                             <div className="card-reference-content">
-                                <strong>{cardDetail.values}</strong>
-                                <p>{cardDetail.description}</p>
-                                <small>{cardDetail.availability}</small>
+                                <strong>{t(`sections.cards.reference.${cardDetail.id}.values`)}</strong>
+                                <p>{t(`sections.cards.reference.${cardDetail.id}.description`)}</p>
+                                <small>{t(`sections.cards.reference.${cardDetail.id}.availability`)}</small>
                             </div>
                         </article>
                     ))}
@@ -474,17 +371,17 @@ const Tutorial = () => {
     const slide4 = (
         <Fragment>
             <div className="slide-4 slide">
-                <h1>Modificadores</h1>
-                <p>En tu partida irás conseguindo <span>modificadores</span> que te ayudarán a llegar lo más lejos que puedas. Al comenzar cada ronda se ofrecen <span>3 opciones</span> y puedes elegir una.</p>
-                <p>También puedes comprar modificadores en la tienda. <span>Ponte encima</span> de ellos para conocer sus efectos.</p>
-                <div className="tutorial-filters" role="group" aria-label="Categorías de modificadores">
+                <h1>{t('sections.modifiers.title')}</h1>
+                <p>{t('sections.modifiers.p1a')}<span>{t('sections.modifiers.p1Highlight1')}</span>{t('sections.modifiers.p1b')}<span>{t('sections.modifiers.p1Highlight2')}</span>{t('sections.modifiers.p1c')}</p>
+                <p>{t('sections.modifiers.p2a')}<span>{t('sections.modifiers.p2Highlight')}</span>{t('sections.modifiers.p2b')}</p>
+                <div className="tutorial-filters" role="group" aria-label={t('sections.modifiers.filtersAria')}>
                     {modifierFilters.map(filter => (
                         <button
                             className={modifierFilter === filter ? 'tutorial-filter active' : 'tutorial-filter'}
                             key={`modifier-filter-${filter}`}
                             onClick={() => setModifierFilter(filter)}
                         >
-                            {filter}
+                            {t(`filters.modifier.${filter}`)}
                         </button>
                     ))}
                 </div>
@@ -501,69 +398,75 @@ const Tutorial = () => {
     )
 
     const cardsEffects = [
-        { 'name': 'Anticuras', 'description': 'Durante el resto de la mano, te impide curarte.', 'image': AntihealIcon, 'target': 'Enemigo' },
-        { 'name': 'Reducción de daño', 'description': 'Reduce en 10 el siguiente ataque que recibas.', 'image': DmgReductionIcon, 'target': 'Curación' },
-        { 'name': 'Oro extra', 'description': 'El enemigo te da una cantidad de oro equivalente a su valor.', 'image': ExtraGoldIcon, 'target': 'Enemigo' },
-        { 'name': 'Ruleta de curación', 'description': 'Cura 100 de vida, pero tiene un 25% de probabilidad de hacer el efecto contrario.', 'image': HealRouleteIcon, 'target': 'Curación' },
-        { 'name': 'Invencibilidad', 'description': 'El primer ataque que recibas con este arma te hace 0 de daño.', 'image': InvincibilityIcon, 'target': 'Arma' },
-        { 'name': 'Saqueo', 'description': 'El enemigo te quita una cantidad de oro equivalente al doble de su valor.', 'image': PlunderIcon, 'target': 'Enemigo' },
-        { 'name': 'Veneno', 'description': 'Te causa 1 de daño al pasar de mano durante 3 turnos.', 'image': PoisonIcon, 'target': 'Enemigo' },
-        { 'name': 'Curación progresiva', 'description': 'Te cura 10 de vida y después 3 por ronda durante 3 rondas.', 'image': ProgresiveHealIcon, 'target': 'Curación' },
-        { 'name': 'Restaurar habilidad', 'description': 'Restaura la habilidad de tu personaje, pero no te cura.', 'image': RestoreAbilityIcon, 'target': 'Curación' },
-        { 'name': 'Robo de vida', 'description': 'Robas 1 de vida a cada enemigo derrotado con este arma.', 'image': HealthStealIcon, 'target': 'Arma' },
-        { 'name': 'Revivir', 'description': 'Si fueses a morir golpeando con el arma portadora del efecto, sobrevives a 1 de vida.', 'image': ReviveIcon, 'target': 'Arma' },
-        { 'name': 'Espinoso', 'description': 'Recibes 3 de daño fijo.', 'image': ThornyIcon, 'target': 'Enemigo' },
-        { 'name': 'Rompe Armas', 'description': 'Rompe el arma activa.', 'image': WeaponBreakerIcon, 'target': 'Enemigo' },
-        { 'name': 'Mitosis', 'description': 'Al matar al enemigo, crea dos enemigos más débiles.', 'image': MitosisIcon, 'target': 'Enemigo' },
-        { 'name': 'Robaalmas', 'description': 'Durante 3 turnos, pierdes 3 de vida máxima.', 'image': SouleaterIcon, 'target': 'Enemigo' },
-        { 'name': 'Sello Arcano', 'description': 'Durante 3 turnos, la habilidad permanece bloqueada.', 'image': SealIcon, 'target': 'Enemigo' },
-        { 'name': 'Bloqueo', 'description': 'Aunque huyas, la carta se mantendrá en la mano.', 'image': BlockedIcon, 'target': 'Enemigo' },
+        { 'id': 'antiheal', 'image': AntihealIcon, 'target': 'enemy' },
+        { 'id': 'dmg_reduction', 'image': DmgReductionIcon, 'target': 'heal' },
+        { 'id': 'extra_gold', 'image': ExtraGoldIcon, 'target': 'enemy' },
+        { 'id': 'heal_roulete', 'image': HealRouleteIcon, 'target': 'heal' },
+        { 'id': 'invincibility', 'image': InvincibilityIcon, 'target': 'weapon' },
+        { 'id': 'plunder', 'image': PlunderIcon, 'target': 'enemy' },
+        { 'id': 'poison', 'image': PoisonIcon, 'target': 'enemy' },
+        { 'id': 'progresive_heal', 'image': ProgresiveHealIcon, 'target': 'heal' },
+        { 'id': 'restore_ability', 'image': RestoreAbilityIcon, 'target': 'heal' },
+        { 'id': 'health_steal', 'image': HealthStealIcon, 'target': 'weapon' },
+        { 'id': 'revive', 'image': ReviveIcon, 'target': 'weapon' },
+        { 'id': 'thorny', 'image': ThornyIcon, 'target': 'enemy' },
+        { 'id': 'weapon_breaker', 'image': WeaponBreakerIcon, 'target': 'enemy' },
+        { 'id': 'mitosis', 'image': MitosisIcon, 'target': 'enemy' },
+        { 'id': 'souleater', 'image': SouleaterIcon, 'target': 'enemy' },
+        { 'id': 'seal', 'image': SealIcon, 'target': 'enemy' },
+        { 'id': 'blocked', 'image': BlockedIcon, 'target': 'enemy' },
     ];
     const slide5 = (
         <Fragment>
             <div className="slide-5 slide">
-                <h1>Efectos en las cartas</h1>
+                <h1>{t('sections.effects.title')}</h1>
                 <div className="explanation-card explanation-intro">
-                    <p>Aleatoriamente, algunas cartas enemigas podrán tener <span>efectos</span>. Para contrarrestar eso, en la tienda podrás obtener cartas (<span>curaciones</span> y <span>armas</span>) con efectos únicos. Revisa dónde aparece cada efecto y cómo modifica la partida.</p>
+                    <p>{t('sections.effects.introA')}<span>{t('sections.effects.introHighlight')}</span>{t('sections.effects.introB')}<span>{t('sections.effects.introHealing')}</span>{t('sections.effects.introC')}<span>{t('sections.effects.introWeapons')}</span>{t('sections.effects.introD')}</p>
                 </div>
-                <div className="tutorial-filters" role="group" aria-label="Categorías de efectos">
+                <div className="tutorial-filters" role="group" aria-label={t('sections.effects.filtersAria')}>
                     {effectFilters.map(filter => (
                         <button
                             className={effectFilter === filter ? 'tutorial-filter active' : 'tutorial-filter'}
                             key={`effect-filter-${filter}`}
                             onClick={() => setEffectFilter(filter)}
                         >
-                            {filter === 'Todos' ? 'Todos' : filter === 'Enemigo' ? 'Enemigos' : `${filter}s`}
+                            {t(`filters.effect.${filter}`)}
                         </button>
                     ))}
                 </div>
                 <div className="card-effects">
                     {
                         cardsEffects
-                            .filter(effect => effectFilter === 'Todos' || effect.target === effectFilter)
+                            .filter(effect => effectFilter === 'all' || effect.target === effectFilter)
                             .map((effect, index) => {
-                                const details = effectDetails[effect.name] || {
-                                    origin: effect.target,
-                                    timing: 'Según el efecto',
-                                    value: 'Variable',
-                                };
+                                const details = effectsWithDetails.includes(effect.id)
+                                    ? {
+                                        origin: t(`effects.details.${effect.id}.origin`),
+                                        timing: t(`effects.details.${effect.id}.timing`),
+                                        value: t(`effects.details.${effect.id}.value`),
+                                    }
+                                    : {
+                                        origin: t(`filters.targets.${effect.target}`),
+                                        timing: t('effects.fallbackTiming'),
+                                        value: t('effects.fallbackValue'),
+                                    };
 
                                 return <div key={index} className="card-effect">
                                     <div className="effect-image">
-                                        <img src={effect.image} alt={effect.name} />
-                                        <p><span>{effect.target}</span></p>
+                                        <img src={effect.image} alt={t(`effects.items.${effect.id}.name`)} />
+                                        <p><span>{t(`filters.targets.${effect.target}`)}</span></p>
                                     </div>
-                                    <div className="effect-meta" aria-label={`Origen: ${details.origin}. Momento: ${details.timing}. Valor: ${details.value}.`}>
+                                    <div className="effect-meta" aria-label={t('aria.effectMeta', details)}>
                                         <span>{details.origin}</span>
                                         <span>{details.timing}</span>
                                         <strong>{details.value}</strong>
                                     </div>
                                     <div className="effect-text">
                                         <div className="effect-name">
-                                            <h1>{effect.name}</h1>
+                                            <h1>{t(`effects.items.${effect.id}.name`)}</h1>
                                         </div>
                                         <div className="effect-description">
-                                            <p>{effect.description}</p>
+                                            <p>{t(`effects.items.${effect.id}.description`)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -583,14 +486,14 @@ const Tutorial = () => {
     const slide6 = (
         <Fragment>
             <div className="slide-6 slide">
-                <h1>Zona de juego</h1>
+                <h1>{t('sections.zones.title')}</h1>
                 <div className="explanation-card zone-explanation">
                     <p>
-                        La zona de juego se reparte en 4 partes: el <span>mazo</span>, la <span>mano</span>, la <span>zona de equipo</span> y los <span>descartes</span>.<br />
-                        El <span>mazo</span> es donde se 'apilan' todas las cartas que van a verse durante la ronda. <br />
-                        La <span>mano</span>, donde irán apareciendo las cartas que podrán ser <strong>enemigos</strong>, <span>armas</span> o <span style={{ color: "var(--main-green)" }}>curaciones</span> de <span>4 en 4</span>. Puedes jugarlas haciendo clic o arrastrándolas. <br />
-                        La <span>zona de equipo</span>, donde se colocan las armas que protejan del daño enemigo. <br />
-                        Por último, están los <span>descartes</span>, donde se quedan las cartas ya jugadas. Los enemigos derrotados volverán a aparecer en la siguiente ronda.
+                        {t('sections.zones.z1')}<span>{t('sections.zones.zMazo')}</span>{t('sections.zones.z2')}<span>{t('sections.zones.zMano')}</span>{t('sections.zones.z3')}<span>{t('sections.zones.zZona')}</span>{t('sections.zones.z4')}<span>{t('sections.zones.zDescartes')}</span>{t('sections.zones.z5')}<br />
+                        {t('sections.zones.z6')}<span>{t('sections.zones.zMazo2')}</span>{t('sections.zones.z7')}<br />
+                        {t('sections.zones.z8')}<span>{t('sections.zones.zMano2')}</span>{t('sections.zones.z9')}<strong>{t('sections.zones.zEnemigos')}</strong>{t('sections.zones.z10')}<span>{t('sections.zones.zArmas')}</span>{t('sections.zones.z11')}<span style={{ color: "var(--main-green)" }}>{t('sections.zones.zCuraciones')}</span>{t('sections.zones.z12')}<span>{t('sections.zones.zCuatro')}</span>{t('sections.zones.z13')}<br />
+                        {t('sections.zones.z14')}<span>{t('sections.zones.zZona2')}</span>{t('sections.zones.z15')}<br />
+                        {t('sections.zones.z16')}<span>{t('sections.zones.zDescartes2')}</span>{t('sections.zones.z17')}
                     </p>
                 </div>
                 <Stage width={765 * scale} height={400 * scale} scaleX={scale} scaleY={scale} y={20 * scale / 20}>
@@ -598,19 +501,19 @@ const Tutorial = () => {
                         {/* ZONA DEL MAZO */}
                         <Group x={DUNGEON_ZONE.x} y={DUNGEON_ZONE.y}>
                             <Rect width={DUNGEON_ZONE.width} height={DUNGEON_ZONE.height} fill="#0000006c" stroke="white" strokeWidth={2} cornerRadius={8} />
-                            <Text text="DUNGEON" rotation={55} fontFamily="Alagard" fontSize={20} fill="white" y={25} x={35} />
+                            <Text text={t('sections.zones.dungeon')} rotation={55} fontFamily="Alagard" fontSize={20} fill="white" y={25} x={35} />
                         </Group>
                         <Group x={DISCARD_ZONE.x} y={DISCARD_ZONE.y}>
                             <Rect width={DISCARD_ZONE.width} height={DISCARD_ZONE.height} fill="#9c4747c9" stroke="white" strokeWidth={2} cornerRadius={8} />
-                            <Text text="DESCARTES" rotation={55} fontFamily="Alagard" fontSize={20} fill="white" y={WEAPON_ZONE.height * 0.05} x={WEAPON_ZONE.width * 0.08} />
+                            <Text text={t('sections.zones.discard')} rotation={55} fontFamily="Alagard" fontSize={20} fill="white" y={WEAPON_ZONE.height * 0.05} x={WEAPON_ZONE.width * 0.08} />
                         </Group>
                         <Group x={WEAPON_ZONE.x} y={WEAPON_ZONE.y}>
                             <Rect width={WEAPON_ZONE.width} height={WEAPON_ZONE.height} fill="#6a9c476e" stroke="white" strokeWidth={2} cornerRadius={8} />
-                            <Text text="ZONA DE EQUIPO" fontFamily="Alagard" fontSize={40} fill="white" y={WEAPON_ZONE.height * 0.4} x={WEAPON_ZONE.width * 0.12} />
+                            <Text text={t('sections.zones.weaponZone')} fontFamily="Alagard" fontSize={40} fill="white" y={WEAPON_ZONE.height * 0.4} x={WEAPON_ZONE.width * 0.12} />
                         </Group>
                         <Group x={HAND_ZONE.x} y={HAND_ZONE.y}>
                             <Rect width={HAND_ZONE.width} height={HAND_ZONE.height} fill="#90c0ff50" stroke="white" strokeWidth={2} cornerRadius={8} />
-                            <Text text="MANO" fontFamily="Alagard" fontSize={40} fill="white" y={HAND_ZONE.height * 0.4} x={HAND_ZONE.width * 0.35} />
+                            <Text text={t('sections.zones.hand')} fontFamily="Alagard" fontSize={40} fill="white" y={HAND_ZONE.height * 0.4} x={HAND_ZONE.width * 0.35} />
                         </Group>
                     </Layer>
                 </Stage>
@@ -622,31 +525,11 @@ const Tutorial = () => {
     const tutorial7Cards = getTutorialCards(7) ?? [];
 
     const simulatorScenarios = [
-        {
-            id: 'explore',
-            label: 'Explorar',
-            description: 'Prueba todas las cartas disponibles en el simulador.'
-        },
-        {
-            id: 'first-weapon',
-            label: 'Primer golpe',
-            description: 'Coloca un arma y prueba su primer uso contra un enemigo.'
-        },
-        {
-            id: 'strict-order',
-            label: 'Orden de combate',
-            description: 'Comprueba cuándo puede volver a aplicarse el arma.'
-        },
-        {
-            id: 'without-weapon',
-            label: 'Sin arma',
-            description: 'Observa cuánto daño recibes cuando no tienes arma activa.'
-        },
-        {
-            id: 'special-cards',
-            label: 'Cartas especiales',
-            description: 'Prueba las cartas de valor 11, 12 y 13 de la tienda.'
-        }
+        'explore',
+        'first_weapon',
+        'strict_order',
+        'without_weapon',
+        'special_cards',
     ];
 
     const getSimulatorCards = (scenarioId) => {
@@ -664,19 +547,19 @@ const Tutorial = () => {
             getHealItem(14),
         ].filter(Boolean);
 
-        if (scenarioId === 'without-weapon') {
+        if (scenarioId === 'without_weapon') {
             return [...enemies];
         }
 
-        if (scenarioId === 'first-weapon' && weaponCard && enemies[0]) {
+        if (scenarioId === 'first_weapon' && weaponCard && enemies[0]) {
             return [weaponCard, enemies[0]];
         }
 
-        if (scenarioId === 'strict-order' && weaponCard && enemies.length >= 2) {
+        if (scenarioId === 'strict_order' && weaponCard && enemies.length >= 2) {
             return [weaponCard, enemies[0], enemies[enemies.length - 1]];
         }
 
-        if (scenarioId === 'special-cards' && specialCards.length > 0) {
+        if (scenarioId === 'special_cards' && specialCards.length > 0) {
             return [...specialCards.slice(0, 3), enemies[0]].filter(Boolean);
         }
 
@@ -716,7 +599,7 @@ const Tutorial = () => {
     const [poisonTurns, setPoisonTurns] = useState(0);
     const [progressiveHealTurns, setProgressiveHealTurns] = useState(0);
     const [antihealActive, setAntihealActive] = useState(false);
-    const [simulatorMessage, setSimulatorMessage] = useState('Elige un escenario o juega una carta para comprobar la regla.');
+    const [simulatorMessage, setSimulatorMessage] = useState(() => t('simulator.initialMessage'));
     const [room, setRoom] = useState(() => getSimulatorState('explore').hand);
     const [simulatorDeck, setSimulatorDeck] = useState(() => getSimulatorState('explore').deck);
     const [discardPile, setDiscardPile] = useState([]);
@@ -782,7 +665,10 @@ const Tutorial = () => {
 
     const handleWeapon = (card) => {
         const previousWeapon = weapon;
-        setSimulatorMessage(`Has equipado un arma de valor ${card?.valor}.${previousWeapon ? ' La secuencia de enemigos derrotados se reinicia.' : ''}`);
+        setSimulatorMessage(t('simulator.messages.equipWeapon', {
+            value: card?.valor,
+            suffix: previousWeapon ? t('simulator.messages.equipWeaponReset') : '',
+        }));
 
         if (weapon) {
             moveCardToDiscard([weapon], true);
@@ -855,39 +741,39 @@ const Tutorial = () => {
 
         if (hasInvincibility) {
             setActiveSimulatorEffects(prev => prev.filter(effect => effect !== 'invincibility'));
-            setSimulatorMessage('La invencibilidad bloquea el primer ataque: 0 de daño y el enemigo queda derrotado.');
+            setSimulatorMessage(t('simulator.messages.invincibility'));
         } else if (isSlain) {
-            setSimulatorMessage(`El arma de ${weaponPower} reduce el daño de ${enemyDamage} a ${combatDamage}.`);
+            setSimulatorMessage(t('simulator.messages.weaponReduced', { weaponPower, enemyDamage, combatDamage }));
         } else {
             setSimulatorMessage(activeWeapon
-                ? `El arma no se aplica: el último enemigo derrotado era de ${lastSlainCard?.valor} y este enemigo es de ${card?.valor}.`
-                : `No tienes arma activa, así que recibes todo el daño: ${enemyDamage}.`
+                ? t('simulator.messages.weaponNotApplied', { lastValue: lastSlainCard?.valor, value: card?.valor })
+                : t('simulator.messages.noWeapon', { enemyDamage })
             );
         }
 
         if (hasThorny) {
-            setSimulatorMessage('El enemigo tenía espinas: recibes 3 de daño adicional.');
+            setSimulatorMessage(t('simulator.messages.thorny'));
         } else if (hasPoison) {
-            setSimulatorMessage(`El veneno te causa 1 de daño. Quedan ${Math.max(0, poisonTurns - 1)} turnos.`);
+            setSimulatorMessage(t('simulator.messages.poison', { turns: Math.max(0, poisonTurns - 1) }));
         }
 
         if (hasSeal) {
-            setSimulatorMessage('Sello Arcano: la habilidad del personaje queda bloqueada durante 3 turnos.');
+            setSimulatorMessage(t('simulator.messages.seal'));
         } else if (hasBlocked) {
-            setSimulatorMessage('Bloqueo: aunque intentes huir, este enemigo permanece en la mano.');
+            setSimulatorMessage(t('simulator.messages.blocked'));
         }
 
         if (hasWeaponBreaker && weapon) {
             moveCardToDiscard([weapon], true);
             setWeapon(null);
-            setSimulatorMessage('Rompe Armas destruye el arma activa antes de resolver el combate.');
+            setSimulatorMessage(t('simulator.messages.weaponBreaker'));
         }
 
         if (hasRevive && reviveTriggered) {
             setActiveSimulatorEffects(prev => prev.filter(effect => effect !== 'revive'));
-            setSimulatorMessage('El ataque te habría dejado sin vida, pero revives con 1 de vida.');
+            setSimulatorMessage(t('simulator.messages.revive'));
         } else if (lifeStealAmount > 0) {
-            setSimulatorMessage(`El arma derrota al enemigo y recuperas ${lifeStealAmount} de vida.`);
+            setSimulatorMessage(t('simulator.messages.lifeSteal', { amount: lifeStealAmount }));
         }
 
         if (hasDamageReduction) {
@@ -921,11 +807,14 @@ const Tutorial = () => {
         }
 
         if (hasPlunder) {
-            setSimulatorMessage(`Saqueo: pierdes ${stolenGold} de oro. Ganas ${baseGoldReward} de oro base si has derrotado al enemigo con un arma.`);
+            setSimulatorMessage(t('simulator.messages.plunder', { stolen: stolenGold, base: baseGoldReward }));
         } else if (hasExtraGold && isSlain) {
-            setSimulatorMessage(`Oro extra: ganas ${specialGoldReward} de oro${baseGoldReward ? ` y ${baseGoldReward} de oro base` : ''}.`);
+            setSimulatorMessage(t('simulator.messages.extraGold', {
+                special: specialGoldReward,
+                suffix: baseGoldReward ? t('simulator.messages.extraGoldBase', { base: baseGoldReward }) : '',
+            }));
         } else if (baseGoldReward > 0) {
-            setSimulatorMessage(`Enemigo derrotado con el arma: ganas ${baseGoldReward} de oro base.`);
+            setSimulatorMessage(t('simulator.messages.baseGold', { base: baseGoldReward }));
         }
 
         if (hasMitosis && isSlain) {
@@ -957,31 +846,31 @@ const Tutorial = () => {
         const effectName = getCardEffectName(card);
 
         if (antihealActive) {
-            setSimulatorMessage('Anticuras está activo: esta curación no puede aplicarse.');
+            setSimulatorMessage(t('simulator.messages.antiheal'));
             return;
         }
 
         if (effectName === 'restore_ability') {
-            setSimulatorMessage('Restaurar habilidad activa la habilidad del personaje, pero no recupera vida.');
+            setSimulatorMessage(t('simulator.messages.restoreAbility'));
         } else if (effectName === 'progresive_heal') {
             setHealth(prev => Math.min(maxHealth, prev + 10));
             setProgressiveHealTurns(3);
-            setSimulatorMessage('Curación progresiva: recuperas 10 de vida ahora y 3 más en los próximos intercambios.');
+            setSimulatorMessage(t('simulator.messages.progresiveHeal'));
         } else if (effectName === 'heal_roulete') {
             const didHeal = Math.random() > 0.25;
             const healValue = didHeal ? 100 : -100;
             setHealth(prev => Math.max(0, Math.min(maxHealth, prev + healValue)));
             setSimulatorMessage(didHeal
-                ? 'Ruleta de curación: el resultado favorable recupera 100 de vida.'
-                : 'Ruleta de curación: el resultado contrario causa 100 de daño.'
+                ? t('simulator.messages.rouleteGood')
+                : t('simulator.messages.rouleteBad')
             );
         } else if (effectName === 'dmg_reduction') {
             setActiveSimulatorEffects(prev => [...new Set([...prev, 'dmg_reduction'])]);
-            setSimulatorMessage('Reducción de daño activada: el siguiente ataque recibe una reducción de 10 puntos de daño.');
+            setSimulatorMessage(t('simulator.messages.dmgReduction'));
         } else {
             const healValue = card?.valor || 0;
             setHealth(prev => Math.min(maxHealth, prev + healValue));
-            setSimulatorMessage(`Recuperas ${healValue} de vida.`);
+            setSimulatorMessage(t('simulator.messages.heal', { value: healValue }));
         }
 
         moveCardToDiscard([card]);
@@ -1004,7 +893,7 @@ const Tutorial = () => {
             setCanBeClicked(true);
             document.body.style.cursor = "auto";
         }, 500);
-    }, [weapon, slainMonsters, health, maxHealth, antihealActive, activeSimulatorEffects, activeEnemyEffects, poisonTurns, progressiveHealTurns, simulatorCharacterCodeValue, room, simulatorDeck]);
+    }, [t, weapon, slainMonsters, health, maxHealth, antihealActive, activeSimulatorEffects, activeEnemyEffects, poisonTurns, progressiveHealTurns, simulatorCharacterCodeValue, room, simulatorDeck]);
 
     const toggleSimulatorEffect = (effectId) => {
         setActiveSimulatorEffects(prev => (
@@ -1052,7 +941,7 @@ const Tutorial = () => {
         if (!code) {
             setMaxHealth(20);
             setHealth(previousHealth => Math.min(previousHealth, 20));
-            setSimulatorMessage('Se ha quitado el personaje de referencia. El simulador vuelve a sus reglas básicas.');
+            setSimulatorMessage(t('simulator.messages.characterRemoved'));
             return;
         }
 
@@ -1060,15 +949,17 @@ const Tutorial = () => {
         if (code === 'paladin') {
             setMaxHealth(25);
             setHealth(25);
-            setSimulatorMessage('Vitalismo aplicado: el Paladin comienza con 25 de vida.');
+            setSimulatorMessage(t('simulator.messages.paladin'));
         } else {
             setHealth(previousHealth => Math.min(previousHealth, 20));
             if (code === 'apostador') {
                 setGold(previousGold => previousGold + 50);
-                setSimulatorMessage('Apuesta Ciega aplicada: el Apostador comienza con 50 de oro y gana 10 por enemigo derrotado con arma.');
+                setSimulatorMessage(t('simulator.messages.gambler'));
             } else {
                 const character = availableCharacters?.find(item => item?.habilidad_personaje?.codigo === code);
-                setSimulatorMessage(`Pasiva aplicada: ${character?.nombre || 'personaje'}. Revisa su efecto en las reglas del simulador.`);
+                setSimulatorMessage(t('simulator.messages.passiveApplied', {
+                    name: character?.nombre || t('simulator.messages.genericCharacter'),
+                }));
             }
         }
     };
@@ -1094,8 +985,9 @@ const Tutorial = () => {
         setAntihealActive(false);
         setSimulatorCharacterCode('');
         setSimulatorMessage(
-            simulatorScenarios.find(scenario => scenario.id === scenarioId)?.description ||
-            'Simulador reiniciado.'
+            simulatorScenarios.includes(scenarioId)
+                ? t(`simulator.scenarios.${scenarioId}.description`)
+                : t('simulator.messages.resetFallback')
         );
     };
 
@@ -1103,14 +995,14 @@ const Tutorial = () => {
         <Fragment>
             <div className="slide-7 slide">
                 <div className="container explanation-card">
-                    <h1>Combate</h1>
+                    <h1>{t('sections.combat.title')}</h1>
                     <p>
-                        Las bases del combate en Scoundrel's Quest giran en torno al arma activa. Puedes jugar las cartas haciendo clic o arrastrándolas a la zona de equipo. <br />
-                        Si <span>tienes arma</span> y <span>no has pegado aún</span> a ningún <strong>enemigo</strong>, el daño que recibirás será el valor del <strong>enemigo</strong> menos el valor del <span>arma</span>. <br />
-                        Si <span>ya dispones de un arma</span> y ya la has <span>usado contra un enemigo</span>, para que el arma tenga efecto el <span>último enemigo</span> que has derrotado tiene que ser <span>mayor</span> que el que vas a derrotar a continuación. <br />
-                        <span>Si no tienes ninguna arma</span> o si el enemigo que vas a golpear es <span>mayor o igual que el anterior</span>, recibirás <strong>todo el daño del enemigo</strong>. El daño nunca puede ser menor que 0.
+                        {t('sections.combat.c1')}<br />
+                        {t('sections.combat.cSi1')}<span>{t('sections.combat.haveWeapon')}</span>{t('sections.combat.c2')}<span>{t('sections.combat.notHitYet')}</span>{t('sections.combat.c3')}<strong>{t('sections.combat.enemyS1')}</strong>{t('sections.combat.c4')}<strong>{t('sections.combat.enemyS2')}</strong>{t('sections.combat.c5')}<span>{t('sections.combat.weaponS')}</span>{t('sections.combat.c6')}<br />
+                        <span>{t('sections.combat.alreadyHave')}</span>{t('sections.combat.c7')}<span>{t('sections.combat.usedAgainst')}</span>{t('sections.combat.c8')}<span>{t('sections.combat.lastEnemy')}</span>{t('sections.combat.c9')}<span>{t('sections.combat.greater')}</span>{t('sections.combat.c10')}<br />
+                        <span>{t('sections.combat.noWeapon')}</span>{t('sections.combat.c11')}<span>{t('sections.combat.greaterEqual')}</span>{t('sections.combat.c12')}<strong>{t('sections.combat.allDamage')}</strong>{t('sections.combat.c13')}
                     </p>
-                    <p>A continuación, tendrás un <span>simulador de combate</span> para comprobarlo por tu cuenta.</p>
+                    <p>{t('sections.combat.p2a')}<span>{t('sections.combat.simHighlight')}</span>{t('sections.combat.p2b')}</p>
                 </div>
             </div>
         </Fragment>
@@ -1119,66 +1011,66 @@ const Tutorial = () => {
     const slide8 = (
         <Fragment>
             <div className="slide-8 slide">
-                <h1>Simulador de combate</h1>
+                <h1>{t('simulator.title')}</h1>
                 <div className="simulator-guide">
-                    <p>Elige un escenario o haz clic en las cartas. El simulador te mostrará por qué se usa o no se usa el arma.</p>
-                    <div className="simulator-scenarios" role="group" aria-label="Escenarios del simulador">
+                    <p>{t('simulator.guide')}</p>
+                    <div className="simulator-scenarios" role="group" aria-label={t('simulator.scenariosAria')}>
                         {simulatorScenarios.map(scenario => (
                             <button
-                                className={selectedScenario === scenario.id ? 'simulator-scenario active' : 'simulator-scenario'}
-                                key={scenario.id}
-                                onClick={() => resetSimulator(scenario.id)}
+                                className={selectedScenario === scenario ? 'simulator-scenario active' : 'simulator-scenario'}
+                                key={scenario}
+                                onClick={() => resetSimulator(scenario)}
                             >
-                                {scenario.label}
+                                {t(`simulator.scenarios.${scenario}.label`)}
                             </button>
                         ))}
                     </div>
                     <div className="simulator-feedback" aria-live="polite">{simulatorMessage}</div>
                     <details className="simulator-settings">
-                        <summary>Ajustes del simulador</summary>
+                        <summary>{t('simulator.settingsSummary')}</summary>
                         <div className="simulator-advanced">
-                            <h3>Simulador avanzado</h3>
-                            <p>Activa un efecto para comprobar cómo puede cambiar el resultado del combate. Los efectos de un solo uso se desactivan después de aplicarse.</p>
+                            <h3>{t('simulator.advancedTitle')}</h3>
+                            <p>{t('simulator.advancedText')}</p>
                             <div className="simulator-effect-options">
                                 {simulatorEffectOptions.map(effect => (
                                     <button
-                                        className={activeSimulatorEffects.includes(effect.id) ? 'simulator-effect active' : 'simulator-effect'}
-                                        key={effect.id}
-                                        aria-pressed={activeSimulatorEffects.includes(effect.id)}
-                                        onClick={() => toggleSimulatorEffect(effect.id)}
-                                        title={effect.description}
+                                        className={activeSimulatorEffects.includes(effect) ? 'simulator-effect active' : 'simulator-effect'}
+                                        key={effect}
+                                        aria-pressed={activeSimulatorEffects.includes(effect)}
+                                        onClick={() => toggleSimulatorEffect(effect)}
+                                        title={t(`simulator.effectOptions.${effect}.description`)}
                                     >
-                                        {effect.label}
+                                        {t(`simulator.effectOptions.${effect}.label`)}
                                     </button>
                                 ))}
                             </div>
                             <div className="simulator-enemy-effects">
-                                <h3>Efectos de enemigos</h3>
-                                <p>Activa un efecto para aplicarlo al siguiente enemigo. Anticuras permanece activo hasta que lo desactives o reinicies el simulador.</p>
+                                <h3>{t('simulator.enemyEffectsTitle')}</h3>
+                                <p>{t('simulator.enemyEffectsText')}</p>
                                 <div className="simulator-effect-options">
                                     {simulatorEnemyEffectOptions.map(effect => (
                                         <button
-                                            className={activeEnemyEffects.includes(effect.id) ? 'simulator-effect active' : 'simulator-effect'}
-                                            key={effect.id}
-                                            aria-pressed={activeEnemyEffects.includes(effect.id)}
-                                            onClick={() => toggleSimulatorEnemyEffect(effect.id)}
-                                            title={effect.description}
+                                            className={activeEnemyEffects.includes(effect) ? 'simulator-effect active' : 'simulator-effect'}
+                                            key={effect}
+                                            aria-pressed={activeEnemyEffects.includes(effect)}
+                                            onClick={() => toggleSimulatorEnemyEffect(effect)}
+                                            title={t(`simulator.enemyEffectOptions.${effect}.description`)}
                                         >
-                                            {effect.label}
+                                            {t(`simulator.enemyEffectOptions.${effect}.label`)}
                                         </button>
                                     ))}
                                 </div>
-                                {poisonTurns > 0 && <p className="simulator-effect-status">Veneno activo: {poisonTurns} turnos restantes.</p>}
-                                {antihealActive && <p className="simulator-effect-status">Anticuras activo: las curaciones están bloqueadas.</p>}
+                                {poisonTurns > 0 && <p className="simulator-effect-status">{t('simulator.poisonStatus', { turns: poisonTurns })}</p>}
+                                {antihealActive && <p className="simulator-effect-status">{t('simulator.antihealStatus')}</p>}
                             </div>
                             <div className="simulator-character">
-                                <label htmlFor="tutorial-simulator-character">Personaje de referencia</label>
+                                <label htmlFor="tutorial-simulator-character">{t('simulator.characterLabel')}</label>
                                 <select
                                     id="tutorial-simulator-character"
                                     value={simulatorCharacterCode}
                                     onChange={event => handleSimulatorCharacterChange(event.target.value)}
                                 >
-                                    <option value="">Sin personaje</option>
+                                    <option value="">{t('simulator.noCharacter')}</option>
                                     {availableCharacters?.map(character => (
                                         <option key={character.id} value={character?.habilidad_personaje?.codigo || character.id}>
                                             {character.nombre}
@@ -1188,7 +1080,11 @@ const Tutorial = () => {
                                 {simulatorCharacter && (
                                     <div className="simulator-character-note">
                                         <strong>{simulatorCharacter.habilidad_personaje?.nombre}</strong>
-                                        <p>{simulatorCharacterNotes[simulatorCharacter.habilidad_personaje?.codigo] || simulatorCharacter.descripcion}</p>
+                                        <p>
+                                            {t(`characters.strategies.${simulatorCharacter.habilidad_personaje?.codigo}`, {
+                                                defaultValue: simulatorCharacter.descripcion,
+                                            })}
+                                        </p>
                                     </div>
                                 )}
                             </div>
@@ -1199,27 +1095,27 @@ const Tutorial = () => {
                     <h1 className="player-health"><img src={healthIcon} />{health}/{maxHealth}{healthAnimation !== null ? <div className="animation-container"><strong className="animation" disabled={healthAnimation}>{healthAnimationValue}</strong><img className="animation" disabled={healthAnimation} src={healthAnimation} /></div> : <></>}</h1>
                     <h1 className="simulator-gold"><img src={GoldIcon} />{gold}</h1>
                 </div>
-                <div className="simulator-board-stats" aria-label="Estado del tablero">
-                    <span>Mazo: <strong>{simulatorDeck.length}</strong></span>
-                    <span>Mano: <strong>{room.length}/4</strong></span>
-                    <span>Descartes: <strong>{discardPile.length}</strong></span>
+                <div className="simulator-board-stats" aria-label={t('simulator.boardAria')}>
+                    <span>{t('simulator.board.deck')}<strong>{simulatorDeck.length}</strong></span>
+                    <span>{t('simulator.board.hand')}<strong>{room.length}/4</strong></span>
+                    <span>{t('simulator.board.discard')}<strong>{discardPile.length}</strong></span>
                 </div>
                 <div>
                     <button className="reset-simulator-btn" onClick={() => resetSimulator()}>
-                        Reiniciar
+                        {t('simulator.reset')}
                     </button>
                     <Stage width={1200 * scale} height={550 * scale} scaleX={scale * 1.5} scaleY={scale * 1.5} y={30 * scale / 30}>
                         <Layer>
                             {/* ZONA DEL MAZO */}
                             <Group x={DUNGEON_ZONE.x} y={DUNGEON_ZONE.y}>
                                 <Rect width={DUNGEON_ZONE.width} height={DUNGEON_ZONE.height} fill="#0000006c" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                <Text text="DUNGEON" rotation={55} fontFamily="Alagard" fontSize={20} fill="white" y={25} x={35} />
+                                <Text text={t('sections.zones.dungeon')} rotation={55} fontFamily="Alagard" fontSize={20} fill="white" y={25} x={35} />
                             </Group>
 
                             {/* DESCARTES */}
                             <Group x={DISCARD_ZONE.x} y={DISCARD_ZONE.y}>
                                 <Rect width={DISCARD_ZONE.width} height={DISCARD_ZONE.height} fill="#9c4747c9" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                <Text text="DESCARTES" rotation={55} fontFamily="Alagard" fontSize={20} fill="white" y={WEAPON_ZONE.height * 0.05} x={WEAPON_ZONE.width * 0.08} />
+                                <Text text={t('sections.zones.discard')} rotation={55} fontFamily="Alagard" fontSize={20} fill="white" y={WEAPON_ZONE.height * 0.05} x={WEAPON_ZONE.width * 0.08} />
                                 {discardPile.slice(-1).map((card, i) => (
                                     <Card
                                         key={card.key}
@@ -1239,7 +1135,7 @@ const Tutorial = () => {
                             {/* ZONA DE EQUIPO */}
                             <Group x={WEAPON_ZONE.x} y={WEAPON_ZONE.y}>
                                 <Rect width={WEAPON_ZONE.width} height={WEAPON_ZONE.height} fill="#6a9c476e" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                <Text text="ZONA DE EQUIPO" fontFamily="Alagard" fontSize={40} fill="white" y={WEAPON_ZONE.height * 0.4} x={WEAPON_ZONE.width * 0.12} />
+                                <Text text={t('sections.zones.weaponZone')} fontFamily="Alagard" fontSize={40} fill="white" y={WEAPON_ZONE.height * 0.4} x={WEAPON_ZONE.width * 0.12} />
                                 {weapon && <Card
                                     key={weapon.key}
                                     cardInfo={weapon}
@@ -1271,7 +1167,7 @@ const Tutorial = () => {
                             {/* MANO */}
                             <Group x={HAND_ZONE.x} y={HAND_ZONE.y}>
                                 <Rect width={HAND_ZONE.width} height={HAND_ZONE.height} fill="#90c0ff50" stroke="white" strokeWidth={2} cornerRadius={8} />
-                                <Text text="MANO" fontFamily="Alagard" fontSize={40} fill="white" y={HAND_ZONE.height * 0.4} x={HAND_ZONE.width * 0.35} />
+                                <Text text={t('sections.zones.hand')} fontFamily="Alagard" fontSize={40} fill="white" y={HAND_ZONE.height * 0.4} x={HAND_ZONE.width * 0.35} />
                                 {room.length != 0 ? room.map((card, index) => {
                                     if (card !== undefined) {
                                         return <Card
@@ -1295,7 +1191,7 @@ const Tutorial = () => {
                         <Layer>
                             <Label x={0} y={0}>
                                 <Rect width={150} height={120} fill="#FFF" x={40} y={170} cornerRadius={5} stroke={"black"} />
-                                <Text text={"Si no cargan las cartas, dale a reiniciar."} fill="var(--main-black)" padding={5} fontSize={24} width={150} align="center" fontFamily="Alagard" x={40} y={175} />
+                                <Text text={t('simulator.reloadHint')} fill="var(--main-black)" padding={5} fontSize={24} width={150} align="center" fontFamily="Alagard" x={40} y={175} />
                                 <Image image={shopManNormal} width={60} height={60} x={5} y={265} imageSmoothingEnabled={false} listening={false} />
                             </Label>
                         </Layer>
@@ -1310,17 +1206,17 @@ const Tutorial = () => {
         <Fragment>
             <div className="slide-9 slide">
                 <div className="container explanation-card">
-                    <h1>Tienda</h1>
+                    <h1>{t('sections.shop.title')}</h1>
                     <p>
-                        Tras terminar cada ronda, aparecerá la tienda donde podrás comprar con el oro obtenido cartas de <span>curación</span>, <span>armas</span> e incluso <span>modificadores</span>. <br /> <br />
-                        Obtienes <span>5 de oro <img src={GoldIcon} /></span> base cada vez que derrotas a un enemigo con tu arma. Algunos personajes y modificadores pueden aumentar esta recompensa. <br /> <br />
-                        El precio de una carta aumenta cada vez que la compras de nuevo y los precios escalan especialmente al entrar en las rondas posteriores a la 10.
+                        {t('sections.shop.p1a')}<span>{t('sections.shop.healing')}</span>{t('sections.shop.p1b')}<span>{t('sections.shop.weapons')}</span>{t('sections.shop.p1c')}<span>{t('sections.shop.modifiers')}</span>{t('sections.shop.p1d')} <br /> <br />
+                        {t('sections.shop.p2a')}<span>{t('sections.shop.goldReward')}<img src={GoldIcon} /></span>{t('sections.shop.p2b')} <br /> <br />
+                        {t('sections.shop.p3')}
                     </p>
                     <Stage width={300 * scale} height={250 * scale} scaleX={scale} scaleY={scale} x={0} y={0}>
                         <Layer>
                             <Label x={0} y={0}>
                                 <Rect width={220} height={150} fill="#FFF" x={70} y={5} cornerRadius={5} stroke={"black"} />
-                                <Text text={"Tengo los mejores precios de la zona y la única tienda en la zona."} fill="var(--main-black)" padding={5} fontSize={26} width={220} align="center" fontFamily="Alagard" x={70} y={5} />
+                                <Text text={t('sections.shop.shopmanQuote')} fill="var(--main-black)" padding={5} fontSize={26} width={220} align="center" fontFamily="Alagard" x={70} y={5} />
                                 <Image image={shopManHappy} width={90} height={90} x={5} y={120} imageSmoothingEnabled={false} listening={false} />
                             </Label>
                         </Layer>
@@ -1339,29 +1235,29 @@ const Tutorial = () => {
     const slide11 = (
         <div className="slide-11 slide">
             <div className="explanation-card miniboss-intro">
-                <p className="character-tutorial-kicker">Amenazas especiales</p>
-                <h1>Minibosses</h1>
-                <p>Los minibosses aparecen en momentos concretos de la partida y tienen reglas propias. No se comportan como una carta normal: lee su efecto antes de decidir cómo afrontarlos.</p>
+                <p className="character-tutorial-kicker">{t('minibosses.kicker')}</p>
+                <h1>{t('minibosses.title')}</h1>
+                <p>{t('minibosses.intro')}</p>
             </div>
-            <div className="miniboss-grid" aria-label="Lista de minibosses">
+            <div className="miniboss-grid" aria-label={t('minibosses.listAria')}>
                 {minibossDetails.map((miniboss, index) => (
-                    <article className="miniboss-card" key={miniboss.name}>
+                    <article className="miniboss-card" key={miniboss}>
                         <div className="miniboss-card-header">
                             <div className="miniboss-icon-wrap">
-                                <img src={MinibossIcon} alt={`Icono de ${miniboss.name}`} />
+                                <img src={MinibossIcon} alt={t('aria.minibossIcon', { name: t(`minibosses.list.${miniboss}.name`) })} />
                             </div>
                             <div>
-                                <span>Miniboss {index + 1} de {minibossDetails.length}</span>
-                                <h2>{miniboss.name}</h2>
-                                <strong>{miniboss.effect}</strong>
+                                <span>{t('minibosses.counter', { index: index + 1, total: minibossDetails.length })}</span>
+                                <h2>{t(`minibosses.list.${miniboss}.name`)}</h2>
+                                <strong>{t(`minibosses.list.${miniboss}.effect`)}</strong>
                             </div>
                         </div>
                         <div className="miniboss-card-body">
                             <div className="miniboss-meta">
-                                <span>Valor: {miniboss.value}</span>
-                                <span>{miniboss.timing}</span>
+                                <span>{t('minibosses.valueLabel', { value: t(`minibosses.list.${miniboss}.value`) })}</span>
+                                <span>{t(`minibosses.list.${miniboss}.timing`)}</span>
                             </div>
-                            <p>{miniboss.description}</p>
+                            <p>{t(`minibosses.list.${miniboss}.description`)}</p>
                         </div>
                     </article>
                 ))}
@@ -1370,20 +1266,24 @@ const Tutorial = () => {
     );
 
     const slides = [
-        { id: 'welcome', label: 'Inicio', description: 'Conoce el objetivo de la mazmorra.', render: slide1 },
-        { id: 'objective', label: 'Objetivo', description: 'Descubre cómo se gana y se pierde una partida.', render: slide2 },
-        { id: 'zones', label: 'Zonas', description: 'Aprende para qué sirve cada zona de juego.', render: slide6 },
-        { id: 'cards', label: 'Cartas', description: 'Diferencia enemigos, armas y curaciones.', render: slide3 },
-        { id: 'combat', label: 'Combate', description: 'Comprende cómo se utiliza el arma activa.', render: slide7 },
-        { id: 'simulator', label: 'Simulador', description: 'Practica las reglas de combate de forma interactiva.', render: slide8 },
-        { id: 'characters', label: 'Personajes', description: 'Elige el estilo de juego que mejor te encaje.', render: slide10 },
-        { id: 'minibosses', label: 'Minibosses', description: 'Conoce las amenazas especiales de cada ronda.', render: slide11 },
-        { id: 'modifiers', label: 'Modificadores', description: 'Descubre las mejoras que pueden acompañarte.', render: slide4 },
-        { id: 'effects', label: 'Efectos', description: 'Aprende los efectos de enemigos, armas y curaciones.', render: slide5 },
-        { id: 'shop', label: 'Tienda', description: 'Entiende cómo convertir el oro de la ronda en mejoras.', render: slide9 },
+        { id: 'welcome', render: slide1 },
+        { id: 'objective', render: slide2 },
+        { id: 'zones', render: slide6 },
+        { id: 'cards', render: slide3 },
+        { id: 'combat', render: slide7 },
+        { id: 'simulator', render: slide8 },
+        { id: 'characters', render: slide10 },
+        { id: 'minibosses', render: slide11 },
+        { id: 'modifiers', render: slide4 },
+        { id: 'effects', render: slide5 },
+        { id: 'shop', render: slide9 },
     ];
     const totalSlides = slides.length;
     const currentSlide = slides[currentIndex];
+    const slideLabel = (id) => t(`slides.${id}.label`);
+    const currentSlideLabel = slideLabel(currentSlide.id);
+    const prevSlide = currentIndex > 0 ? slides[currentIndex - 1] : null;
+    const nextSlide = currentIndex < totalSlides - 1 ? slides[currentIndex + 1] : null;
 
     const moveSlide = (direction) => {
         if (direction === 1) {
@@ -1401,25 +1301,25 @@ const Tutorial = () => {
                             className="btn-prev"
                             onClick={() => moveSlide(-1)}
                             disabled={currentIndex === 0}
-                            aria-label={currentIndex > 0 ? `Ir a la sección anterior: ${slides[currentIndex - 1].label}` : 'No hay sección anterior'}
+                            aria-label={prevSlide ? t('nav.prevAria', { label: slideLabel(prevSlide.id) }) : t('nav.prevEmpty')}
                         >
                             <span aria-hidden="true">←</span>
-                            <span>Anterior: {currentIndex > 0 ? slides[currentIndex - 1].label : 'Inicio'}</span>
+                            <span>{t('nav.prev', { label: prevSlide ? slideLabel(prevSlide.id) : slideLabel('welcome') })}</span>
                         </button>
                         <button
                             className="btn-next"
                             onClick={() => moveSlide(1)}
                             disabled={currentIndex === totalSlides - 1}
-                            aria-label={currentIndex < totalSlides - 1 ? `Ir a la sección siguiente: ${slides[currentIndex + 1].label}` : 'No hay sección siguiente'}
+                            aria-label={nextSlide ? t('nav.nextAria', { label: slideLabel(nextSlide.id) }) : t('nav.nextEmpty')}
                         >
-                            <span>Siguiente: {currentIndex < totalSlides - 1 ? slides[currentIndex + 1].label : 'Tienda'}</span>
+                            <span>{t('nav.next', { label: nextSlide ? slideLabel(nextSlide.id) : slideLabel('shop') })}</span>
                             <span aria-hidden="true">→</span>
                         </button>
                     </div>
                 <header className="tutorial-navigation">
                     <div className="tutorial-progress-label">
-                        <span>Sección {currentIndex + 1} de {totalSlides}</span>
-                        <strong>{currentSlide.label}</strong>
+                        <span>{t('nav.section', { current: currentIndex + 1, total: totalSlides })}</span>
+                        <strong>{currentSlideLabel}</strong>
                     </div>
                     <div
                         className="tutorial-progress-track"
@@ -1427,23 +1327,23 @@ const Tutorial = () => {
                         aria-valuemin="1"
                         aria-valuemax={totalSlides}
                         aria-valuenow={currentIndex + 1}
-                        aria-label={`Progreso del tutorial: ${currentSlide.label}`}
+                        aria-label={t('nav.progressAria', { label: currentSlideLabel })}
                     >
                         <span style={{ width: `${((currentIndex + 1) / totalSlides) * 100}%` }} />
                     </div>
-                    <p className="tutorial-section-description">{currentSlide.description}</p>
+                    <p className="tutorial-section-description">{t(`slides.${currentSlide.id}.description`)}</p>
                 </header>
 
-                <nav ref={movementButtonsRef} className="movement-buttons" aria-label="Secciones del tutorial">
+                <nav ref={movementButtonsRef} className="movement-buttons" aria-label={t('nav.navAria')}>
                     {slides.map((slide, index) => (
                         <button
                             key={slide.id}
                             className={currentIndex === index ? "movement-button active" : "movement-button"}
                             onClick={() => setCurrentIndex(index)}
-                            aria-label={`Ir a ${slide.label}`}
+                            aria-label={t('nav.goTo', { label: slideLabel(slide.id) })}
                             aria-current={currentIndex === index ? 'page' : undefined}
                         >
-                            {slide.label}
+                            {slideLabel(slide.id)}
                         </button>
                     ))}
                 </nav>

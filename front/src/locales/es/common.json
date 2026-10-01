@@ -1,0 +1,17 @@
+{
+  "actions": {
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "loading": "Cargando…"
+  },
+  "loading": "Cargando...",
+  "loadingPage": "Cargando página...",
+  "errorBoundary": {
+    "title": "ERROR",
+    "message": "Se ha producido un error inesperado durante la partida.",
+    "home": "INICIO",
+    "retry": "REINTENTAR"
+  }
+}

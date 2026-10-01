@@ -6,16 +6,21 @@ import { NavLink, useLocation } from "react-router-dom";
 
 import { settingsContext } from "../../context/SettingsProvider.jsx";
 import { notificationContext } from "../../context/NotificationsProdiver.jsx";
+import { matchContext } from "../../context/MatchProvider.jsx";
+import { shouldConfirmExit } from "../../game/navigation.js";
 
 import FPSCounter from "./FPSCounter.jsx";
 import UserShow from "../UserShow.jsx";
 import ConfirmationModal from "./../modals/ConfirmationModal.jsx";
 import GameIcon from '/images/banner_menu.webp';
 import NotificationIcon from '/images/notification_icon.svg';
+import { useTranslation } from 'react-i18next';
 
 
 const Navbar = () => {
+    const { t } = useTranslation('nav');
     const { user, searchUsuario, isLoading, activePlayers } = useUser();
+    const { character } = useContext(matchContext);
     const { showFPS } = useContext(settingsContext);
     const { userNotifications, openNotificationModal } = useContext(notificationContext);
     const [userAvatar, setUserAvatar] = useState('');
@@ -44,7 +49,7 @@ const Navbar = () => {
     };
 
     const handleNavClick = (e, to) => {
-        if (location.pathname === '/jugar') {
+        if (shouldConfirmExit(location.pathname, character)) {
             e.preventDefault();
             setToPage(to)
             setIsModalOpen(true);
@@ -90,14 +95,14 @@ const Navbar = () => {
                     onClick={(e) => handleNavClick(e, `/`)}
                     to={`/`}
                 >
-                    <img className="game-icon" alt="Icono juego" src={GameIcon} />
+                    <img className="game-icon" alt={t('gameIconAlt')} src={GameIcon} />
                 </NavLink>
 
                 <div className="navbar-items">
                     {!isLoading && user && (
                         <div className="navbar-active-players">
                             <span style={{ width: '8px', height: '8px', backgroundColor: '#2ecc71', borderRadius: '50%' }}></span>
-                            {activePlayers} activos
+                            {t('activePlayers', { count: activePlayers })}
                         </div>
                     )}
                     {!isLoading && user && (
@@ -106,7 +111,7 @@ const Navbar = () => {
                                 ref={searchRef}
                                 type="search"
                                 className="search-input"
-                                placeholder="Buscar usuario"
+                                placeholder={t('searchPlaceholder')}
                                 onFocus={() => setIsActiveSearch(true)}
                                 onChange={(e) => handleSearchUser(e.target.value)}
                             />
@@ -135,7 +140,7 @@ const Navbar = () => {
                             to={`/admin-panel`}
                             className={({ isActive }) => isActive ? 'menu_link menu_link--active' : 'menu_link'}
                         >
-                            Panel Admin
+                            {t('adminPanel')}
                         </NavLink>
                         : <></>}
 
@@ -151,7 +156,7 @@ const Navbar = () => {
                                     </div>
                                     : <></>
                                 }
-                                <img src={NotificationIcon} alt="Notification Icon" title={`Tienes ${unseenNotifications} notificaciones pendientes.`} />
+                                <img src={NotificationIcon} alt="Notification Icon" title={t('notificationsPending', { count: unseenNotifications })} />
                             </button>
                             : <></>
                     }
@@ -161,7 +166,7 @@ const Navbar = () => {
                         className={({ isActive }) => isActive ? 'menu_link menu_link--active' : 'menu_link'}
                         onClick={(e) => handleNavClick(e, '/')}
                     >
-                        Inicio
+                        {t('home')}
                     </NavLink>
 
                     {!isLoading ? (
@@ -174,7 +179,7 @@ const Navbar = () => {
                                 <img
                                     className="navbar-avatar"
                                     src={userAvatar || Placeholder}
-                                    alt="avatar"
+                                    alt={user.nick}
                                     style={{ borderColor: userColor }}
                                     onError={(e) => {
                                         e.currentTarget.src = Placeholder;
@@ -183,8 +188,8 @@ const Navbar = () => {
                             </NavLink>
                         ) : (
                             <>
-                                <NavLink to="/login" className={({ isActive }) => isActive ? 'menu_link menu_link--active' : 'menu_link'}>Iniciar sesión</NavLink>
-                                <NavLink to="/signup" className={({ isActive }) => isActive ? 'menu_link menu_link--active' : 'menu_link'}>Registrarse</NavLink>
+                                <NavLink to="/login" className={({ isActive }) => isActive ? 'menu_link menu_link--active' : 'menu_link'}>{t('login')}</NavLink>
+                                <NavLink to="/signup" className={({ isActive }) => isActive ? 'menu_link menu_link--active' : 'menu_link'}>{t('signup')}</NavLink>
                             </>
                         )
                     ) : null}
@@ -194,8 +199,8 @@ const Navbar = () => {
                 isOpen={isModalOpen}
                 onClose={handleCancelAction}
                 onConfirm={handleConfirmAction}
-                title="Salir de la Partida"
-                message="Si sales, la partida contará como derrota."
+                title={t('exitMatchTitle')}
+                message={t('exitMatchMessage')}
             />
         </Fragment>
     );

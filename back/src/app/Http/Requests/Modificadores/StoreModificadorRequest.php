@@ -17,7 +17,10 @@ class StoreModificadorRequest extends FormRequest
             'nombre' => 'required|string|max:100',
             'descripcion' => 'nullable|string|max:300',
             'imagen' => 'nullable|image|max:2048',
-            'efectos' => 'required|array'
+            'efectos' => 'required|array',
+            'nivel' => 'sometimes|integer|min:1',
+            'activo' => 'sometimes|boolean',
+            'translations' => 'sometimes|nullable|array',
         ];
     }
 }

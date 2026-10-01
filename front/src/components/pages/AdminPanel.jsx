@@ -1,25 +1,29 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useUser } from "../../hooks/useUser";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import UserShow from "../UserShow";
 import './AdminPanel.css'
 import Loading from '../Loading.jsx';
 import { useReportBugs } from "../../hooks/useReportBugs.js";
 
-const ESTADOS = [
-    { value: 'abierto', label: 'Abierto' },
-    { value: 'en_revision', label: 'En revisión' },
-    { value: 'solucionado', label: 'Solucionado' },
-    { value: 'descartado', label: 'Descartado' },
-    { value: 'duplicado', label: 'Duplicado' },
-];
-
 const AdminPanel = () => {
     const { user, getUsers } = useUser();
+    const { t } = useTranslation('bugs');
     const [users, setUsers] = useState([]);
     const [showList, setShowList] = useState([]);
     const searchRef = useRef(null);
     const navigate = useNavigate();
+
+    // `value` es el identificador que se envía al backend: NO se traduce.
+    // Reutiliza las mismas claves compartidas que BugReportPage (`bugs:status.*`).
+    const ESTADOS = [
+        { value: 'abierto', label: t('bugs:status.abierto') },
+        { value: 'en_revision', label: t('bugs:status.en_revision') },
+        { value: 'solucionado', label: t('bugs:status.solucionado') },
+        { value: 'descartado', label: t('bugs:status.descartado') },
+        { value: 'duplicado', label: t('bugs:status.duplicado') },
+    ];
 
     // Reportes de bugs
     const { useReportesList, updateEstadoReporte } = useReportBugs();
@@ -60,7 +64,7 @@ const AdminPanel = () => {
         <Fragment>
             <div className="admin-panel">
                 <div className="users">
-                    <input ref={searchRef} type="text" placeholder="Buscar usuario" onChange={search} />
+                    <input ref={searchRef} type="text" placeholder={t('bugs:admin.searchUsers')} onChange={search} />
                     {showList.length > 0 ?
                         <div className="users-panel">
                             {showList.map(user =>
@@ -74,12 +78,12 @@ const AdminPanel = () => {
                 </div>
                 <div className="bug-reports">
                     <div className="bug-reports-header">
-                        <h3>Reportes de bugs ({reportes?.data?.length??0})</h3>
+                        <h3>{t('bugs:admin.title', { count: reportes?.data?.length ?? 0 })}</h3>
                         <select
                             value={filtroEstado}
                             onChange={(e) => setFiltroEstado(e.target.value)}
                         >
-                            <option value="">Todos los estados</option>
+                            <option value="">{t('bugs:filters.allStates')}</option>
                             {ESTADOS.map((e) => (
                                 <option key={e.value} value={e.value}>{e.label}</option>
                             ))}
@@ -87,10 +91,14 @@ const AdminPanel = () => {
                     </div>
 
                     {isLoadingReportes && <Loading />}
-                    {reportesError && <p className="bug-reports-error">Error al cargar los reportes.</p>}
+                    {reportesError && <p className="bug-reports-error">{t('bugs:admin.loadError')}</p>}
 
                     {!isLoadingReportes && reportes?.data?.length === 0 && (
-                        <p>No hay reportes {filtroEstado ? `en estado "${filtroEstado}"` : ''}.</p>
+                        <p>{t('bugs:admin.noReports', {
+                            suffix: filtroEstado
+                                ? t('bugs:admin.noReportsState', { estado: filtroEstado })
+                                : '',
+                        })}</p>
                     )}
 
                     {!isLoadingReportes && reportes?.data?.length > 0 && (

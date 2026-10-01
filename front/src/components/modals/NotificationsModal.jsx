@@ -1,11 +1,14 @@
 import './NotificationModal.css';
 import { Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReportIcon from '/images/report_icon.svg'
 import CommentsIcon from '/images/comment_noti_icon.svg'
 import { useNavigate } from 'react-router-dom';
+import { fmtDate } from '../../i18n/format.js';
 
 const NotificationModal = ({ onClose, userNotifications, markNotificationAsSeen, markAllNotificationsAsSeen }) => {
     const location = useNavigate();
+    const { t, i18n } = useTranslation('modals');
     return (
         <Fragment>
             <div className='notification-container' onClick={(event) => {
@@ -19,7 +22,7 @@ const NotificationModal = ({ onClose, userNotifications, markNotificationAsSeen,
                         <button
                             onClick={markAllNotificationsAsSeen}
                         >
-                            Marcar todas como vistas
+                            {t('modals:notifications.markAllRead')}
                         </button>
                         <button
                             className='close-button'
@@ -30,7 +33,6 @@ const NotificationModal = ({ onClose, userNotifications, markNotificationAsSeen,
 
                     </div>
                     <div className='notifications'>
-                        {console.log(userNotifications[0])}
                         {
                             userNotifications.map((notification) =>
                                 <div key={notification.id + "-notification"}
@@ -49,8 +51,8 @@ const NotificationModal = ({ onClose, userNotifications, markNotificationAsSeen,
                                         <img src={notification.tipo === `reporte` ? ReportIcon : CommentsIcon} alt="" />
                                         <h1>{notification.descripcion}</h1>
                                     </div>
-                                    <p>Clic para ir {notification.tipo === `reporte` ? 'al reporte' : 'a la partida'}</p>
-                                    <span>{new Date(notification.updated_at).toLocaleDateString('es-ES')} {new Date(notification.updated_at).toLocaleTimeString('es-ES')}</span>
+                                    <p>{notification.tipo === `reporte` ? t('modals:notifications.goToReport') : t('modals:notifications.goToMatch')}</p>
+                                    <span>{fmtDate(i18n.language, notification.updated_at, { dateStyle: 'short', timeStyle: 'short' })}</span>
                                 </div>)
                         }
                     </div>

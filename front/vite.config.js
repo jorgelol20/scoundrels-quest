@@ -16,14 +16,24 @@ export default defineConfig({
     ]
   },
   build: {
+    chunkSizeWarningLimit: 600,
     rolldownOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Konva en chunk propio: solo se descarga al entrar a /jugar o /jugar/tutorial
+            if (id.includes('konva') || id.includes('react-konva') || id.includes('use-image')) {
+              return 'konva';
+            }
             return 'vendor';
           }
         }
       }
     }
+  },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.{js,jsx}'],
+    setupFiles: ['./src/testSetup.js']
   }
 })

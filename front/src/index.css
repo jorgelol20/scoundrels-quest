@@ -22,9 +22,10 @@
 }
 @font-face {
     font-family: 'Alagard';
-    src: url('/font/Alagard.ttf') format('truetype');
+    src: url('/font/Alagard.woff') format('woff');
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }
 img{
     image-rendering: pixelated;

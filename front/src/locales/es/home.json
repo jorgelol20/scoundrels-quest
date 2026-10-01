@@ -1,0 +1,12 @@
+{
+  "play": "JUGAR",
+  "howToPlay": "CÓMO JUGAR",
+  "settings": "AJUSTES",
+  "profile": "PERFIL",
+  "reportBug": "REPORTAR ERROR",
+  "firefoxWarningTitle": "¡Advertencia!",
+  "firefoxWarningLine1": "En navegadores Firefox pueden haber perdidas de rendimiento durante la experiencia de juego.",
+  "firefoxWarningLine2": "Recomendamos encarecidamente que se utilice un navegador en base",
+  "firefoxWarningLine3": "Disculpen las molestias.",
+  "lastMatches": "Últimas partidas ( Totales: {{total}} )"
+}

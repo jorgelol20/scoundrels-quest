@@ -16,7 +16,11 @@ class UpdateCartaRequest extends FormRequest
         return [
             'palo' => 'sometimes|string|max:50',
             'valor' => 'sometimes|integer',
-            'imagen' => 'nullable|image|max:2048'
+            'imagen' => 'nullable|image|max:2048',
+            'activa' => 'sometimes|boolean',
+            'especial' => 'sometimes|boolean',
+            'efectos' => 'sometimes|nullable|array',
+            'translations' => 'sometimes|nullable|array',
         ];
     }
 }

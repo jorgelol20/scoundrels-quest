@@ -19,13 +19,19 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', 'https://scoundrels-quest.com'),'http://localhost:5173','http://localhost:5174', 'http://192.168.8.5:5174', 'https://xjorgelol20.itch.io/scoundrels-quest', 'https://html-classic.itch.zone'],
+    'allowed_origins' => array_values(array_filter(array_map('trim', explode(
+        ',',
+        (string) env(
+            'CORS_ALLOWED_ORIGINS',
+            'https://scoundrels-quest.com,http://localhost:5173,http://localhost:5174,https://xjorgelol20.itch.io/scoundrels-quest,https://html-classic.itch.zone'
+        )
+    )))),
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => ['Content-Language'],
 
     'max_age' => 0,
 

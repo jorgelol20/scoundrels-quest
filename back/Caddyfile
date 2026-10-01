@@ -3,7 +3,7 @@ scoundrels-quest.com, http://localhost, :5174 {
     encode gzip zstd
 
      @assets {
-        path /assets/*
+        path /assets/* /images/* /sounds/* /font/* /favicon.png
     }
     handle @assets {
         header Cache-Control "public, max-age=31536000, immutable"

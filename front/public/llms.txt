@@ -1,14 +1,18 @@
-# Scoundrel's Quest
+# Scoundrel's Quest (Scoundrels Quest) — Free Card Roguelike, No Ads
 
-> Roguelike de cartas gratuito con ambientación D&D. Elige entre 5 personajes y sobrevive 10 rondas usando una baraja de póker: diamantes como armas, corazones como curaciones, y tréboles/picas como enemigos.
+> Descend free into Scoundrel's Quest, a roguelike web game based on Scoundrel with no ads: a poker deck turned dungeon (diamonds to arm, hearts to heal, spades/clubs out for blood), 8 antiheroes with unique abilities, 1-of-3 modifiers per round, a shop hiding Excalibur, minibosses (Slime Queen, Mimic, Demon Shaman) and 10 rounds. No download. Also found as: scoundrel, scoundrel game, scoundrel web game, scoundrel games, scoundrel's quest, scoundrels quest.
 
-Scoundrel's Quest es un juego web 100% gratuito con ambientación D&D. El objetivo es sobrevivir 10 rondas gestionando recursos limitados (armas, curación) frente a enemigos cada vez más difíciles, usando la mecánica de una baraja de póker estándar. Requiere una cuenta gratuita para jugar, que puede crearse con correo electrónico o mediante Google/X.
+Scoundrel's Quest (Scoundrels Quest) is a 100% free roguelike web game based on the Scoundrel card game, with D&D atmosphere and zero ads. Empty 4-card hands, exhaust the 44-card deck each round and survive all 10 against waves of 5, 7 and 9 enemies with poisons, weapon-breakers, plunder and arcane seals. Weapons only bite twice against weaker enemies and fleeing is rationed. Requires a free account (email, Google or X).
 
-## Juego
+## Juego / Descend now
 
-- [Jugar](https://scoundrels-quest.com/jugar): acceso al juego (requiere haber iniciado sesión).
-- [Crear cuenta](https://scoundrels-quest.com/signup): registro gratuito con correo, Google o X.
-- [Tutorial](https://scoundrels-quest.com/jugar/tutorial): explicación de las reglas y mecánicas del juego.
+- [Play Scoundrel online — Jugar](https://scoundrels-quest.com/jugar): acceso a la mazmorra (requiere haber iniciado sesión).
+- [Create free account — Crear cuenta](https://scoundrels-quest.com/signup): registro gratuito con correo, Google o X.
+- [How to play Scoundrel — Tutorial](https://scoundrels-quest.com/jugar/tutorial): reglas de la mazmorra (armas que se desgastan, huidas contadas, modificadores, tienda, minibosses) con simulador de combate.
+
+## What is Scoundrel?
+
+Scoundrel is the single-deck tabletop game where every card is a decision: wield diamonds, swallow hearts or bleed against spades and clubs. No dice, no board: just you, 44 cards and your greed. In this roguelike web game a weapon only works again against weaker enemies and fleeing is limited. Survive all 10 rounds to win.
 
 ## Opcional
 

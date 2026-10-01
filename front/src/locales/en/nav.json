@@ -1,0 +1,26 @@
+{
+  "home": "Home",
+  "login": "Log in",
+  "signup": "Sign up",
+  "adminPanel": "Admin panel",
+  "searchPlaceholder": "Search user",
+  "activePlayers": "{{count}} online",
+  "notificationsPending": "You have {{count}} pending notifications.",
+  "exitMatchTitle": "Leave the match",
+  "exitMatchMessage": "If you leave, the match will count as a defeat.",
+  "gameIconAlt": "Game icon",
+  "footer": {
+    "toggleLabel": "Expand/collapse footer navigation",
+    "versionAndDate": "V. Alpha · Last updated: {{date}}",
+    "dateUnavailable": "Not available",
+    "support": "support@scoundrels-quest.com",
+    "legalNavLabel": "Legal links",
+    "reportError": "REPORT A BUG",
+    "credits": "Credits",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "terms": "Terms of use",
+    "legal": "Legal information",
+    "bannerAlt": "Banner"
+  }
+}

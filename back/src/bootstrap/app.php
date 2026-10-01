@@ -22,7 +22,18 @@ return Application::configure(basePath: dirname(__DIR__))
             '192.168.0.0/16' // Rangos comunes de redes internas de Docker
         ]);
 
-        // 2. Si prefieres configurar CORS aquí en lugar de en el archivo config/cors.php
+        // 2. Fase 0 i18n: SetLocale NO va como middleware global api porque
+        // corre antes que auth:sanctum y $request->user() siempre sería null
+        // (el override por user.locale nunca se aplicaría). Se registra como
+        // alias y se aplica en rutas DESPUÉS de auth:sanctum.
+        // 3. Alias 'admin': solo usuarios con es_admin. Se aplica a las rutas de
+        //    escritura del contenido del juego y a las de edición/borrado.
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'locale' => \App\Http\Middleware\SetLocale::class,
+        ]);
+
+        // 4. Si prefieres configurar CORS aquí en lugar de en el archivo config/cors.php
         // (Opcional, pero muy útil en Laravel 11)
         /*
         $middleware->validateCsrfTokens(except: [

@@ -17,7 +17,7 @@ class ComentarioReporteBugController extends Controller
     public function index(Request $request, ReporteBug $reporte_bug)
     {
         if ($request->user()->id !== $reporte_bug->usuario_id && !$request->user()->es_admin) {
-            abort(403, 'No tienes permiso para ver estos comentarios.');
+            abort(403, __('api.forbidden_comentarios_view'));
         }
 
         return response()->json(
@@ -32,7 +32,9 @@ class ComentarioReporteBugController extends Controller
             'comentario' => $request->validated('comentario'),
         ]);
         $usuarioReporte = $reporte_bug->usuario;
-        if ($request->user()->id !== $usuarioReporte?->id) {
+        // El reporte puede ser huérfano (usuario eliminado): sin usuario no
+        // hay a quién avisar; se devuelve el comentario sin mail ni fila.
+        if ($usuarioReporte && $request->user()->id !== $usuarioReporte->id) {
             Notification::route('mail', $usuarioReporte->email)
                 ->notify(
                     new ComentarioReporteBugNotificacionUsuario($comentario)
@@ -40,7 +42,7 @@ class ComentarioReporteBugController extends Controller
             Notificacion::create([
                 'usuario_id' => $usuarioReporte?->id,
                 'tipo' => 'reporte',
-                'descripcion' => 'Han puesto un comentario a tu reporte.',
+                'descripcion' => __('api.notif_reporte_comentario'),
                 'reporte_id' => $reporte_bug->id,
                 'partida_id' => null,
             ]);
@@ -63,7 +65,7 @@ class ComentarioReporteBugController extends Controller
         $this->comprobarPertenencia($reporte_bug, $comentario);
 
         if ($request->user()->id !== $comentario->usuario_id && !$request->user()->es_admin) {
-            abort(403, 'No tienes permiso para eliminar este comentario.');
+            abort(403, __('api.forbidden_comentario_delete'));
         }
 
         $comentario->delete();
@@ -73,7 +75,7 @@ class ComentarioReporteBugController extends Controller
     private function comprobarPertenencia(ReporteBug $reporte_bug, ComentarioReporteBug $comentario): void
     {
         if ($comentario->reporte_id !== $reporte_bug->id) {
-            abort(404, 'Comentario no encontrado en este reporte.');
+            abort(404, __('api.comentario_not_in_reporte'));
         }
     }
 }

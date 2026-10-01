@@ -1,0 +1,17 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "loading": "Loading…"
+  },
+  "loading": "Loading...",
+  "loadingPage": "Loading page...",
+  "errorBoundary": {
+    "title": "ERROR",
+    "message": "An unexpected error occurred during the match.",
+    "home": "HOME",
+    "retry": "RETRY"
+  }
+}

@@ -36,11 +36,11 @@ class CambioEstadoReporteBugNotificacionUsuario extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Actualización reporte.")
-            ->greeting("Tu reporte ha cambiado de estado.")
-            ->line("Recientemente, tu reporte ha pasado a: {$this->reporteBug->estado}")
-            ->line("Puedes acceder al resto de tus reportes desde tu perfil.")
-            ->action("Ver la página del reporte", config('app.frontend_url') . "/reportes-bug/{$this->reporteBug->id}");
+            ->subject(__('mail.cambio_estado_subject'))
+            ->greeting(__('mail.cambio_estado_greeting'))
+            ->line(__('mail.cambio_estado_line_estado', ['estado' => $this->reporteBug->estado]))
+            ->line(__('mail.cambio_estado_line_perfil'))
+            ->action(__('mail.cambio_estado_action'), config('app.frontend_url') . "/reportes-bug/{$this->reporteBug->id}");
     }
 
     /**

@@ -1,0 +1,44 @@
+{
+  "bugForm": {
+    "title": "Report",
+    "reportUserTitle": "Report {{nick}}",
+    "successMessage": "Thank you! Your report was sent successfully.",
+    "close": "Close",
+    "reason": "Reason",
+    "selectReason": "Select a reason...",
+    "reasons": {
+      "badBanner": "The player has an inappropriate banner",
+      "badAvatar": "The player has an inappropriate avatar",
+      "badBoth": "Both the avatar and the banner are inappropriate"
+    },
+    "cheatBase": "The player has cheated",
+    "otherReason": "Other",
+    "cheatPlaceholder": "Describe the cheating",
+    "type": "Type",
+    "types": {
+      "visual": "Visual",
+      "jugabilidad": "Gameplay",
+      "rendimiento": "Performance",
+      "error": "Error",
+      "otro": "Other"
+    },
+    "description": "Description",
+    "descriptionCount": "Description ({{len}}/2000)",
+    "descriptionPlaceholder": "Describe what happened, what you expected to happen, and how to reproduce it",
+    "screenshot": "Screenshot",
+    "selectFile": "Select file",
+    "logsAttached": "Match logs (attached automatically)",
+    "detectedDuring": "Detected during the match with",
+    "cancel": "Cancel",
+    "submit": "Send report",
+    "sending": "Sending..."
+  },
+  "notifications": {
+    "markAllRead": "Mark all as seen",
+    "goToReport": "Click to go to the report",
+    "goToMatch": "Click to go to the match"
+  },
+  "achievement": {
+    "iconAlt": "Achievement icon {{nombre}}"
+  }
+}

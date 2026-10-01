@@ -1,5 +1,5 @@
-import { createContext, Fragment, useState, useEffect, useCallback } from "react";
-import lodash from 'lodash';
+import { createContext, Fragment, useState, useEffect, useCallback, useRef } from "react";
+import shuffle from 'lodash/shuffle';
 
 import { useCard } from "../hooks/useCard.js";
 import { useCharacters } from "../hooks/useCharacter.js";
@@ -7,6 +7,9 @@ import { useModifier } from "../hooks/useModifier.js";
 import { useMatch } from "../hooks/useMatch.js";
 import { useUser } from "../hooks/useUser.js";
 import { useAchievements } from "../hooks/useAchievements.js";
+import { buildLossPayload, postMatchKeepalive } from "../api/matchKeepalive.js";
+import missionsCatalog from "../assets/database/missions.json";
+import { advanceMission, isMissionCompleted } from "../game/missions.js";
 
 
 
@@ -111,6 +114,9 @@ const MatchProvider = (props) => {
     const [availableCharacters, setAvailableCharacters] = useState([]);
     const [availableModifiers, setAvailableModifiers] = useState([]);
     const [activeModifiers, setActiveModifiers] = useState([]);
+    // Misiones del cazador: [{id, progress, claimed}]. Viven aquí para
+    // sobrevivir a la reconstrucción de la tienda cada ronda.
+    const [activeMissions, setActiveMissions] = useState([]);
 
 
 
@@ -150,7 +156,7 @@ const MatchProvider = (props) => {
      */
     const startNewGame = () => {
         setGameLoading(true);
-        const shuffledDeck = lodash.shuffle(baseDeck).map(card => (
+        const shuffledDeck = shuffle(baseDeck).map(card => (
             {
                 ...card,
                 key: generateCardKey()
@@ -158,6 +164,7 @@ const MatchProvider = (props) => {
         setMatchDeck(shuffledDeck);
         setCharacter(undefined);
         setActiveModifiers([]);
+        setActiveMissions([]);
         setActualMatchId(null);
         setGameLoading(false);
     };
@@ -221,7 +228,6 @@ const MatchProvider = (props) => {
             await handleNewAchievement('victoria')
             switch (character.id) {
                 case 1:
-
                     await handleNewAchievement('victoria_guerrero')
                     break;
                 case 2:
@@ -299,6 +305,28 @@ const MatchProvider = (props) => {
         }
     };
 
+    // Derrota por recarga/cierre: axios no sobrevive al unload, así que se
+    // envía por keepalive (fire-and-forget, sin logros). Una sola vez por
+    // montaje del provider (cubre doble disparo por bfcache).
+    const unloadSavedRef = useRef(false);
+    const saveLossOnUnload = (stats) => {
+        if (unloadSavedRef.current || !user?.id || !character) {
+            return false;
+        }
+        unloadSavedRef.current = true;
+        postMatchKeepalive(buildLossPayload({
+            usuario_id: user.id,
+            personaje_id: character.id,
+            tiempo: stats.tiempo,
+            rondas: stats.rondas,
+            modificadores: activeModifiers.map((modifier) => modifier.id),
+            oro_obtenido: stats.oro_obtenido,
+            vida_curada: stats.vida_curada,
+            enemigos_enfrentados: stats.enemigos_enfrentados,
+        }));
+        return true;
+    };
+
     /**
      *  Función para actualizar el estado de una partida. 
      * Utiliza el id de la partida activa, por lo que si no hay ninguna, devolverá false. En caso que si haya, devolverá true/false si se ha podido actualizar o no
@@ -347,7 +375,7 @@ const MatchProvider = (props) => {
      * Baraja el mazo actual
      */
     const shuffleMatchDeck = () => {
-        setMatchDeck(prev => lodash.shuffle(prev));
+        setMatchDeck(prev => shuffle(prev));
     };
 
     /**
@@ -409,7 +437,7 @@ const MatchProvider = (props) => {
             valor <= maxPower
         );
 
-        const shuffled = lodash.shuffle(candidates);
+        const shuffled = shuffle(candidates);
         const selectedEnemys = shuffled.slice(0, quantity);
         const effectProbability = Math.min(5 + (round - 1) * 5, 100);
 
@@ -689,8 +717,60 @@ const MatchProvider = (props) => {
         return selectedModifiers;
     }, [activeModifiers, availableModifiers])
 
+    /**
+     * Meta del catálogo por id de misión.
+     */
+    const getMissionMeta = (missionId) => missionsCatalog.find((m) => m?.id === missionId);
+
+    /**
+     * Acepta una misión ofertada (gratis). Devuelve la entrada creada
+     * (progreso 0) o la existente si ya estaba cogida.
+     *
+     * @param {string} missionId
+     * @returns {{id:string, progress:number, claimed:boolean}|null}
+     */
+    const acceptMission = (missionId) => {
+        if (!getMissionMeta(missionId)) return null;
+        const existing = activeMissions.find((m) => m.id === missionId);
+        if (existing) return existing;
+        const entry = { id: missionId, progress: 0, claimed: false };
+        setActiveMissions(prev => prev.some((m) => m.id === missionId) ? prev : [...prev, entry]);
+        return entry;
+    };
+
+    /**
+     * Avanza las misiones aceptadas no reclamadas con un evento de partida.
+     * Evento: {kills, streak, goldTotal, round, miniboss}.
+     */
+    const trackMissionEvent = (ev) => {
+        setActiveMissions(prev => {
+            if (prev.length === 0) return prev;
+            return prev.map((m) => advanceMission(m, getMissionMeta(m.id)?.meta, ev));
+        });
+    };
+
+    /**
+     * Reclama una misión completada: la marca y devuelve el oro.
+     * Sin completar devuelve 0.
+     *
+     * @param {string} missionId
+     * @returns {number} oro de recompensa
+     */
+    const claimMission = (missionId) => {
+        const meta = getMissionMeta(missionId);
+        const found = activeMissions.find((m) => m.id === missionId);
+        if (!found || !isMissionCompleted(found, meta?.meta)) return 0;
+        setActiveMissions(prev => prev.map((m) => m.id === missionId ? { ...m, claimed: true } : m));
+        return meta?.recompensa_oro ?? 0;
+    };
+
+    const resetMissions = () => {
+        setActiveMissions([]);
+    };
+
     const exports = {
         gameLoading,
+        baseDeck,
         matchDeck,
         character,
         activeModifiers,
@@ -716,6 +796,12 @@ const MatchProvider = (props) => {
         getHairball,
         getCustomSlime,
         updateActualGame,
+        saveLossOnUnload,
+        activeMissions,
+        acceptMission,
+        trackMissionEvent,
+        claimMission,
+        resetMissions,
         getTutorialCards,
         setNewAchievements,
         handleNewAchievement,

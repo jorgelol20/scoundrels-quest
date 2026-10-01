@@ -1,0 +1,9 @@
+{
+  "musicVolume": "Volumen Música",
+  "effectsVolume": "Volumen Efectos",
+  "showFps": "Mostrar FPS",
+  "showLogs": "Mostrar Logs en partida",
+  "back": "Volver",
+  "language": "Idioma",
+  "languageHelp": "Se aplica al instante y se guarda en este navegador."
+}

@@ -1,0 +1,44 @@
+{
+  "bugForm": {
+    "title": "Reportar",
+    "reportUserTitle": "Reportar a {{nick}}",
+    "successMessage": "¡Gracias! Tu reporte ha sido enviado correctamente.",
+    "close": "Cerrar",
+    "reason": "Motivo",
+    "selectReason": "Selecciona una razón...",
+    "reasons": {
+      "badBanner": "El jugador tiene un banner inapropiado",
+      "badAvatar": "El jugador tiene un avatar inapropiado",
+      "badBoth": "Tanto el avatar como el banner son inapropiados"
+    },
+    "cheatBase": "El jugador ha hecho trampas",
+    "otherReason": "Otro",
+    "cheatPlaceholder": "Indique las trampas",
+    "type": "Tipo",
+    "types": {
+      "visual": "Visual",
+      "jugabilidad": "Jugabilidad",
+      "rendimiento": "Rendimiento",
+      "error": "Error",
+      "otro": "Otro"
+    },
+    "description": "Descripción",
+    "descriptionCount": "Descripción ({{len}}/2000)",
+    "descriptionPlaceholder": "Describe qué ha pasado, qué esperabas que pasara y cómo reproducirlo",
+    "screenshot": "Captura de pantalla",
+    "selectFile": "Seleccionar Archivo",
+    "logsAttached": "Logs de la partida (adjuntos automáticamente)",
+    "detectedDuring": "Detectado durante la partida con",
+    "cancel": "Cancelar",
+    "submit": "Enviar reporte",
+    "sending": "Enviando..."
+  },
+  "notifications": {
+    "markAllRead": "Marcar todas como vistas",
+    "goToReport": "Clic para ir al reporte",
+    "goToMatch": "Clic para ir a la partida"
+  },
+  "achievement": {
+    "iconAlt": "Icono logro {{nombre}}"
+  }
+}

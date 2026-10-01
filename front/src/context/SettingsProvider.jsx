@@ -8,6 +8,9 @@ import ShuffleDeckSound from '/sounds/shuffle-deck-sound.aac'
 import { useUser } from "../hooks/useUser";
 import DefaultBanner from '/images/banner.webp'
 import { useLocation } from "react-router-dom";
+import i18n from "../i18n/index.js";
+import { normalizeLocale, persistLocale, resolveInitialLocale } from "../i18n/detector.js";
+import api from "../api/api.js";
 
 export const settingsContext = createContext();
 
@@ -28,9 +31,17 @@ const SettingsProvider = ({ children }) => {
     // Estado del banner
     const [bannerImage, setBannerImage] = useState();
 
+    // Estado del idioma (Fase 0 i18n: 'es' | 'en', extensible)
+    const [locale, setLocale] = useState(() => resolveInitialLocale(user?.locale));
+
     // Refs
     const musicRef = useRef(null);
     const effectRef = useRef(null);
+    // La música (27MB en WAV) NO se precarga: el src solo se asigna tras el
+    // primer clic (los navegadores bloquean el autoplay de todos modos).
+    // Así el landing no descarga 27MB de golpe. Conviene convertir
+    // main-music.wav a .mp3/.opus (~2-3MB) cuando sea posible.
+    const [musicSrc, setMusicSrc] = useState(null);
 
     // Carga inicial de preferencias guardadas
     useEffect(() => {
@@ -61,9 +72,11 @@ const SettingsProvider = ({ children }) => {
     // EventListener para iniciar la música cuando el jugador clicke dentro de la web.
     useEffect(() => {
         const enableAudio = () => {
-            if (musicRef.current) {
-                musicRef.current.play().catch(err => console.log("Audio bloqueado:", err));
-            }
+            setMusicSrc((prev) => prev ?? MainMusic);
+            // Espera un tick para que el <audio> tenga src antes del play.
+            setTimeout(() => {
+                musicRef.current?.play().catch(err => console.log("Audio bloqueado:", err));
+            }, 0);
             window.removeEventListener('click', enableAudio);
         };
         window.addEventListener('click', enableAudio);
@@ -181,6 +194,48 @@ const SettingsProvider = ({ children }) => {
         }
     }, [location])
 
+    // Aplica el idioma inicial al montar (html lang + i18next)
+    useEffect(() => {
+        const initial = normalizeLocale(locale);
+        if (i18n.language !== initial) {
+            i18n.changeLanguage(initial);
+        }
+        if (typeof document !== 'undefined') {
+            document.documentElement.lang = initial;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Si el usuario trae locale persistido y no hay preferencia local, adoptarlo
+    useEffect(() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('sq_locale')) return;
+        if (user?.locale === 'es' || user?.locale === 'en') {
+            changeLocale(user.locale);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.locale]);
+
+    /**
+     * Cambia el idioma en caliente (sin recarga), lo persiste en
+     * localStorage y lo intenta guardar en el backend (best-effort).
+     *
+     * @param {string} lng 'es' | 'en'
+     */
+    const changeLocale = async (lng) => {
+        const next = normalizeLocale(lng);
+        await i18n.changeLanguage(next);
+        if (typeof document !== 'undefined') {
+            document.documentElement.lang = next;
+        }
+        persistLocale(next);
+        setLocale(next);
+        try {
+            await api.put('/user/locale', { locale: next });
+        } catch {
+            // Best-effort: el endpoint puede no existir aún (Fase 0 back parcial)
+        }
+    };
+
     const value = {
         effectsVolume,
         musicVolume,
@@ -189,6 +244,8 @@ const SettingsProvider = ({ children }) => {
         showFPS,
         showLogs,
         bannerImage,
+        locale,
+        changeLocale,
         changeEffectsSound,
         changeMusicSound,
         startButtonSound,
@@ -205,7 +262,7 @@ const SettingsProvider = ({ children }) => {
 
     return (
         <settingsContext.Provider value={value}>
-            <audio ref={musicRef} src={MainMusic} volume={musicVolume} loop />
+            <audio ref={musicRef} src={musicSrc} preload="none" volume={musicVolume} loop />
             {children}
         </settingsContext.Provider>
     );
