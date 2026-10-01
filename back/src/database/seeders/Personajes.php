@@ -120,6 +120,15 @@ class Personajes extends Seeder
                 'activo' => true,
                 'habilidad_codigo' => 'alquimista'
             ],
+            [
+                'id' => 12,
+                'nombre' => 'Guardian',
+                'descripcion' => 'El hermano mayor y guay del guerrero. Enviado por un rey codicioso para conseguir riquezas a cambio de seguir alquilando su armadura casi impenetrable.',
+                'nombre_en' => 'Guardian',
+                'descripcion_en' => 'The Warrior\'s cooler big brother. Shipped off by a greedy king to get rich — or at least keep renting out his near-impenetrable armour.',
+                'activo' => true,
+                'habilidad_codigo' => 'guardian'
+            ],
 
         ];
 

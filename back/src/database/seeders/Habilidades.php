@@ -143,6 +143,17 @@ class Habilidades extends Seeder
                 'coste_oro' => null,
                 'usos_por_ronda' => 1,
             ],
+            [
+                'nombre' => 'Posición defensiva',
+                'descripcion' => 'Te endureces más que un portón de acero de un castillo, reduciendo el daño de los enemigos en la mano activa un 50%. Recibes -1 de daño de enemigos.',
+                'nombre_en' => 'Defensive Stance',
+                'descripcion_en' => 'You brace like a castle gate, halving damage from enemies in the active hand. You take 1 less damage from enemies.',
+                'icono' => '/storage/habilidades/PosicionDefensiva.webp',
+                'codigo' => 'guardian',
+                'efectos' => null,
+                'coste_oro' => null,
+                'usos_por_ronda' => 1,
+            ],
         ];
 
         foreach ($habilidadesData as $data) {

@@ -240,6 +240,24 @@ class Logros extends Seeder
                 'codigo' => 'habilidad_alquimista'
             ],
             [
+                'nombre' => 'Gran Muralla',
+                'descripcion' => 'Gana tu primera partida con `El Guardian`.',
+                'nombre_en' => 'Great Wall',
+                'descripcion_en' => 'Win your first run with `The Guardian`.',
+                'icono' => '/storage/logros/Oro.webp',
+                'meta' => null,
+                'codigo' => 'victoria_guardian'
+            ],
+            [
+                'nombre' => 'Guerrero Inamovible',
+                'descripcion' => 'Usa la habilidad de `El Guardian` 100 veces.',
+                'nombre_en' => 'Immovable Warrior',
+                'descripcion_en' => 'Use `The Guardian\'s` ability 100 times.',
+                'icono' => '/storage/logros/Plata.webp',
+                'meta' => 100,
+                'codigo' => 'habilidad_guardian'
+            ],
+            [
                 'nombre' => 'Textura gelatinosa',
                 'descripcion' => 'Consume el Cubo de Slime',
                 'nombre_en' => 'Gelatinous Texture',

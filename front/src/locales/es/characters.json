@@ -25,7 +25,8 @@
     "cazador": "Economía",
     "vampiro": "Drenaje",
     "domador": "Control",
-    "alquimista": "Apoyo"
+    "alquimista": "Apoyo",
+    "guardian": "Defensivo"
   },
   "strategies": {
     "guerrero": "Lo ideal es jugar al rededor del 50% de la vida e intentar obtener los modificadores de vida extra para que ese 50% sea superior y no ir siempre a riesgo de morir por una mala decisión.",
@@ -33,7 +34,8 @@
     "elfo": "Con la posibilidad de huir hasta 2 veces por mano, puedes pensar mejor cuando jugartela o usar tu habilidad.",
     "mago": "Personaje ideal si te gusta un ritmo de juego más pausado y calmado dado que te permite pensar con varios turnos a futuro.",
     "apostador": "La opción más viable es: no usar su habilidad.",
-    "alquimista": "Juega a curarte con corazones para activar la pasiva y usa la poción cada ronda según lo que necesites: oro, daño, vida o huida."
+    "alquimista": "Juega a curarte con corazones para activar la pasiva y usa la poción cada ronda según lo que necesites: oro, daño, vida o huida.",
+    "guardian": "Aguanta los golpes con la pasiva y guarda la Posición defensiva para la mano con los enemigos más duros; contra minibosses no tienes ventaja."
   },
   "select": "Seleccionar",
   "aria": {

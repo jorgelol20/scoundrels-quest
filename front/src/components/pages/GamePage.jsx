@@ -45,6 +45,8 @@ import {
     calcAlchemistHealBonus,
     rollAlchemistPotion,
     calcPotionHeal,
+    GUARDIAN_FLAT_REDUCTION,
+    isGuardianTarget,
 } from "../../game/characters.js";
 import {
     calcStageLayout,
@@ -239,6 +241,10 @@ const GamePageInner = () => {
     // Toque espectral: manos futuras restantes tras aplicar a la activa (2).
     const spectreHandsLeft = useRef(0);
     const [isAlchemist, setIsAlchemist] = useState(false);
+    const [isGuardian, setIsGuardian] = useState(false);
+    // Posición defensiva: claves de la mano activa protegidas con -50%.
+    // Se pierde al huir, al reiniciar o al cambiar de ronda (no persiste).
+    const guardianStanceKeys = useRef(new Set());
     // Poción de avaricia: duplica el oro del siguiente enemigo con arma (un uso).
     const alchemistGreedRef = useRef(false);
     // Pasiva alquimista (+1 daño): se sortea en handleHeal pero se vuelca tras
@@ -526,7 +532,7 @@ const GamePageInner = () => {
 
         const spectre = () => {
             // Toque espectral puro en game/characters.js; aquí solo logs y commit.
-            // Aplica a la sala activa y deja 2 manos futuras (-3, suelo 0).
+            // Aplica a la mano activa y deja 2 manos futuras (-3, suelo 0).
             const result = spectreWeaken(room);
             logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.spectre'))
             result.weakened.forEach((weakened) => {
@@ -534,6 +540,14 @@ const GamePageInner = () => {
             });
             setRoom(result.room);
             spectreHandsLeft.current = 2;
+        }
+
+        const guardian = () => {
+            // Posición defensiva pura en game/combat.js; aquí solo snapshot y logs.
+            // Protege la mano activa (claves actuales): -50% (floor) + -1 al finalDmg,
+            // solo Pica/Trebol (minibosses exentos). Se pierde al huir o reiniciar.
+            guardianStanceKeys.current = new Set(room.map((card) => card?.key));
+            logsRef.current.push((logsRef.current.length + 1) + " - " + t('game:logs.guardianStance'))
         }
 
         const scape = () => {
@@ -571,6 +585,8 @@ const GamePageInner = () => {
 
             setDungeon(prev => [...nonBlocked, ...prev]);
             setRoom(blockedCards);
+            // La posición defensiva se pierde al huir.
+            guardianStanceKeys.current = new Set();
 
             if (actualScapes.current - 1 > 0) {
                 actualScapes.current -= 1;
@@ -923,6 +939,7 @@ const GamePageInner = () => {
                 tameDamage,
                 isSpectre,
                 isAlchemist,
+                isGuardian,
             }, code);
             if (!handled) return;
             if (next.isWarrior !== isWarrior) {
@@ -953,6 +970,9 @@ const GamePageInner = () => {
             }
             if (next.isAlchemist !== isAlchemist) {
                 setIsAlchemist(next.isAlchemist);
+            }
+            if (next.isGuardian !== isGuardian) {
+                setIsGuardian(next.isGuardian);
             }
             setMaxHealthSteal(next.maxHealthSteal);
             setTameDamage(next.tameDamage);
@@ -1078,6 +1098,8 @@ const GamePageInner = () => {
             setIsVampire(false);
             setIsSpectre(false);
             spectreHandsLeft.current = 0;
+            setIsGuardian(false);
+            guardianStanceKeys.current = new Set();
             setIsAlchemist(false);
             alchemistGreedRef.current = false;
             alchemistDmgPendingRef.current = 0;
@@ -1225,6 +1247,8 @@ const GamePageInner = () => {
                 if (canUseAbility) {
                     setAvailableAbility(true);
                 }
+                // La posición defensiva pertenece a la mano activa anterior.
+                guardianStanceKeys.current = new Set();
 
                 // Misiones: la meta de rondas avanza al empezar cada ronda.
                 trackMissionEvent({ round: startedRound });
@@ -1616,6 +1640,13 @@ const GamePageInner = () => {
                 clubsExtra: clubsExtraTakedDmg.current,
                 criticalPercentage: criticalPercentage.current,
                 criticalRoll: Math.floor(Math.random() * 100),
+                // Kit del guardián (puro en game/combat.js): el adaptador decide
+                // por palo (solo Pica/Trebol, minibosses exentos) y por clave
+                // (stance solo si la carta estaba en la mano activa al activarla).
+                guardian: {
+                    flat: (isGuardian && isGuardianTarget(card)) ? GUARDIAN_FLAT_REDUCTION : 0,
+                    stance: guardianStanceKeys.current.has(card?.key) && isGuardianTarget(card),
+                },
             });
             const { criticalMultiplier, finalUserDmg } = combat;
             let { finalDmg, isSlain } = combat;
@@ -2009,6 +2040,7 @@ const GamePageInner = () => {
             },
             elfo: () => { elf(); setAvailableAbility(false); handleNewAchievement('habilidad_elfo') },
             espectro: () => { spectre(); setAvailableAbility(false); handleNewAchievement('habilidad_espectro') },
+            guardian: () => { guardian(); setAvailableAbility(false); handleNewAchievement('habilidad_guardian') },
             mago: () => { shuffleDeck(dungeon); setAvailableAbility(false); handleNewAchievement('habilidad_mago') },
             apostador: () => {
                 gambler().catch((gamblerError) => console.error("Error en la apuesta:", gamblerError));

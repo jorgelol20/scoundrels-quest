@@ -358,6 +358,20 @@ Los personajes a elegir son los siguientes:
 
             ],
 
+            [
+
+                'id' => 12,
+
+                'nombre' => 'Guardian',
+
+                'descripcion' => 'El hermano mayor y guay del guerrero. Enviado por un rey codicioso para conseguir riquezas a cambio de seguir alquilando su armadura casi impenetrable.',
+
+                'activo' => true,
+
+                'habilidad_id' => 12
+
+            ],
+
     ```
 
 # === HABILIDADES ===
@@ -582,11 +596,35 @@ Las habilidades donde `usos_por_ronda` es nulo, significa que pueden usarse vari
 
             ],
 
+            [
+
+                'nombre' => 'Posición defensiva',
+
+                'descripcion' => 'Te endureces más que un portón de acero de un castillo, reduciendo el daño de los enemigos en la mano activa un 50%. Recibes -1 de daño de enemigos.',
+
+                'icono' => '/storage/habilidades/PosicionDefensiva.webp',
+
+                'codigo' => 'guardian',
+
+                'efectos' => null,
+
+                'coste_oro' => null,
+
+                'usos_por_ronda' => 1,
+
+            ],
+
     ```
 
     ***Nota:*** *Cazarecompensas (código `cazador`) existe en BD pero su habilidad no está implementada en partida: el botón no hace nada.*
 
     ***Alquimista (código `alquimista`):*** *pasiva con dos tiradas independientes del 50% solo cuando una carta de curación (Corazón) cura de verdad —descartada sin efecto (anticura/vampiro/ya curado) no dispara—: +25% de curación (suelo, con clamp a vida máxima) y +1 de daño en la siguiente acción. Activa `Alquimia Básica` (1 uso por ronda, efecto inmediato): poción aleatoria 25% cada una — curativa (+2 si vida > 50% máx, +4 si < 50%, +3 si = 50%, con clamp), fuerza (+2 daño siguiente acción), avaricia (dobla el oro del siguiente enemigo derrotado con arma; extra_gold y midas aplican antes; un uso, sin apilar) y velocidad (+1 huida en `actualScapes` de la mano actual). La poción curativa es directa y no dispara la pasiva.*
+
+    ***Guardián (código `guardian`):*** *pasiva −1 al daño final de combate, solo Pica/Trebol (minibosses exentos; sin efecto sobre veneno, espinoso u oro). Activa `Posición defensiva` (1 uso por ronda): protege la mano activa (las cartas en mesa al activarla) con −50% (floor) al daño final y luego −1 de la pasiva, con suelo 0. Precedencia: invencibilidad > stance+pasiva; `dmgReduction` (13-Corazón) se consume igual. La stance se pierde al huir, al cambiar de ronda o al reiniciar.*
+
+    ***Elfo:*** *`Abrojos` no afecta a minibosses (palo `Miniboss`): −5 (suelo 0) a las dos últimas cartas de la mano, saltando minibosses.*
+
+    ***Glosario:*** *`mano` = cartas en mesa (antes `sala`); `ronda` = conjunto de todas las manos hasta completar la baraja.*
 
     Posibles efectos apuesta ciega:
 

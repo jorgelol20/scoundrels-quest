@@ -156,13 +156,14 @@
     "enemiesDefeated": "Total enemigos derrotados:"
   },
   "logs": {
-    "scareStart": "Asustas a los enemigos en la sala.",
+    "scareStart": "Asustas a los enemigos en la mano.",
     "scareFled": "{{valor}} de {{palo}} ha huido",
     "scareNone": "No has asustado a nada...",
     "caltrops": "Has lanzado unos abrojos, bajando el valor a dos cartas.",
     "caltropsWeakened": "{{prevValor}} de {{palo}} ahora vale {{valor}}",
     "spectre": "El toque espectral debilita a los enemigos.",
     "spectreWeakened": "{{prevValor}} de {{palo}} ahora vale {{valor}}",
+    "guardianStance": "Adoptas la posición defensiva: los enemigos de la mano activa te harán la mitad de daño.",
     "spectreImmune": "Tu forma espectral te protege del efecto de {{valor}} de {{palo}}.",
     "webBlock": "Una telaraña te impide huir.",
     "thorns": "El enemigo tenía unas espinas que te han inflingido 3 de daño.",
