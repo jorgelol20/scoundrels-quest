@@ -24,14 +24,18 @@
     "herrero": "Offensive",
     "cazador": "Economy",
     "vampiro": "Drain",
-    "domador": "Control"
+    "domador": "Control",
+    "alquimista": "Support",
+    "guardian": "Defensive"
   },
   "strategies": {
     "guerrero": "The ideal play is to stay around 50% health and try to grab the extra health modifiers so that 50% is actually higher, instead of always risking death from a bad decision.",
     "paladin": "The most balanced character, since it fits any playstyle.",
     "elfo": "With the chance to flee up to 2 times per hand, you can think things through better when you push your luck or use your ability.",
     "mago": "The ideal character if you enjoy a slower, calmer pace, since it lets you plan several turns ahead.",
-    "apostador": "The most viable option is: not using its ability."
+    "apostador": "The most viable option is: not using its ability.",
+    "alquimista": "Heal with hearts to trigger the passive and brew every round for whatever the run needs: gold, damage, health or escape.",
+    "guardian": "Soak hits with the passive and save Defensive Stance for the toughest hand; against minibosses you hold no edge."
   },
   "select": "Select",
   "aria": {
