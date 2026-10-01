@@ -74,9 +74,6 @@ const SettingsPage = () => {
                             <input className="logs-setting checkbox-setting" type="checkbox" checked={showLogs ? true : false} name="" id="" onChange={(e) => { changeShowLogs(e.target.checked) }} />
                         </div>
                     </div>
-                    <div>
-                        <button onClick={(event) => { startButtonSound(true); navigate('/') }}>{t('back')}</button>
-                    </div>
                     <div className="language-setting">
                         <label htmlFor="locale-select">{t('language')}</label><br />
                         <select
@@ -100,6 +97,9 @@ const SettingsPage = () => {
                             <option value="halloween">{t('themeHalloween')}</option>
                             <option value="default">{t('themeDefault')}</option>
                         </select>
+                    </div>
+                    <div>
+                        <button onClick={(event) => { startButtonSound(true); navigate('/') }}>{t('back')}</button>
                     </div>
                 </div>
             </div>

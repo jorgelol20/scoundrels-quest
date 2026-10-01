@@ -21,6 +21,8 @@ export const CHARACTER_DEFAULTS = {
     maxHealthSteal: 3,
     tameDamage: 0,
     isSpectre: false,
+    isAlchemist: false,
+    isGuardian: false,
 };
 
 const isEnemy = (card) => card?.palo === 'Pica' || card?.palo === 'Trebol';
@@ -54,6 +56,10 @@ export const applyPassiveToState = (state, charCode) => {
             return { state: { ...state, tameDamage: 1 }, handled: true };
         case 'espectro':
             return { state: { ...state, isSpectre: true }, handled: true };
+        case 'alquimista':
+            return { state: { ...state, isAlchemist: true }, handled: true };
+        case 'guardian':
+            return { state: { ...state, isGuardian: true }, handled: true };
         default:
             return { state, handled: false };
     }
@@ -64,7 +70,7 @@ export const applyPassiveToState = (state, charCode) => {
  * repone desde el tope (final del array). Sin enemigos no toca nada.
  * No muta las entradas.
  *
- * @param {Array} room sala actual
+ * @param {Array} room mano actual
  * @param {Array} dungeon mazo actual (tope = final)
  * @returns {{room:Array, dungeon:Array, scared:Array}}
  */
@@ -86,26 +92,32 @@ export const warriorScare = (room, dungeon) => {
 };
 
 /**
- * Abrojos del elfo: -5 a las dos últimas cartas (toda la sala si hay
- * 2 o menos), con suelo de 0. No muta la entrada.
+ * Abrojos del elfo: -5 a las dos últimas cartas de la mano (toda la mano si hay
+ * 2 o menos), con suelo de 0. Minibosses (palo 'Miniboss') exentos.
+ * No muta la entrada.
  *
- * @param {Array} room sala actual
+ * @param {Array} room mano actual
  * @returns {{room:Array, weakened:Array<{prevValor:number, valor:number, palo:string|undefined}>}}
  */
 export const elfCaltrops = (room) => {
-    const weaken = (card) => ({ ...card, valor: Math.max(0, card?.valor - 5) });
+    const isExempt = (card) => card?.palo === 'Miniboss';
+    const weaken = (card) => (isExempt(card) ? card : { ...card, valor: Math.max(0, card?.valor - 5) });
     const describe = (card) => ({
         prevValor: card?.valor,
         valor: Math.max(0, card?.valor - 5),
         palo: card?.palo,
     });
     if (room.length <= 2) {
-        return { room: room.map(weaken), weakened: room.map(describe) };
+        return { room: room.map(weaken), weakened: room.filter((c) => !isExempt(c)).map(describe) };
     }
+    const lastTwo = new Set([room.length - 2, room.length - 1]);
     const next = room.map((card, index) =>
-        (index === room.length - 1 || index === room.length - 2) ? weaken(card) : card
+        (lastTwo.has(index) && !isExempt(card)) ? weaken(card) : card
     );
-    return { room: next, weakened: room.slice(-2).map(describe) };
+    return {
+        room: next,
+        weakened: room.filter((card, index) => lastTwo.has(index) && !isExempt(card)).map(describe),
+    };
 };
 
 /**
@@ -122,10 +134,10 @@ export const calcVampireAbility = (health) => {
 const isBountyTarget = (card) => card?.palo === 'Pica' || card?.palo === 'Trebol';
 
 /**
- * Toque espectral: -3 a todos los enemigos Pica/Trébol de la sala,
+ * Toque espectral: -3 a todos los enemigos Pica/Trébol de la mano,
  * con suelo de 0. Minibosses (palo 'Miniboss') exentos. No muta la entrada.
  *
- * @param {Array} room sala actual
+ * @param {Array} room mano actual
  * @param {number} [amount=3] cantidad a reducir
  * @returns {{room:Array, weakened:Array<{prevValor:number, valor:number, palo:string|undefined}>}}
  */
@@ -149,20 +161,87 @@ export const spectreWeaken = (room, amount = 3) => {
 };
 
 /**
+ * Tirada de pasiva de la alquimista (curación): 50% (roll 0-99 < 50).
+ * El azar se inyecta desde el adaptador (sin Math.random en el puro).
+ * @param {number} roll tirada 0-99
+ * @returns {boolean}
+ */
+export const rollAlchemistHeal = (roll) => roll < 50;
+
+/**
+ * Tirada de pasiva de la alquimista (daño): 50% independiente (roll 0-99 < 50).
+ * @param {number} roll tirada 0-99
+ * @returns {boolean}
+ */
+export const rollAlchemistDmg = (roll) => roll < 50;
+
+/**
+ * Bonus de curación de la pasiva: +25% (suelo por defecto).
+ * @param {number} amount curación base ya con gluttony
+ * @returns {number} bonus a sumar
+ */
+export const calcAlchemistHealBonus = (amount) => Math.floor((amount ?? 0) * 0.25);
+
+/**
+ * Poción de Alquimia Básica según tirada 0-99 (25% cada una).
+ * @param {number} roll tirada 0-99
+ * @returns {'heal'|'force'|'greed'|'speed'}
+ */
+export const rollAlchemistPotion = (roll) => {
+    if (roll < 25) return 'heal';
+    if (roll < 50) return 'force';
+    if (roll < 75) return 'greed';
+    return 'speed';
+};
+
+/**
+ * Poción curativa: >50% vida máx +2, <50% +4, =50% +3 (punto medio).
+ * @param {{health:number, maxHealth:number}} input
+ * @returns {number}
+ */
+export const calcPotionHeal = ({ health, maxHealth }) => {
+    if (health * 2 > maxHealth) return 2;
+    if (health * 2 < maxHealth) return 4;
+    return 3;
+};
+
+/**
  * Manos restantes del toque espectral (3 contando la activa:
- * al activar se aplica a la sala y quedan 2 futuras).
+ * al activar se aplica a la mano y quedan 2 futuras).
  * @param {number} left manos restantes
  * @returns {number}
  */
 export const nextSpectreHands = (left) => Math.max(0, (left ?? 0) - 1);
 
 /**
+ * Reducción plana del guardián: -1 al daño final de combate
+ * (solo Pica/Trebol; minibosses exentos; suelo 0 lo aplica el llamador).
+ */
+export const GUARDIAN_FLAT_REDUCTION = 1;
+
+/**
+ * Posición defensiva: -50% al daño final de la mano activa (suelo con floor).
+ * Solo Pica/Trebol; minibosses exentos (lo decide el adaptador por palo/clave).
+ * @param {number} dmg daño final ya calculado
+ * @returns {number} daño mitigado
+ */
+export const calcGuardianStanceDamage = (dmg) => Math.floor((dmg ?? 0) * 0.5);
+
+/**
+ * ¿Aplica el kit del guardián a esta carta? Solo enemigos normales.
+ * @param {object} card carta enemiga
+ * @returns {boolean}
+ */
+export const isGuardianTarget = (card) =>
+    card?.palo === 'Pica' || card?.palo === 'Trebol';
+
+/**
  * Recompensa del cazador: oro extra permanente a los 2 enemigos más
- * fuertes de la sala. Los efectos existentes se conservan (el campo
+ * fuertes de la mano. Los efectos existentes se conservan (el campo
  * puede venir como objeto, array o ausente). No muta la entrada.
  * Minibosses excluidos (mismo criterio que warriorScare).
  *
- * @param {Array} room sala actual
+ * @param {Array} room mano actual
  * @returns {{room:Array, bountied:Array<{valor:number, palo:string|undefined}>}}
  */
 export const applyBounty = (room) => {

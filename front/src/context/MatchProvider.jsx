@@ -280,6 +280,14 @@ const MatchProvider = (props) => {
                 case 'id:10':
                     await handleNewAchievement('victoria_espectro')
                     break;
+                case 'alquimista':
+                case 'id:11':
+                    await handleNewAchievement('victoria_alquimista')
+                    break;
+                case 'guardian':
+                case 'id:12':
+                    await handleNewAchievement('victoria_guardian')
+                    break;
             }
         } else {
             // Logro derrota
