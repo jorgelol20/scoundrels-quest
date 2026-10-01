@@ -7,4 +7,7 @@ back/src/.env
 .env
 back/src/.env
 back/docker-compose.yml
-BibliMecanicas.md
+SCOUNDRELSQUEST.md
+MEMORY.md
+AGENTS.md
+**/.phpunit.result.cache
