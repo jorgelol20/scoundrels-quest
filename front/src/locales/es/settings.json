@@ -5,5 +5,9 @@
   "showLogs": "Mostrar Logs en partida",
   "back": "Volver",
   "language": "Idioma",
-  "languageHelp": "Se aplica al instante y se guarda en este navegador."
+  "languageHelp": "Se aplica al instante y se guarda en este navegador.",
+  "theme": "Tema",
+  "themeAuto": "Automático",
+  "themeHalloween": "Halloween",
+  "themeDefault": "Normal"
 }

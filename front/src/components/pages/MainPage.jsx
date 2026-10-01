@@ -7,7 +7,8 @@ import { settingsContext } from "../../context/SettingsProvider.jsx";
 import { useMatch } from "../../hooks/useMatch.js";
 import Match from "../Match.jsx";
 import UserRanking from "../UserRanking.jsx";
-import GameIcon from '/images/banner_menu.webp';
+import GameIconDefault from '/images/banner_menu.webp';
+import GameIconHalloween from '/images/banner_menu_halloween.webp';
 import { useCard } from "../../hooks/useCard.js";
 import { useAchievements } from "../../hooks/useAchievements.js";
 import { useModifier } from "../../hooks/useModifier.js";
@@ -24,6 +25,8 @@ const MainPage = () => {
     const { openBugReport } = useContext(bugReportContext)
     const { matches, isLoading: matchIsLoading } = useMatch();
     const { startButtonSound } = useContext(settingsContext)
+    const { theme } = useContext(settingsContext)
+    const GameIcon = theme === 'halloween' ? GameIconHalloween : GameIconDefault;
     const navigate = useNavigate();
 
 

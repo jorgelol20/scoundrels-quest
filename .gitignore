@@ -7,8 +7,4 @@ back/src/.env
 .env
 back/src/.env
 back/docker-compose.yml
-SCOUNDRELSQUEST.md
-MEMORY.md
-AGENTS.md
 **/.phpunit.result.cache
-.opencode
