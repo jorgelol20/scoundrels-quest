@@ -34,6 +34,11 @@
  * @param {number} input.clubsExtra daño extra recibido por tréboles
  * @param {number} input.criticalPercentage probabilidad de crítico
  * @param {number} input.criticalRoll tirada 0-99 (inyectada)
+ * @param {object} [input.guardian] mitigación del guardián (namespaced para
+ *   no engordar la firma con más flags: patrón para futuras mitigaciones).
+ * @param {number} [input.guardian.flat] reducción plana ya decidida por el
+ *   adaptador (0/1; solo Pica/Trebol, minibosses exentos)
+ * @param {boolean} [input.guardian.stance] posición defensiva activa en la carta
  * @returns {{criticalMultiplier:number, pentakill:number, enemyBaseDmg:number,
  *   extraSuitDmg:number, canUseWeapon:boolean, finalUserDmg:number,
  *   finalDmg:number, isSlain:boolean}}
@@ -46,7 +51,9 @@ export const calcCombatDamage = (input) => {
         userExtraDmg, userPermanentExtraDmg, userDmgMultiplier,
         enemyDmgMultiplier, enemyExtraDmg, dmgReduction,
         spadesExtra, clubsExtra, criticalPercentage, criticalRoll,
+        guardian = {},
     } = input;
+    const { flat: guardianFlat = 0, stance: guardianStance = false } = guardian;
 
     const criticalMultiplier = criticalRoll < criticalPercentage ? 1.5 : 1;
     const pentakill = actualStreak >= pentakillTargetNumber ? pentakillDmg : 0;
@@ -68,10 +75,24 @@ export const calcCombatDamage = (input) => {
         finalUserDmg = Math.floor(((pentakill + extraSuitDmg + userExtraDmg + userPermanentExtraDmg + mma) * userDmgMultiplier) * criticalMultiplier + 0.5);
         isSlain = false;
     }
-    const finalDmg = Math.max(0, enemyBaseDmg - finalUserDmg);
+    const finalDmg = applyGuardianMitigation(
+        Math.max(0, enemyBaseDmg - finalUserDmg),
+        { flat: guardianFlat, stance: guardianStance },
+    );
 
     return { criticalMultiplier, pentakill, enemyBaseDmg, extraSuitDmg, canUseWeapon, finalUserDmg, finalDmg, isSlain };
 };
+
+/**
+ * Mitigación del guardián al daño final: primero 50% (floor) si la stance
+ * cubre la carta, luego -1 plano. Suelo 0. El adaptador decide por palo
+ * (solo Pica/Trebol) y por clave (mano activa); aquí solo aritmética.
+ * @param {number} dmg daño final ya calculado
+ * @param {{flat:number, stance:boolean}} [guardian]
+ * @returns {number}
+ */
+export const applyGuardianMitigation = (dmg, { flat = 0, stance = false } = {}) =>
+    Math.max(0, Math.floor((dmg ?? 0) * (stance ? 0.5 : 1)) - flat);
 
 /**
  * Recompensa de oro por enemigo (base 10 apostador, 5 resto).
