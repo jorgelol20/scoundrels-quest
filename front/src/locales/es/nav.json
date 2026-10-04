@@ -9,6 +9,7 @@
   "exitMatchTitle": "Salir de la Partida",
   "exitMatchMessage": "Si sales, la partida contará como derrota.",
   "gameIconAlt": "Icono juego",
+  "notificationIconAlt": "Icono de notificaciones",
   "footer": {
     "toggleLabel": "Expandir/Contraer navegación del footer",
     "versionAndDate": "V. Alfa · Última actualización: {{date}}",

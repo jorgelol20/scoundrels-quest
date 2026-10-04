@@ -7,6 +7,8 @@
 - **Arranque:** `start-dev.bat` (Windows) / `start-dev.sh` (Linux/Mac). Manual: `pnpm run dev` en `front/`, `docker compose up -d --build` en `back/`, luego en PHP `php artisan migrate`, `php artisan optimize`, `php artisan storage:link`. Front en `http://localhost:5174`.
 - **Fuente de verdad de mecánicas:** `SCOUNDRELSQUEST.md` (cartas, personajes, habilidades, modificadores, combate, tienda, minibosses, salida/derrotas). Si código y doc discrepan, repórtalo y no cambies el balance sin preguntar.
 
+***Nota:*** **Comprueba al documentación que necesites con Context7**
+
 ### Backend
 
 ```
@@ -247,4 +249,5 @@ dejarlo en la memoria.
 
 ## Verificación
 
-- Sin comandos de verificación automatizada. Verificación manual.
+- Front: Utiliza las chrome-dev-tools
+- Backend: Sin comandos automatizados.

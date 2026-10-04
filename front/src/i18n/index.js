@@ -32,7 +32,7 @@ import esTutorial from '../locales/es/tutorial.json';
 import enTutorial from '../locales/en/tutorial.json';
 import esLegal from '../locales/es/legal.json';
 import enLegal from '../locales/en/legal.json';
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './detector.js';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, resolveInitialLocale } from './detector.js';
 
 /**
  * Todos los namespaces van en el bundle inicial vía `resources`.
@@ -49,6 +49,10 @@ if (!i18n.isInitialized) {
             en: { common: enCommon, nav: enNav, settings: enSettings, home: enHome, ranking: enRanking, match: enMatch, profile: enProfile, auth: enAuth, modals: enModals, bugs: enBugs, game: enGame, characters: enCharacters, credits: enCredits, seo: enSeo, tutorial: enTutorial, legal: enLegal },
         },
         fallbackLng: DEFAULT_LOCALE,
+        // Idioma inicial síncrono (?lang= > localStorage > user > navigator > en):
+        // sin esto el primer render sale en el fallback y los componentes
+        // estáticos (p. ej. Footer) se quedan con textos en inglés.
+        lng: resolveInitialLocale(),
         supportedLngs: SUPPORTED_LOCALES,
         defaultNS: 'common',
         ns: ['common', 'nav', 'settings', 'home', 'ranking', 'match', 'profile', 'auth', 'modals', 'bugs', 'game', 'legal', 'tutorial', 'characters', 'credits', 'seo'],

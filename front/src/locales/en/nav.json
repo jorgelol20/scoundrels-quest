@@ -9,6 +9,7 @@
   "exitMatchTitle": "Leave the match",
   "exitMatchMessage": "If you leave, the match will count as a defeat.",
   "gameIconAlt": "Game icon",
+  "notificationIconAlt": "Notifications icon",
   "footer": {
     "toggleLabel": "Expand/collapse footer navigation",
     "versionAndDate": "V. Alpha · Last updated: {{date}}",

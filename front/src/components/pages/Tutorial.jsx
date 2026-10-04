@@ -8,6 +8,7 @@ import useImage from "use-image";
 // 2. Contextos y Hooks
 import { matchContext } from "../../context/MatchProvider.jsx";
 import { useModifier } from "../../hooks/useModifier.js";
+import { useScheduledTimeouts } from "../../hooks/game/useScheduledTimeouts.js";
 
 // 3. Componentes
 import Card from "../Card.jsx";
@@ -147,6 +148,8 @@ const Tutorial = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const movementButtonsRef = useRef(null);
     const { getTutorialCards, getWeapon, getHealItem, availableCharacters } = useContext(matchContext);
+    // Timers cancelables: se limpian al desmontar (evita setState tras salir del tutorial).
+    const { scheduleTimeout } = useScheduledTimeouts();
 
     //Imagenes ShopMan
     const [shopManSad] = useImage(ShopManSad);
@@ -636,13 +639,13 @@ const Tutorial = () => {
             setHealthAnimation(DamageAnimation);
         }
 
-        setTimeout(() => {
+        scheduleTimeout(() => {
             setHealthAnimation(null);
         }, 300);
     }
 
     const moveCardToDiscard = (cardsToMove, moved = false) => {
-        setTimeout(() => {
+        scheduleTimeout(() => {
             setDiscardPile(prev => [...prev, ...cardsToMove]);
             setRoom(prev => prev.filter(c => !cardsToMove.find(moved => moved.key === c.key)));
         }, 200);
@@ -653,7 +656,7 @@ const Tutorial = () => {
         if (cardsNeeded === 0 || simulatorDeck.length === 0) return;
 
         const cardsToDraw = simulatorDeck.slice(0, cardsNeeded);
-        setTimeout(() => {
+        scheduleTimeout(() => {
             setSimulatorDeck(previousDeck => previousDeck.slice(cardsToDraw.length));
             setRoom(previousRoom => {
                 const missingCards = Math.max(0, 4 - previousRoom.length);
@@ -672,7 +675,7 @@ const Tutorial = () => {
 
         if (weapon) {
             moveCardToDiscard([weapon], true);
-            setTimeout(() => {
+            scheduleTimeout(() => {
                 setWeapon(card);
                 deleteFromRoom(card);
             }, 100);
@@ -683,7 +686,7 @@ const Tutorial = () => {
 
         if (slainMonsters.length > 0) {
             moveCardToDiscard([...slainMonsters], true);
-            setTimeout(() => {
+            scheduleTimeout(() => {
                 setSlainMonsters([]);
             }, 200);
         }
@@ -889,7 +892,7 @@ const Tutorial = () => {
         }
 
         refillHandFromDeck();
-        setTimeout(() => {
+        scheduleTimeout(() => {
             setCanBeClicked(true);
             document.body.style.cursor = "auto";
         }, 500);

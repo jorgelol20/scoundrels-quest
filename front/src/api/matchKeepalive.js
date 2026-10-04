@@ -9,6 +9,9 @@
  * No dispara logros: en unload no hay tiempo para la cadena async.
  */
 
+import { normalizeLocale } from '../i18n/detector.js';
+import i18n from '../i18n/index.js';
+
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 /**
@@ -41,10 +44,17 @@ export const buildLossPayload = ({
 export const postMatchKeepalive = (form) => {
     try {
         const token = localStorage.getItem('auth_token');
+        let locale = 'en';
+        try {
+            locale = normalizeLocale(i18n.language?.split('-')[0]);
+        } catch {
+            locale = 'en';
+        }
         return fetch(`${BACKEND_URL}/partidas`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept-Language': locale,
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify(form),

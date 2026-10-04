@@ -5,22 +5,21 @@ import { useTranslation } from 'react-i18next';
 import achievementPlaceholder from '/images/achievement.webp'
 import { settingsContext } from '../../context/SettingsProvider';
 import { fmtDate } from '../../i18n/format.js';
+import { useScheduledTimeouts } from '../../hooks/game/useScheduledTimeouts.js';
 
 const AchievementNotifie = ({ achievementInfo }) => {
     const { deleteNewAchievement } = useContext(matchContext);
     const {startAchievementSound} = useContext(settingsContext);
     const { t, i18n } = useTranslation('modals');
-    const deleteAchievement = async () => {
-        setTimeout(() => {
-            deleteNewAchievement(achievementInfo.id);
-        }, 4900)
-    }
+    const { scheduleTimeout } = useScheduledTimeouts();
     useEffect(() => {
         if (achievementInfo != null) {
-            startAchievementSound(true)
-            deleteAchievement()
+            startAchievementSound(true);
+            scheduleTimeout(() => {
+                deleteNewAchievement(achievementInfo.id);
+            }, 4900);
         }
-    },[achievementInfo])
+    }, [achievementInfo])
     return (
         <Fragment>
             <div className='achievement-modal'>

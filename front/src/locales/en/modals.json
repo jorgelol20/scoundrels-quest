@@ -40,5 +40,12 @@
   },
   "achievement": {
     "iconAlt": "Achievement icon {{nombre}}"
+  },
+  "confirmation": {
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "advice": {
+    "ok": "OK"
   }
 }

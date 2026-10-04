@@ -21,7 +21,7 @@ export const useCharacters = () => {
             let { data } = await api.get('/personajes');
             return data;
         },
-        staleTime: 300,
+        staleTime: 300000,
     });
 
     /**

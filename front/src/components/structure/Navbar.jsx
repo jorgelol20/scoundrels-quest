@@ -156,7 +156,7 @@ const Navbar = () => {
                                     </div>
                                     : <></>
                                 }
-                                <img src={NotificationIcon} alt="Notification Icon" title={t('notificationsPending', { count: unseenNotifications })} />
+                                <img src={NotificationIcon} alt={t('notificationIconAlt')} title={t('notificationsPending', { count: unseenNotifications })} />
                             </button>
                             : <></>
                     }

@@ -60,9 +60,10 @@
 }
 
 .footer-toggle:hover,
-.footer-toggle:focus {
+.footer-toggle:focus-visible {
     color: var(--main-orange);
-    outline: none;
+    outline: 2px solid var(--main-orange);
+    outline-offset: 2px;
 }
 
 .toggle-icon {

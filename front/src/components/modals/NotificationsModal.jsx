@@ -1,5 +1,5 @@
 import './NotificationModal.css';
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReportIcon from '/images/report_icon.svg'
 import CommentsIcon from '/images/comment_noti_icon.svg'
@@ -9,6 +9,15 @@ import { fmtDate } from '../../i18n/format.js';
 const NotificationModal = ({ onClose, userNotifications, markNotificationAsSeen, markAllNotificationsAsSeen }) => {
     const location = useNavigate();
     const { t, i18n } = useTranslation('modals');
+
+    useEffect(() => {
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [onClose]);
+
     return (
         <Fragment>
             <div className='notification-container' onClick={(event) => {
@@ -17,7 +26,7 @@ const NotificationModal = ({ onClose, userNotifications, markNotificationAsSeen,
                 }
 
             }}>
-                <div className='notification-list'>
+                <div className='notification-list' role="dialog" aria-modal="true" aria-label={t('notifications.markAllRead')}>
                     <div className='window-bar'>
                         <button
                             onClick={markAllNotificationsAsSeen}
