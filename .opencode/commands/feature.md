@@ -1,6 +1,6 @@
 --- 
 description: Planifica una nueva funcionalidad sin tocar código.
-agent: plan
+agent: planner
 --- 
 Quiero implementar una nueva funcionalidad: $ARGUMENTS
 

@@ -1,6 +1,6 @@
 --- 
 description: Planifica la implementación de un nuevo personaje.
-agent: plan
+agent: planner
 --- 
 Quiero implementar un nuevo personaje: $ARGUMENTS
 

@@ -20,3 +20,6 @@ Memoria del proyecto entre sesiones. Máximo ~50 líneas: resume o elimina lo qu
 - No meter `Math.random`/`setTimeout` crudo en `game/` ni texto hardcodeado en JSX (rompe paridad i18n).
 ## Próximos pasos
 - (pendiente)
+- `docs/constitution.md`: 7 principios innegociables (stack, spec, capas, tests, datos, idioma, disciplina unipersonal). Detalle operativo sigue en `AGENTS.md`.
+- `AGENTS.md` podado (~250→~160 líneas): sin árboles de directorios ni reglas duplicadas; cada sección referencia a su principio y conserva solo el *cómo* (rutas, firmas, ejemplos, pendientes).
+- Agentes SDD (`.opencode/agents/`): `coordinator.md` solo-lectura + `planner`/`implementer`/`reviewer` base; specs en `specs/NNN-slug/` (`spec.md`+`plan.md`+`tasks.md`); `/feature` cambio pequeño, `/personaje` trazable.

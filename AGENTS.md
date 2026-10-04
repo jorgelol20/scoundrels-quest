@@ -1,111 +1,17 @@
 # AGENTS.md — Scoundrel's Quest
 
+> Normas innegociables: `docs/constitution.md` (7 principios + verificación). Este archivo es el detalle operativo: rutas, firmas, ejemplos y pendientes.
+
 ## Stack y estructura
 
-- **Front:** React 19 + Vite 8 + pnpm (`front/`). Libs: `react-router-dom`, `react-konva/konva`, `axios + @tanstack/react-query`, `i18next`, `lodash`.
+- **Front:** React 19 + Vite 8 + pnpm (`front/`). Libs: `react-router-dom`, `react-konva/konva`, `axios + @tanstack/react-query`, `i18next`, `lodash` (norma: principio 1).
 - **Back:** Laravel (`back/src/`), Sanctum, MySQL 8, Caddy + Docker (`back/docker-compose.yml`, `back/Caddyfile`).
 - **Arranque:** `start-dev.bat` (Windows) / `start-dev.sh` (Linux/Mac). Manual: `pnpm run dev` en `front/`, `docker compose up -d --build` en `back/`, luego en PHP `php artisan migrate`, `php artisan optimize`, `php artisan storage:link`. Front en `http://localhost:5174`.
-- **Fuente de verdad de mecánicas:** `SCOUNDRELSQUEST.md` (cartas, personajes, habilidades, modificadores, combate, tienda, minibosses, salida/derrotas). Si código y doc discrepan, repórtalo y no cambies el balance sin preguntar.
+- **Fuente de verdad de mecánicas:** `SCOUNDRELSQUEST.md` (cartas, personajes, habilidades, modificadores, combate, tienda, minibosses, salida/derrotas). Ante discrepancia con el código: ver principio 2.
 
 ***Nota:*** **Comprueba al documentación que necesites con Context7**
 
-### Backend
-
-```
-back/
-+---Caddyfile
-+---docker-compose.yml
-+---php/
-    +---docker-entrypoint.sh
-    +---Dockerfile
-    \---uploads.ini
-\---src/
-    +---app/
-    |   +---Console/
-    |   |   \---Commands/
-    |   +---Http/
-    |   |   +---Controllers/
-    |   |   |   \---Api/
-    |   |   \---Requests/
-    |   |       +---Cartas/
-    |   |       +---Habilidades/
-    |   |       +---Modificadores/
-    |   |       +---Partidas/
-    |   |       +---Personajes/
-    |   |       +---Usuarios/
-    |   |       \---Logros/
-    |   +---Models/
-    |   \---Providers/
-    +---bootstrap/
-    +---config/
-    +---database/
-    |   +---factories/
-    |   +---migrations/
-    |   \---seeders/
-    +---public/
-    +---resources/
-    |   +---css/
-    |   +---js/
-    |   \---views/
-    +---routes/
-    +---storage/
-    |   +---app/
-    |   |   +---private/
-    |   |   \---public/
-    |   |       +---cartas/
-    |   |       +---habilidades/
-    |   |       +---modificadores/
-    |   |       +---personajes/
-    |   |       +---usuarios/
-    |   |        \---logros/
-    |   +---framework/
-    |   |   +---cache/
-    |   |   |   \---data/
-    |   |   +---sessions/
-    |   |   +---testing/
-    |   |   \---views/
-    |   \---logs/
-    +---tests/
-    +---.env
-    \---vendor/
-```
-
-### Frontend
-
-```
-front/
-+--- node_modules/
-+---dist/
-+---public/
-|   +---font/
-|   +---images/
-|   |   +---animations/
-|   |   +---cardEffects/
-|   |   +---cursor/
-|   |   \---shopman/
-|   \---sounds/
-|       \---music/
-+---.env
-+---index.html
-+---package.json
-+---vite.config.js
-\---src/
-    +---api/
-    +---assets/
-    |   \---database
-    +---components/
-    |   +---pages/
-    |   \---structure/
-    +---context/
-    +---game/                      # lógica pura (ver "Arquitectura del juego")
-    |   +---utils.js               # uid()
-    |   +---cardEffects.js         # applyCardEffectToState()
-    |   +---modifiers.js           # applyModifierToState()
-    |   \---__tests__/             # tests vitest
-    \---hooks/
-        \---game/
-            \---useScheduledTimeouts.js  # timers cancelables
-```
+Estructura de referencia: `back/src/` (`app/Http/Controllers/Api/`, `app/Http/Requests/{Cartas,Habilidades,Modificadores,Partidas,Personajes,Usuarios,Logros}/`, `app/Models/`, `routes/`, `database/{factories,migrations,seeders}/`, `storage/app/{private,public/...}`) y `front/src/` (`api/`, `components/{pages,structure}/`, `context/`, `game/` + `__tests__/`, `hooks/game/`, `i18n/`, `locales/{es,en}/`). El código es la fuente de verdad de la estructura.
 
 ## Convenciones
 
@@ -131,12 +37,8 @@ Los casos aritméticos/booleanos devuelven el siguiente estado; los casos con ef
 secundarios (animaciones, oro, mazo, contexto) devuelven `events` que ejecuta el adaptador.
 `CARD_EFFECT_DEFAULTS` y `MODIFIER_DEFAULTS` definen el snapshot plano de entrada.
 
-#### Reglas
+Restricciones de capas: ver principio 3. Detalle operativo:
 
-- `game/` sin React/JSX/`setTimeout`/`document` ni imports de contexto. Sin `Math.random`
-  en las reglas (`cardEffects`/`modifiers` delegan el azar al adaptador vía `events`);
-  única excepción: el fallback de `uid()` en `game/utils.js` (`crypto.randomUUID()` primero).
-- `components/` sin `Math.random` nuevo ni mutación de refs ajenas.
 - Timeouts solo vía `useScheduledTimeouts` (`scheduleTimeout` / `cancelTimeout` /
   `clearScheduledTimeouts`): se registran en un `Set` y se limpian al reiniciar o desmontar
   (evita `setState` tras desmontar y timeouts huérfanos).
@@ -181,9 +83,7 @@ describe('applyMyRuleToState', () => {
 
 ### Idiomas (i18n) — es / en
 
-Toda la UI del front vive en `front/src/locales/{es,en}/<namespace>.json`
-(16 namespaces, ~1200 claves, paridad 1:1 verificada por tests). No se escribe
-texto visible en los componentes: se usa `useTranslation('<ns>')` + `t('clave')`.
+Norma de paridad y alcance: ver principio 6. Detalle operativo:
 
 | Pieza | Ruta | Rol |
 |-------|------|-----|
@@ -193,17 +93,9 @@ texto visible en los componentes: se usa `useTranslation('<ns>')` + `t('clave')`
 | Estado | `front/src/context/SettingsProvider.jsx` | `locale` + `changeLocale()` (en caliente, persiste en localStorage y en `users.locale`) |
 | Backend | `back/src/app/Http/Middleware/SetLocale.php` | Resuelve locale por `Accept-Language` (que envía `front/src/api/api.js`) o `users.locale`; responde `Content-Language` |
 
-Reglas para no romper la paridad:
-
-- Claves jerárquicas estables y semánticas (`game.hud.round`), nunca el texto como clave.
-- Sin HTML dentro de los JSON: si el texto lleva `<strong>`/`<br/>`, se parte en
-  varias claves (`p1a` / `p1b`) y las etiquetas se quedan en el JSX.
-- Fechas y plurales: `fmtDate(i18n.language, ...)` y claves `_one` / `_other`
-  (nunca `minuto/minutos` a mano).
-- `game/` (lógica pura) nunca llama a `t()`: devuelve claves o códigos.
-- No se traducen: contenido de usuario (nicks, comentarios, reportes), datos de
-  la API que aún no tienen i18n en backend (cartas, personajes, habilidades,
-  logros, `dialogs.json`, `missions.json`) ni logs de `console`.
+Alcance (no se traduce): contenido de usuario (nicks, comentarios, reportes), datos de
+la API que aún no tienen i18n en backend (cartas, personajes, habilidades,
+logros, `dialogs.json`, `missions.json`) ni logs de `console`.
 
 Tests que lo vigilan:
 
@@ -219,15 +111,23 @@ los ~70 logs de `GamePage.jsx`.
 
 ## Datos
 
-- Rankings públicos (`ranking-victorias`, `ranking-rondas`, `ranking-partidas`) sin `email` (PII).
+Norma de protección: ver principio 5. Detalle operativo:
+
+- Rankings públicos (`ranking-victorias`, `ranking-rondas`, `ranking-partidas`).
 - Contenido del juego (cartas, personajes, habilidades, modificadores, partidas): lectura pública en `index/show`, escritura solo con `auth:sanctum` + `admin` (ver `back/src/routes/api.php`).
 - `POST /partidas` exige sesión y toma la identidad del token. Salir sin personaje no guarda nada; salir con personaje o recargar/cerrar cuenta como derrota (`victoria: false`, vía `fetch keepalive`, sin logros). No duplicar el registro al recargar tras el fin.
-- Registro/login/OAuth bajo `throttle`. No subir `.env` ni secretos al repo.
+- Registro/login/OAuth bajo `throttle`.
 
 ## Forma de trabajar
 
-- Cambios pequeños y localizados; no reescribir `GamePage.jsx` ni `MatchProvider.jsx` de golpe.
-- Si una mecánica de `SCOUNDRELSQUEST.md` contradice al código, parar y preguntar antes de "arreglarlo".
+- Cambios pequeños y localizados; no reescribir `GamePage.jsx` ni `MatchProvider.jsx` de golpe (ver principio 7).
+- Si una mecánica de `SCOUNDRELSQUEST.md` contradice al código: ver principio 2.
+
+## Agentes (`.opencode/agents/`)
+
+- `coordinator.md` (primary, solo lectura): elige el comando que mejor ajuste (`/spec`, `/feature`, `/personaje` u otros futuros), reparte entre `planner`/`implementer`/`reviewer` y exige aprobación de spec y de plan+tasks. Flujo SDD en `specs/NNN-slug/` (`spec.md` + `plan.md` + `tasks.md`).
+- `planner.md` / `reviewer.md` (subagentes, solo lectura): el planner redacta spec EARS + plan/tasks por capas; el reviewer valida RF por RF (capas, tests, datos, idioma) con veredicto `OK` / `CAMBIOS NECESARIOS` (máx. 2 vueltas).
+- `implementer.md` (subagente): una tarea por llamada, patrón `(state, effect, extra) => { state, handled, events }` + test en `__tests__/`; `pnpm test` en verde; back sin comandos automatizados.
 
 ## Memoria
 
@@ -242,10 +142,10 @@ dejarlo en la memoria.
 
 
 ## Límites
-- ✅ Siempre: respetar la arquitectura de 3 capas, la paridad i18n es/en y las reglas de `SCOUNDRELSQUEST.md`.
-- ✅ Siempre: actualizar `MEMORY.md` al terminar cada tarea. 
+
+> Norma completa: `docs/constitution.md` (principios 1–7). Aquí solo el detalle de cuándo preguntar.
+
 - ⚠️ Pregunta antes: cambios de balance (daños, precios de tienda `calculateWeaponPrice`/`calculateHealPrice`, probabilidades de modificadores), nuevas dependencias, migraciones/seeders, tocar auth/roles/throttle o `routes/api.php`.
-- 🚫 Nunca: subir `.env`/secretos, `Math.random` nuevo en `game/` o `components/`, `setTimeout` crudo fuera de `useScheduledTimeouts`, mutar refs ajenas, texto visible hardcodeado en JSX, exponer `email` en endpoints públicos.
 
 ## Verificación
 
