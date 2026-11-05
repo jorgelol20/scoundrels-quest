@@ -1,0 +1,28 @@
+# Contexto de build: ./back
+FROM php:8.3-fpm-alpine
+
+RUN apk add --no-cache \
+    bash git unzip icu-dev oniguruma-dev libzip-dev mysql-client sed \
+  && docker-php-ext-configure intl \
+  && docker-php-ext-install -j$(nproc) pdo pdo_mysql mbstring intl zip \
+  && rm -rf /var/cache/apk/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www
+
+COPY php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+COPY php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Dependencias primero (aprovecha la caché de capas)
+COPY src/composer.json src/composer.lock* ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
+
+# Código de la aplicación (en dev venía por bind mount; aquí va dentro de la imagen)
+COPY src/ ./
+RUN composer dump-autoload --optimize --no-dev --no-scripts
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["php-fpm"]

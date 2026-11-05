@@ -33,3 +33,7 @@ api.scoundrels-quest.com, http://api.localhost {
 portfolio.scoundrels-quest.com {
 	reverse_proxy node:5000
 }
+
+coolify.scoundrels-quest.com {
+	reverse_proxy coolify:8080
+}

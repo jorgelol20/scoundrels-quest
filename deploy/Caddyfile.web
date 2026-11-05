@@ -1,0 +1,33 @@
+{
+	# El TLS lo termina tu Caddy compartido; este solo habla HTTP
+	auto_https off
+	servers {
+		# Conserva X-Forwarded-Proto/For que llegan de Traefik/Caddy
+		trusted_proxies static private_ranges
+	}
+}
+
+:80 {
+	encode gzip zstd
+
+	# Añade aquí los subdominios de prueba que uses
+	@api host api.scoundrels-quest.com test-api.scoundrels-quest.com
+	handle @api {
+		root * /var/www/public
+		php_fastcgi php:9000
+		file_server
+	}
+
+	handle {
+		root * /srv/frontend
+
+		@assets path /assets/* /images/* /sounds/* /font/* /favicon.png
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+
+		@index path /index.html /
+		header @index Cache-Control "no-cache, no-store, must-revalidate"
+
+		try_files {path} /index.html
+		file_server
+	}
+}

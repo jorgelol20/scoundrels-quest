@@ -1,0 +1,69 @@
+# Va en la RAÍZ del repo. En Coolify: Build Pack = Docker Compose,
+# Base Directory = /  y  Docker Compose Location = /docker-compose.coolify.yml
+
+x-php-env: &php-env
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_KEY: ${APP_KEY}
+  APP_URL: ${APP_URL}
+  DB_CONNECTION: mysql
+  DB_HOST: db
+  DB_PORT: "3306"
+  DB_DATABASE: scoundrel
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  # Añade aquí el resto de claves de tu .env de producción
+  # (OAuth, mail, SANCTUM_STATEFUL_DOMAINS, FRONTEND_URL, etc.)
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: deploy/web.Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    expose:
+      - "80"            # sin ports: el 80/443 del host no se tocan
+    depends_on:
+      - php
+    volumes:
+      - app_storage:/var/www/storage:ro
+    restart: unless-stopped
+
+  php:
+    build:
+      context: ./back
+      dockerfile: php/Dockerfile.prod
+    environment: *php-env
+    volumes:
+      - app_storage:/var/www/storage
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  scheduler:
+    build:
+      context: ./back
+      dockerfile: php/Dockerfile.prod
+    command: php artisan schedule:work
+    environment: *php-env
+    volumes:
+      - app_storage:/var/www/storage
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: scoundrel
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  app_storage:
